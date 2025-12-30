@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Arunaya Consumables</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0078d4;
+            --primary-dark: #106ebe;
+            --primary-light: #deecf9;
+            --text-main: #323130;
+            --text-light: #605e5c;
+            --border-color: #edebe9;
+            --hover-bg: #f3f2f1;
+            --danger: #d13438;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f3f2f1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 3.2px 7.2px 0 rgba(0, 0, 0, 0.132), 0 0.6px 1.8px 0 rgba(0, 0, 0, 0.108);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px 32px;
+        }
+
+        .company-name {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .company-name h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .company-name p {
+            font-size: 13px;
+            color: var(--text-light);
+            font-weight: 400;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            transition: all 0.1s;
+            font-family: 'Segoe UI', 'Inter', sans-serif;
+            background: #ffffff;
+            color: var(--text-main);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+
+        .password-toggle {
+            position: relative;
+        }
+
+        .password-toggle .toggle-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-light);
+            transition: color 0.1s;
+        }
+
+        .password-toggle .toggle-btn:hover {
+            color: var(--text-main);
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .remember-me input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .remember-me label {
+            font-size: 13px;
+            color: var(--text-light);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 10px 16px;
+            background: var(--primary);
+            color: white;
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .login-btn:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .login-btn:active {
+            background: #005a9e;
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: #fde7e9;
+            color: var(--danger);
+            padding: 10px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none;
+            border-left: 3px solid var(--danger);
+        }
+
+        .error-message.show {
+            display: block;
+            animation: slideIn 0.2s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 32px 24px;
+            }
+
+            .company-name h1 {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="company-name">
+            <h1>ARUNAYA CONSUMABLES</h1>
+            <p>Distribution Management System</p>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label class="form-label" for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-input" required autofocus
+                    autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <div class="password-toggle">
+                    <input type="password" id="password" name="password" class="form-input" required
+                        autocomplete="current-password">
+                    <button type="button" class="toggle-btn" id="togglePassword">👁️</button>
+                </div>
+            </div>
+
+            <div class="remember-me">
+                <input type="checkbox" id="rememberMe" name="rememberMe">
+                <label for="rememberMe">Remember me</label>
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">Sign In</button>
+        </form>
+    </div>
+
+    <script>
+        // Check if already logged in
+        const existingUser = localStorage.getItem('user') || sessionStorage.getItem('user');
+        if (existingUser) {
+            window.location.href = '/';
+        }
+
+        // Password toggle
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const passwordInput = document.getElementById('password');
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            this.textContent = type === 'password' ? '👁️' : '🙈';
+        });
+
+        // Form submission
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            const errorMessage = document.getElementById('errorMessage');
+            const loginBtn = document.getElementById('loginBtn');
+
+            // Hide previous errors
+            errorMessage.classList.remove('show');
+
+            // Disable button
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Signing in...';
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Store user data
+                    const storage = rememberMe ? localStorage : sessionStorage;
+                    storage.setItem('user', JSON.stringify(data.user));
+
+                    // Redirect to main app
+                    window.location.href = '/';
+                } else {
+                    throw new Error(data.error || 'Invalid credentials');
+                }
+            } catch (error) {
+                errorMessage.textContent = error.message || 'Login failed. Please try again.';
+                errorMessage.classList.add('show');
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Sign In';
+            }
+        });
+    </script>
+</body>
+
+</html>

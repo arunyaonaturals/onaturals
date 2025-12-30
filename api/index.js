@@ -44,7 +44,42 @@ app.use('/api/order-delivery', orderDeliveryRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        turso_url_set: !!process.env.TURSO_URL,
+        turso_auth_set: !!process.env.TURSO_AUTH_TOKEN,
+        node_env: process.env.NODE_ENV
+    });
+});
+
+// Database test endpoint
+app.get('/api/db-test', async (req, res) => {
+    try {
+        const { createClient } = await import('@libsql/client');
+
+        if (!process.env.TURSO_URL) {
+            return res.status(500).json({ error: 'TURSO_URL not configured' });
+        }
+
+        const client = createClient({
+            url: process.env.TURSO_URL,
+            authToken: process.env.TURSO_AUTH_TOKEN,
+        });
+
+        const result = await client.execute('SELECT 1 as test');
+        res.json({
+            status: 'ok',
+            dbConnected: true,
+            result: result.rows
+        });
+    } catch (error) {
+        console.error('DB Test Error:', error);
+        res.status(500).json({
+            error: error.message,
+            stack: error.stack
+        });
+    }
 });
 
 // Export for Vercel serverless

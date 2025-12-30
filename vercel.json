@@ -4,6 +4,34 @@
         {
             "src": "server.js",
             "use": "@vercel/node"
+        },
+        {
+            "src": "index.html",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "login.html",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "styles.css",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "app.js",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "favicon.png",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "js/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "public/**",
+            "use": "@vercel/static"
         }
     ],
     "routes": [

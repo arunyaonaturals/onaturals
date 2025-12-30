@@ -40,12 +40,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <style>
-        /* ===== CLEAN LIGHT THEME ===== */
+        /* ===== MODERN LIGHT THEME ===== */
         :root {
-            /* Primary - Soft Blue */
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --primary-light: #eff6ff;
+            /* Primary - Teal/Dark Cyan Navigation */
+            --primary: #186570;
+            --primary-dark: #134d56;
+            --primary-light: #20808f;
+
+            /* Backgrounds - Clean Whites & Grays */
+            --bg-color: #f5f5f5;
+            --bg-white: #ffffff;
+            --sidebar-bg: #ffffff;
+            --header-bg: #186570;
+            --card-bg: #ffffff;
+
+            /* Functional Tile Colors */
+            --tile-green: #5d8f6a;
+            --tile-orange: #c17b4f;
+            --tile-burgundy: #a65d75;
+            --tile-gray: #6c7a89;
+            --tile-blue: #4a8fa6;
 
             /* Neutrals - Clean Grays */
             --gray-50: #f9fafb;
@@ -59,37 +73,35 @@
             --gray-800: #1f2937;
             --gray-900: #111827;
 
-            /* Background - Pure Whites */
-            --bg-color: #ffffff;
-            --sidebar-bg: #f9fafb;
-            --header-bg: #ffffff;
-            --card-bg: #ffffff;
+            /* Text Colors */
+            --text-main: #2c3e50;
+            --text-light: #718096;
+            --text-secondary: #a0aec0;
+            --text-white: #ffffff;
 
-            /* Text */
-            --text-main: #111827;
-            --text-light: #6b7280;
-            --text-secondary: #9ca3af;
+            /* Borders & Dividers */
+            --border-color: #e2e8f0;
+            --border-light: #f0f0f0;
+            --hover-bg: #f8fafc;
 
-            /* Borders */
-            --border-color: #e5e7eb;
-            --hover-bg: #f3f4f6;
-
-            /* Status Colors - Soft */
-            --success: #059669;
+            /* Status Colors */
+            --success: #10b981;
             --success-light: #ecfdf5;
-            --warning: #d97706;
+            --warning: #f59e0b;
             --warning-light: #fffbeb;
-            --danger: #dc2626;
+            --danger: #ef4444;
             --danger-light: #fef2f2;
+            --info: #3b82f6;
+            --info-light: #eff6ff;
 
             /* Design Tokens */
             --radius: 6px;
             --radius-md: 8px;
             --radius-lg: 12px;
             --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.04);
-            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.05);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.08);
         }
 
         * {
@@ -166,11 +178,11 @@
             font-weight: 400;
         }
 
-        /* ===== TOP HEADER (Clean) ===== */
+        /* ===== TOP HEADER (Teal Theme) ===== */
         .topbar {
             height: 56px;
             background: var(--header-bg);
-            color: var(--text-main);
+            color: var(--text-white);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -180,7 +192,8 @@
             left: 240px;
             right: 0;
             z-index: 90;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
         }
 
         .topbar-left {
@@ -193,7 +206,7 @@
         .page-title-bar {
             font-size: 18px;
             font-weight: 600;
-            color: var(--text-main);
+            color: var(--text-white);
         }
 
         .topbar-center {
@@ -203,27 +216,27 @@
         }
 
         .search-bar {
-            background: var(--gray-100);
+            background: rgba(255, 255, 255, 0.15);
             border-radius: var(--radius);
             padding: 8px 16px;
             display: flex;
             align-items: center;
             width: 100%;
             max-width: 320px;
-            border: 1px solid transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             transition: all 0.2s;
         }
 
         .search-bar:focus-within {
-            background: white;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
         }
 
         .search-input {
             background: transparent;
             border: none;
-            color: var(--text-main);
+            color: var(--text-white);
             width: 100%;
             margin-left: 8px;
             font-size: 14px;
@@ -234,7 +247,7 @@
         }
 
         .search-input::placeholder {
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.7);
         }
 
         .topbar-right {
@@ -246,7 +259,7 @@
         .icon-btn {
             background: transparent;
             border: none;
-            color: var(--text-light);
+            color: rgba(255, 255, 255, 0.9);
             cursor: pointer;
             padding: 8px;
             border-radius: var(--radius);
@@ -258,8 +271,8 @@
         }
 
         .icon-btn:hover {
-            background: var(--gray-100);
-            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--text-white);
         }
 
         .app-logo {
@@ -379,13 +392,14 @@
         }
 
         .nav-link:hover {
-            background: var(--gray-200);
-            color: var(--text-main);
+            background: #f8fafc;
+            color: var(--primary);
         }
 
         .nav-link.active {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
+            box-shadow: 0 2px 4px rgba(24, 101, 112, 0.2);
         }
 
         .nav-icon {
@@ -515,7 +529,7 @@
             padding: 16px;
         }
 
-        /* ===== STATS GRID (Clean Simple) ===== */
+        /* ===== STATS GRID (Colorful Tiles) ===== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -524,75 +538,105 @@
         }
 
         .stat-card {
-            background: white;
+            background: var(--card-bg);
             border-radius: var(--radius-md);
             padding: 20px;
-            border: 1px solid var(--border-color);
+            border: none;
+            box-shadow: var(--shadow-sm);
             display: flex;
             flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-color) 0%, var(--accent-color) 100%);
         }
 
         .stat-card:hover {
-            border-color: var(--gray-300);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
 
-        .stat-card.primary {
-            border-left: 3px solid var(--primary);
+        .stat-card.primary,
+        .stat-card.tile-blue {
+            --accent-color: var(--tile-blue);
         }
 
-        .stat-card.success {
-            border-left: 3px solid var(--success);
+        .stat-card.success,
+        .stat-card.tile-green {
+            --accent-color: var(--tile-green);
         }
 
-        .stat-card.warning {
-            border-left: 3px solid var(--warning);
+        .stat-card.warning,
+        .stat-card.tile-orange {
+            --accent-color: var(--tile-orange);
         }
 
-        .stat-card.danger {
-            border-left: 3px solid var(--danger);
+        .stat-card.danger,
+        .stat-card.tile-burgundy {
+            --accent-color: var(--tile-burgundy);
+        }
+
+        .stat-card.tile-gray {
+            --accent-color: var(--tile-gray);
         }
 
         .stat-value {
             font-size: 28px;
-            font-weight: 600;
-            color: var(--text-main);
+            font-weight: 700;
+            color: var(--accent-color);
             margin: 4px 0;
         }
 
         .stat-label {
             color: var(--text-light);
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.03em;
         }
 
-        /* ===== TABLES (Clean Simple) ===== */
+        /* ===== TABLES (Modern Clean) ===== */
         .table-container {
+            background: var(--card-bg);
             border-radius: var(--radius-md);
             overflow: hidden;
-            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            border: none;
         }
 
         .table thead {
-            background: var(--hover-bg);
+            background: #f8fafc;
         }
 
         .table th {
-            padding: 10px 16px;
+            padding: 14px 16px;
             font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.03em;
+            letter-spacing: 0.05em;
             color: var(--text-light);
             font-weight: 600;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-light);
             text-align: left;
         }
 
         .table td {
-            padding: 12px 16px;
+            padding: 14px 16px;
             font-size: 13px;
-            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .table tbody tr:hover {
+            background: #f8fafc;
         }
 
         /* ===== ANIMATIONS ===== */

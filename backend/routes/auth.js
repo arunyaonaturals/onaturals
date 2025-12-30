@@ -93,11 +93,19 @@ router.post('/users', (req, res) => {
         [username, hashedPassword, name || username, role || 'restricted'],
         function (err) {
             if (err) {
-                if (err.message.includes('UNIQUE constraint failed')) {
+                console.error('Create user error - Full details:', {
+                    message: err.message,
+                    stack: err.stack,
+                    code: err.code,
+                    errno: err.errno
+                });
+                if (err.message && err.message.includes('UNIQUE constraint failed')) {
                     return res.status(400).json({ error: 'Username already exists' });
                 }
-                console.error('Create user error:', err);
-                return res.status(500).json({ error: 'Internal server error' });
+                return res.status(500).json({
+                    error: 'Internal server error',
+                    details: err.message
+                });
             }
             res.json({
                 success: true,
@@ -145,8 +153,16 @@ router.delete('/users/:id', (req, res) => {
 
     db.run('DELETE FROM users WHERE id = ?', [id], function (err) {
         if (err) {
-            console.error('Delete user error:', err);
-            return res.status(500).json({ error: 'Internal server error' });
+            console.error('Delete user error - Full details:', {
+                message: err.message,
+                stack: err.stack,
+                code: err.code,
+                errno: err.errno
+            });
+            return res.status(500).json({
+                error: 'Internal server error',
+                details: err.message
+            });
         }
         if (this.changes === 0) {
             return res.status(404).json({ error: 'User not found' });

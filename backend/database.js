@@ -30,9 +30,20 @@ if (isProduction && process.env.TURSO_URL) {
             }
             client.execute({ sql, args: params })
                 .then(result => {
-                    if (callback) callback.call({ lastID: result.lastInsertRowid, changes: result.rowsAffected }, null);
+                    // Convert BigInt to Number for compatibility
+                    const lastID = result.lastInsertRowid ? Number(result.lastInsertRowid) : undefined;
+                    const changes = result.rowsAffected !== undefined ? Number(result.rowsAffected) : 0;
+
+                    if (callback) {
+                        callback.call({ lastID, changes }, null);
+                    }
                 })
                 .catch(err => {
+                    console.error('Turso db.run error:', {
+                        message: err.message,
+                        stack: err.stack,
+                        sql: sql
+                    });
                     if (callback) callback(err);
                 });
             return this;
@@ -47,6 +58,11 @@ if (isProduction && process.env.TURSO_URL) {
                     if (callback) callback(null, result.rows);
                 })
                 .catch(err => {
+                    console.error('Turso db.all error:', {
+                        message: err.message,
+                        stack: err.stack,
+                        sql: sql
+                    });
                     if (callback) callback(err);
                 });
             return this;
@@ -61,6 +77,11 @@ if (isProduction && process.env.TURSO_URL) {
                     if (callback) callback(null, result.rows[0]);
                 })
                 .catch(err => {
+                    console.error('Turso db.get error:', {
+                        message: err.message,
+                        stack: err.stack,
+                        sql: sql
+                    });
                     if (callback) callback(err);
                 });
             return this;

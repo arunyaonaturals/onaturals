@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARUNAYA CONSUMABLES - Distribution Management System</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#e6f0ff',
+                            100: '#b3d1ff',
+                            500: '#0066ff',
+                            600: '#0052cc',
+                            700: '#003d99',
+                            800: '#002966',
+                            900: '#001433',
+                            950: '#0a1628',
+                        },
+                        sidebar: {
+                            bg: '#0f172a',
+                            hover: '#1e293b',
+                            active: '#334155',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        /* ===== CLEAN LIGHT THEME ===== */
+        :root {
+            /* Primary - Soft Blue */
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #eff6ff;
+
+            /* Neutrals - Clean Grays */
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+
+            /* Background - Pure Whites */
+            --bg-color: #ffffff;
+            --sidebar-bg: #f9fafb;
+            --header-bg: #ffffff;
+            --card-bg: #ffffff;
+
+            /* Text */
+            --text-main: #111827;
+            --text-light: #6b7280;
+            --text-secondary: #9ca3af;
+
+            /* Borders */
+            --border-color: #e5e7eb;
+            --hover-bg: #f3f4f6;
+
+            /* Status Colors - Soft */
+            --success: #059669;
+            --success-light: #ecfdf5;
+            --warning: #d97706;
+            --warning-light: #fffbeb;
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+
+            /* Design Tokens */
+            --radius: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-color);
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-main);
+            font-size: 14px;
+        }
+
+        /* ===== LAYOUT ===== */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            /* Sidebar is fixed, main content margin handled below */
+        }
+
+        /* Prevent flash of content during auth check */
+        .app-loading {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        .app-ready {
+            visibility: visible;
+            opacity: 1;
+            transition: opacity 0.2s ease;
+        }
+
+        /* ===== SIDEBAR (Clean Light) ===== */
+        .sidebar {
+            width: 240px;
+            background: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius);
+            object-fit: cover;
+        }
+
+        .sidebar-brand {
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .sidebar-brand-sub {
+            color: var(--text-light);
+            font-size: 11px;
+            font-weight: 400;
+        }
+
+        /* ===== TOP HEADER (Clean) ===== */
+        .topbar {
+            height: 56px;
+            background: var(--header-bg);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 240px;
+            right: 0;
+            z-index: 90;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+        }
+
+        .page-title-bar {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .topbar-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-bar {
+            background: var(--gray-100);
+            border-radius: var(--radius);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 320px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .search-bar:focus-within {
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            width: 100%;
+            margin-left: 8px;
+            font-size: 14px;
+        }
+
+        .search-input:focus {
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: var(--radius);
+            transition: all 0.15s;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn:hover {
+            background: var(--gray-100);
+            color: var(--text-main);
+        }
+
+        .app-logo {
+            display: none;
+        }
+
+        .app-logo {
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .app-logo span {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .topbar-center {
+            flex: 1;
+            display: flex;
+            justify-content: flex-start;
+            padding-left: 1rem;
+        }
+
+        .search-bar {
+            background: var(--hover-bg);
+            border-radius: var(--radius);
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 300px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .search-bar:focus-within {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+
+        .search-input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            width: 100%;
+            margin-left: 8px;
+            font-size: 13px;
+        }
+
+        .search-input:focus {
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-light);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: var(--radius);
+            transition: all 0.1s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn:hover {
+            background: var(--hover-bg);
+            color: var(--text-main);
+        }
+
+        /* ===== NAVIGATION (Clean Light) ===== */
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+        }
+
+        .nav-section-title {
+            color: var(--text-light);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 16px 12px 8px;
+            font-weight: 600;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: var(--radius);
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.15s ease;
+            margin-bottom: 2px;
+        }
+
+        .nav-link:hover {
+            background: var(--gray-200);
+            color: var(--text-main);
+        }
+
+        .nav-link.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            flex: 1;
+            margin-left: 240px;
+            margin-top: 56px;
+            min-height: calc(100vh - 56px);
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-color);
+        }
+
+        .content-header {
+            display: none;
+        }
+
+        .breadcrumb {
+            display: none;
+        }
+
+        /* ===== CONTENT AREA ===== */
+        .content-area {
+            flex: 1;
+            padding: 24px;
+            max-width: 100%;
+            width: 100%;
+        }
+
+        /* ===== BUTTONS (Clean Simple) ===== */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-300);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #047857;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        /* ===== CARDS (Clean Simple) ===== */
+        .card {
+            background: white;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .card:hover {
+            border-color: var(--gray-300);
+        }
+
+        .card-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--gray-50);
+        }
+
+        .card.accent-top {
+            border-top: 2px solid var(--primary);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        /* ===== STATS GRID (Clean Simple) ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-card:hover {
+            border-color: var(--gray-300);
+        }
+
+        .stat-card.primary {
+            border-left: 3px solid var(--primary);
+        }
+
+        .stat-card.success {
+            border-left: 3px solid var(--success);
+        }
+
+        .stat-card.warning {
+            border-left: 3px solid var(--warning);
+        }
+
+        .stat-card.danger {
+            border-left: 3px solid var(--danger);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 4px 0;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        /* ===== TABLES (Clean Simple) ===== */
+        .table-container {
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .table thead {
+            background: var(--hover-bg);
+        }
+
+        .table th {
+            padding: 10px 16px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--text-light);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        .table td {
+            padding: 12px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* ===== LOADING SPINNER ===== */
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #64748b;
+        }
+
+        .empty-state-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* ===== FORM INPUTS (Office 365 Fluent UI) ===== */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .form-input,
+        .form-select,
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="number"],
+        input[type="date"],
+        input[type="password"],
+        input[type="file"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 13px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            background: #ffffff;
+            color: var(--text-main);
+            transition: all 0.1s;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus,
+        input[type="number"]:focus,
+        input[type="date"]:focus,
+        input[type="password"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+
+        .form-input::placeholder,
+        input::placeholder,
+        textarea::placeholder {
+            color: var(--text-secondary);
+        }
+
+        textarea.form-input,
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        select.form-select,
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23605e5c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 10px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 32px;
+            cursor: pointer;
+        }
+
+        input[type="file"] {
+            padding: 6px;
+            cursor: pointer;
+        }
+
+        input[type="file"]::file-selector-button {
+            padding: 6px 12px;
+            margin-right: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.1s ease;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            background: var(--primary-dark);
+        }
+
+        input[type="checkbox"],
+        input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        /* ===== MODAL (Office 365 Style) ===== */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.15s ease;
+        }
+
+        .modal {
+            background: #ffffff;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border-color);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.2s ease;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius);
+            background: transparent;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s;
+        }
+
+        .modal-close:hover {
+            background: var(--hover-bg);
+            color: var(--text-main);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            background: var(--hover-bg);
+        }
+
+        /* ===== TOAST (Office 365 Style) ===== */
+        .toast-container {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            background: white;
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 280px;
+            animation: slideIn 0.2s ease-out;
+            border: 1px solid var(--border-color);
+        }
+
+        .toast.success {
+            border-left: 3px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 3px solid var(--danger);
+        }
+
+        .toast.info {
+            border-left: 3px solid var(--primary);
+        }
+
+        .toast.warning {
+            border-left: 3px solid var(--warning);
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* ===== LOADING SPINNER ===== */
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #64748b;
+        }
+
+        .empty-state-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* ===== USER PROFILE (Office 365 Style) ===== */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: var(--radius);
+            transition: all 0.1s;
+        }
+
+        .user-profile:hover {
+            background: var(--hover-bg);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        /* ===== PAGE HEADER (Office 365 Style) ===== */
+        .page-header {
+            margin-bottom: 20px;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .page-subtitle {
+            color: var(--text-light);
+            font-size: 13px;
+        }
+
+        /* ===== TABLE (Additional Office 365 Styles) ===== */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table tbody tr {
+            transition: background 0.1s ease;
+        }
+
+        .table tbody tr:hover {
+            background: var(--hover-bg);
+        }
+
+        /* ===== BADGES (Office 365 Style) ===== */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: var(--radius);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .badge-primary {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .badge-success {
+            background: #dff6dd;
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: #fff4ce;
+            color: #835c00;
+        }
+
+        .badge-danger {
+            background: #fde7e9;
+            color: var(--danger);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container app-loading" id="appContainer">
+        <!-- Sidebar (Dark Modern) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="/public/assets/company-logo.jpg" alt="Logo" class="sidebar-logo">
+                <div>
+                    <div class="sidebar-brand">ARUNAYA</div>
+                    <div class="sidebar-brand-sub">Consumables Pvt Ltd</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="#dashboard" class="nav-link active" data-page="dashboard">
+                        <span class="nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#stores" class="nav-link" data-page="stores">
+                        <span class="nav-icon">🏪</span>
+                        <span>Stores</span>
+                    </a>
+                    <a href="#products" class="nav-link" data-page="products">
+                        <span class="nav-icon">📦</span>
+                        <span>Products</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Sales & Billing</div>
+                    <a href="#billing" class="nav-link" data-page="billing">
+                        <span class="nav-icon">🧾</span>
+                        <span>Billing</span>
+                    </a>
+                    <a href="#sales" class="nav-link" data-page="sales">
+                        <span class="nav-icon">💰</span>
+                        <span>Sales Orders</span>
+                    </a>
+                    <a href="#despatch" class="nav-link" data-page="despatch">
+                        <span class="nav-icon">🚚</span>
+                        <span>Despatch</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Operations</div>
+                    <a href="#inventory" class="nav-link" data-page="inventory">
+                        <span class="nav-icon">📋</span>
+                        <span>Inventory</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Purchase</div>
+                    <a href="#suppliers" class="nav-link" data-page="suppliers">
+                        <span class="nav-icon">🏭</span>
+                        <span>Suppliers</span>
+                    </a>
+                    <a href="#purchase" class="nav-link" data-page="purchase">
+                        <span class="nav-icon">📥</span>
+                        <span>Purchase Orders</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">HR & Personnel</div>
+                    <a href="#staff" class="nav-link" data-page="staff">
+                        <span class="nav-icon">👥</span>
+                        <span>Staff</span>
+                    </a>
+                    <a href="#payroll" class="nav-link" data-page="payroll">
+                        <span class="nav-icon">💳</span>
+                        <span>Payroll</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <a href="#settings" class="nav-link" data-page="settings">
+                        <span class="nav-icon">⚙️</span>
+                        <span>Settings</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Top Bar (Light Modern) -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <span class="page-title-bar" id="pageTitle">Dashboard</span>
+            </div>
+            <div class="topbar-center">
+                <div class="search-bar">
+                    <span style="color: var(--text-secondary);">🔍</span>
+                    <input type="text" class="search-input" placeholder="Search anything...">
+                </div>
+            </div>
+            <div class="topbar-right">
+                <button class="icon-btn" title="Notifications">🔔</button>
+                <button class="icon-btn" title="Help">❓</button>
+                <div class="user-profile" style="padding: 0; position: relative;">
+                    <div class="user-dropdown-trigger" onclick="toggleUserMenu()"
+                        style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 6px 12px; border-radius: var(--radius); transition: background 0.2s;">
+                        <div class="user-avatar" id="userAvatar"
+                            style="width: 36px; height: 36px; font-size: 13px; background: var(--primary-gradient); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 600;">
+                            AD</div>
+                        <span id="userName" style="color: var(--text-main); font-size: 14px; font-weight: 500;"></span>
+                        <span style="color: var(--text-light); font-size: 10px;">▼</span>
+                    </div>
+                    <div id="userMenu"
+                        style="display: none; position: absolute; top: 100%; right: 0; margin-top: 8px; background: white; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); min-width: 200px; overflow: hidden; z-index: 1000;">
+                        <div
+                            style="padding: 16px 20px; border-bottom: 1px solid var(--border-color); background: var(--hover-bg);">
+                            <div id="menuUserName" style="font-weight: 600; color: var(--text-main); font-size: 14px;">
+                            </div>
+                            <div id="menuUserRole"
+                                style="font-size: 12px; color: var(--text-light); text-transform: capitalize;"></div>
+                        </div>
+                        <button onclick="Auth.logout()"
+                            style="width: 100%; padding: 12px 20px; text-align: left; background: none; border: none; cursor: pointer; color: var(--danger); font-size: 14px; display: flex; align-items: center; gap: 10px; transition: background 0.2s;">
+                            <span>🚪</span> Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="content-area" id="contentArea">
+                <!-- Content injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Container -->
+    <div id="modalContainer"></div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/stores.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/billing.js"></script>
+    <script src="js/sales.js"></script>
+    <script src="js/inventory.js"></script>
+    <script src="js/despatch.js"></script>
+    <script src="js/staff.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/suppliers.js"></script>
+    <script src="js/purchase.js"></script>
+    <script src="js/payroll.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

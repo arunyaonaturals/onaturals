@@ -30,256 +30,105 @@ const Dashboard = {
             const user = Auth.getCurrentUser();
 
             contentArea.innerHTML = `
-                <!-- Warm Light Theme Dashboard -->
-                <div style="min-height: 100%;">
-                    
-                    <!-- Page Header -->
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
-                        <div>
-                            <h1 style="font-size: 22px; font-weight: 700; color: #3d3632; margin: 0 0 4px 0;">Business Summary</h1>
-                            <p style="font-size: 14px; color: #7a6f66; margin: 0;">Welcome back, ${user?.fullname || user?.name || 'User'}</p>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="dashboard-filter-btn ${this.selectedPeriod === 'today' ? 'active' : ''}" data-period="today">Today</button>
-                            <button class="dashboard-filter-btn ${this.selectedPeriod === 'week' ? 'active' : ''}" data-period="week">Week</button>
-                            <button class="dashboard-filter-btn ${this.selectedPeriod === 'month' ? 'active' : ''}" data-period="month">Month</button>
-                            <button class="dashboard-filter-btn ${this.selectedPeriod === 'year' ? 'active' : ''}" data-period="year">Year</button>
+                <!-- Blue Business Theme Dashboard -->
+                <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1 class="page-title">Dashboard</h1>
+                        <p class="page-subtitle">Welcome back, ${user?.fullname || user?.name || 'User'}</p>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                        <button class="btn ${this.selectedPeriod === 'today' ? 'btn-primary' : 'btn-secondary'}" data-period="today">Today</button>
+                        <button class="btn ${this.selectedPeriod === 'week' ? 'btn-primary' : 'btn-secondary'}" data-period="week">Week</button>
+                        <button class="btn ${this.selectedPeriod === 'month' ? 'btn-primary' : 'btn-secondary'}" data-period="month">Month</button>
+                        <button class="btn ${this.selectedPeriod === 'year' ? 'btn-primary' : 'btn-secondary'}" data-period="year">Year</button>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">💰</div>
+                        <div class="stat-content">
+                            <div class="stat-value">${Utils.formatCurrency(analytics.periodSales)}</div>
+                            <div class="stat-label">Period Sales</div>
                         </div>
                     </div>
-
-                    <!-- Colorful Stat Tiles Grid -->
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
-                        <!-- Row 1 -->
-                        <div class="stat-tile tile-pink">
-                            <div class="stat-tile-header">
-                                <span class="stat-tile-icon">📈</span>
-                                <span class="stat-tile-label">Total Sales</span>
-                                <button class="stat-tile-expand">↗</button>
-                            </div>
-                            <div class="stat-tile-value">${Utils.formatCurrency(analytics.periodSales)}</div>
-                            <div class="stat-tile-change positive">+30% compared to last month</div>
-                        </div>
-
-                        <div class="stat-tile tile-purple">
-                            <div class="stat-tile-header">
-                                <span class="stat-tile-icon">🏭</span>
-                                <span class="stat-tile-label">Total Revenue</span>
-                                <button class="stat-tile-expand">↗</button>
-                            </div>
-                            <div class="stat-tile-value">${Utils.formatCurrency(analytics.totalRevenue)}</div>
-                            <div class="stat-tile-change positive">+30% includes all orders</div>
-                        </div>
-
-                        <div class="stat-tile tile-yellow">
-                            <div class="stat-tile-header">
-                                <span class="stat-tile-icon">📦</span>
-                                <span class="stat-tile-label">Today's Orders</span>
-                                <button class="stat-tile-expand">↗</button>
-                            </div>
-                            <div class="stat-tile-value">${analytics.periodOrderCount}</div>
-                            <div class="stat-tile-change positive">+30% since yesterday</div>
-                        </div>
-
-                        <!-- Row 2 -->
-                        <div class="stat-tile tile-cream">
-                            <div class="stat-tile-header">
-                                <span class="stat-tile-icon">🏪</span>
-                                <span class="stat-tile-label">Active Stores</span>
-                                <button class="stat-tile-expand">↗</button>
-                            </div>
-                            <div class="stat-tile-value">${stores.length}</div>
-                            <div class="stat-tile-change">Total registered stores</div>
-                        </div>
-
-                        <div class="stat-tile tile-pink">
-                            <div class="stat-tile-header">
-                                <span class="stat-tile-icon">📦</span>
-                                <span class="stat-tile-label">Products</span>
-                                <button class="stat-tile-expand">↗</button>
-                            </div>
-                            <div class="stat-tile-value">${products.length}</div>
-                            <div class="stat-tile-change">Active products</div>
-                        </div>
-
-                        <div class="stat-tile tile-green">
-                            <div class="stat-tile-header">
-                                <span class="stat-tile-icon">💰</span>
-                                <span class="stat-tile-label">Avg Order Value</span>
-                                <button class="stat-tile-expand">↗</button>
-                            </div>
-                            <div class="stat-tile-value">${Utils.formatCurrency(analytics.avgOrderValue)}</div>
-                            <div class="stat-tile-change positive">Per invoice</div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">📈</div>
+                        <div class="stat-content">
+                            <div class="stat-value">${Utils.formatCurrency(analytics.totalRevenue)}</div>
+                            <div class="stat-label">Total Revenue</div>
                         </div>
                     </div>
-
-                    <!-- Content Grid -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        
-                        <!-- Sales Variance Card -->
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="card-title">
-                                    <span class="card-title-icon">📊</span>
-                                    Sales Variance
-                                </div>
-                                <div class="card-actions">
-                                    <button class="card-action-btn">+</button>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                ${this.renderWarmBarChart(analytics.monthlyData)}
-                            </div>
-                        </div>
-
-                        <!-- Top Stores Card -->
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="card-title">
-                                    <span class="card-title-icon">🏆</span>
-                                    Top Performing Stores
-                                </div>
-                                <div class="card-actions">
-                                    <button class="card-action-btn">+</button>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                ${this.renderWarmRanking(analytics.topStores)}
-                            </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange">📦</div>
+                        <div class="stat-content">
+                            <div class="stat-value">${analytics.periodOrderCount}</div>
+                            <div class="stat-label">Orders</div>
                         </div>
                     </div>
-
-                    <!-- Recent Transactions -->
-                    <div class="card" style="margin-top: 20px;">
-                        <div class="card-header">
-                            <div class="card-title">
-                                <span class="card-title-icon">🧾</span>
-                                Recent Transactions
-                            </div>
-                            <a href="#sales" style="font-size: 13px; color: #c4956a; text-decoration: none; font-weight: 500;">View All →</a>
-                        </div>
-                        <div class="card-body" style="padding: 0;">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Invoice</th>
-                                        <th>Date</th>
-                                        <th>Store</th>
-                                        <th style="text-align: right;">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${salesOrders.slice(-8).reverse().map(order => `
-                                        <tr>
-                                            <td style="font-weight: 600; color: #c4956a;">${order.invoiceNo}</td>
-                                            <td style="color: #7a6f66;">${order.orderDate || '-'}</td>
-                                            <td>${order.storeName || '-'}</td>
-                                            <td style="text-align: right; font-weight: 600; color: #4ade80;">${Utils.formatCurrency(order.grandTotal)}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
+                    <div class="stat-card">
+                        <div class="stat-icon red">🏪</div>
+                        <div class="stat-content">
+                            <div class="stat-value">${stores.length}</div>
+                            <div class="stat-label">Active Customers</div>
                         </div>
                     </div>
                 </div>
 
-                <style>
-                    .stat-tile {
-                        padding: 20px;
-                        border-radius: 16px;
-                        position: relative;
-                        transition: all 0.2s ease;
-                    }
-                    .stat-tile:hover {
-                        transform: translateY(-2px);
-                        box-shadow: 0 8px 24px rgba(139, 115, 85, 0.15);
-                    }
-                    .stat-tile.tile-pink {
-                        background: linear-gradient(135deg, #f8c8dc 0%, #fde8f0 100%);
-                    }
-                    .stat-tile.tile-purple {
-                        background: linear-gradient(135deg, #d4b8e8 0%, #efe4f7 100%);
-                    }
-                    .stat-tile.tile-yellow {
-                        background: linear-gradient(135deg, #f8e8a0 0%, #fcf4d4 100%);
-                    }
-                    .stat-tile.tile-cream {
-                        background: linear-gradient(135deg, #f5e6d0 0%, #faf3e8 100%);
-                    }
-                    .stat-tile.tile-green {
-                        background: linear-gradient(135deg, #b8e0c8 0%, #e0f4e8 100%);
-                    }
-                    .stat-tile-header {
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                        margin-bottom: 12px;
-                    }
-                    .stat-tile-icon {
-                        width: 28px;
-                        height: 28px;
-                        background: rgba(255, 255, 255, 0.6);
-                        border-radius: 8px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 14px;
-                    }
-                    .stat-tile-label {
-                        flex: 1;
-                        font-size: 12px;
-                        font-weight: 500;
-                        color: #3d3632;
-                        opacity: 0.8;
-                    }
-                    .stat-tile-expand {
-                        width: 22px;
-                        height: 22px;
-                        background: rgba(255, 255, 255, 0.5);
-                        border: none;
-                        border-radius: 6px;
-                        cursor: pointer;
-                        font-size: 10px;
-                        color: #3d3632;
-                    }
-                    .stat-tile-value {
-                        font-size: 28px;
-                        font-weight: 700;
-                        color: #3d3632;
-                        margin-bottom: 4px;
-                    }
-                    .stat-tile-change {
-                        font-size: 12px;
-                        color: #7a6f66;
-                    }
-                    .stat-tile-change.positive {
-                        color: #16a34a;
-                    }
-                    .stat-tile-change.negative {
-                        color: #dc2626;
-                    }
+                <!-- Content Grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    
+                    <!-- Monthly Sales Chart -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">📊 Monthly Sales Trend</span>
+                        </div>
+                        <div class="card-body">
+                            ${this.renderBarChart(analytics.monthlyData)}
+                        </div>
+                    </div>
 
-                    .dashboard-filter-btn {
-                        background: #faf7f4;
-                        border: 1px solid #e8e0d8;
-                        color: #7a6f66;
-                        padding: 8px 16px;
-                        font-size: 13px;
-                        border-radius: 10px;
-                        cursor: pointer;
-                        transition: all 0.15s;
-                        font-weight: 500;
-                    }
-                    .dashboard-filter-btn:hover {
-                        background: #fff;
-                        border-color: #c4956a;
-                        color: #3d3632;
-                    }
-                    .dashboard-filter-btn.active {
-                        background: linear-gradient(135deg, #c4956a 0%, #a67c52 100%);
-                        border-color: transparent;
-                        color: white;
-                    }
-                </style>
+                    <!-- Top Stores -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">🏆 Top Customers</span>
+                        </div>
+                        <div class="card-body">
+                            ${this.renderTopStores(analytics.topStores)}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions Table -->
+                <div class="card" style="margin-top: 16px;">
+                    <div class="card-header">
+                        <span class="card-title">🧾 Recent Transactions</span>
+                        <a href="#sales" style="color: var(--primary); font-size: 12px; text-decoration: none;">View All →</a>
+                    </div>
+                    <div class="table-container" style="border: none; border-radius: 0;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Invoice</th>
+                                    <th>Date</th>
+                                    <th>Customer</th>
+                                    <th style="text-align: right;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${salesOrders.slice(-8).reverse().map(order => `
+                                    <tr>
+                                        <td style="font-weight: 600; color: var(--primary);">${order.invoiceNo}</td>
+                                        <td style="color: var(--text-light);">${order.orderDate || '-'}</td>
+                                        <td>${order.storeName || '-'}</td>
+                                        <td style="text-align: right; font-weight: 600; color: var(--success);">${Utils.formatCurrency(order.grandTotal)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             `;
 
             this.attachEventListeners();
@@ -296,7 +145,7 @@ const Dashboard = {
     },
 
     attachEventListeners() {
-        document.querySelectorAll('.dashboard-filter-btn').forEach(btn => {
+        document.querySelectorAll('[data-period]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 this.selectedPeriod = e.target.dataset.period;
                 this.render();

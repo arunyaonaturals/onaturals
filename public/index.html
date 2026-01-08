@@ -46,7 +46,7 @@
             --bg-gradient-start: #f5e6d8;
             --bg-gradient-end: #e8d5c4;
             --bg-color: linear-gradient(135deg, #f5e6d8 0%, #e8d5c4 50%, #dcc8b5 100%);
-            
+
             /* Card & Surface Colors */
             --card-bg: #faf7f4;
             --card-bg-white: #ffffff;
@@ -886,8 +886,13 @@
 
         /* ===== ANIMATIONS ===== */
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes slideUp {
@@ -895,6 +900,7 @@
                 transform: translateY(20px);
                 opacity: 0;
             }
+
             to {
                 transform: translateY(0);
                 opacity: 1;
@@ -906,6 +912,7 @@
                 transform: translateX(100px);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -923,8 +930,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* ===== SCROLLBAR ===== */
@@ -1008,12 +1020,18 @@
             display: none;
         }
 
-        .sidebar-header, .sidebar-nav, .sidebar-logo, .sidebar-brand, .sidebar-brand-sub {
+        .sidebar-header,
+        .sidebar-nav,
+        .sidebar-logo,
+        .sidebar-brand,
+        .sidebar-brand-sub {
             display: none;
         }
 
         /* Hide old nav elements */
-        .nav-section, .nav-section-title, .nav-link {
+        .nav-section,
+        .nav-section-title,
+        .nav-link {
             display: none;
         }
     </style>
@@ -1031,17 +1049,37 @@
 
                 <nav class="nav-tabs">
                     <a href="#dashboard" class="nav-tab active" data-page="dashboard">Dashboard</a>
-                    <a href="#stores" class="nav-tab" data-page="stores">Stores</a>
-                    <a href="#products" class="nav-tab" data-page="products">Products</a>
-                    <a href="#billing" class="nav-tab" data-page="billing">Billing</a>
-                    <a href="#sales" class="nav-tab" data-page="sales">Sales</a>
+
+                    <!-- Sell Dropdown -->
                     <div class="nav-dropdown">
-                        <span class="nav-tab">More ▾</span>
+                        <span class="nav-tab">Sell ▾</span>
+                        <div class="nav-dropdown-menu">
+                            <a href="#billing" class="nav-dropdown-item" data-page="billing">🧾 Billing</a>
+                            <a href="#sales" class="nav-dropdown-item" data-page="sales">💰 Sales Orders</a>
+                            <a href="#despatch" class="nav-dropdown-item" data-page="despatch">🚚 Despatch</a>
+                        </div>
+                    </div>
+
+                    <!-- Reporting Dropdown -->
+                    <div class="nav-dropdown">
+                        <span class="nav-tab">Reporting ▾</span>
                         <div class="nav-dropdown-menu">
                             <a href="#inventory" class="nav-dropdown-item" data-page="inventory">📋 Inventory</a>
-                            <a href="#despatch" class="nav-dropdown-item" data-page="despatch">🚚 Despatch</a>
-                            <a href="#suppliers" class="nav-dropdown-item" data-page="suppliers">🏭 Suppliers</a>
                             <a href="#purchase" class="nav-dropdown-item" data-page="purchase">📥 Purchase Orders</a>
+                        </div>
+                    </div>
+
+                    <!-- Products -->
+                    <a href="#products" class="nav-tab" data-page="products">Products</a>
+
+                    <!-- Customers/Stores -->
+                    <a href="#stores" class="nav-tab" data-page="stores">Customers</a>
+
+                    <!-- Operations Dropdown -->
+                    <div class="nav-dropdown">
+                        <span class="nav-tab">Operations ▾</span>
+                        <div class="nav-dropdown-menu">
+                            <a href="#suppliers" class="nav-dropdown-item" data-page="suppliers">🏭 Suppliers</a>
                             <a href="#staff" class="nav-dropdown-item" data-page="staff">👥 Staff</a>
                             <a href="#payroll" class="nav-dropdown-item" data-page="payroll">💳 Payroll</a>
                             <a href="#settings" class="nav-dropdown-item" data-page="settings">⚙️ Settings</a>
@@ -1070,9 +1108,12 @@
                     </div>
                     <div id="userMenu"
                         style="display: none; position: absolute; top: 100%; right: 0; margin-top: 8px; background: var(--card-bg-white); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); min-width: 200px; overflow: hidden; z-index: 1000;">
-                        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-light); background: var(--surface);">
-                            <div id="menuUserName" style="font-weight: 600; color: var(--text-main); font-size: 14px;"></div>
-                            <div id="menuUserRole" style="font-size: 12px; color: var(--text-light); text-transform: capitalize;"></div>
+                        <div
+                            style="padding: 16px 20px; border-bottom: 1px solid var(--border-light); background: var(--surface);">
+                            <div id="menuUserName" style="font-weight: 600; color: var(--text-main); font-size: 14px;">
+                            </div>
+                            <div id="menuUserRole"
+                                style="font-size: 12px; color: var(--text-light); text-transform: capitalize;"></div>
                         </div>
                         <button onclick="Auth.logout()"
                             style="width: 100%; padding: 12px 20px; text-align: left; background: none; border: none; cursor: pointer; color: var(--danger); font-size: 14px; display: flex; align-items: center; gap: 10px; transition: background 0.2s;">

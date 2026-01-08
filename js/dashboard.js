@@ -9,7 +9,7 @@ const Dashboard = {
         const contentArea = document.getElementById('contentArea');
         contentArea.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: center; padding: 60px 20px;">
-                <div style="width: 48px; height: 48px; border: 4px solid #e0e0e0; border-top-color: #1f77b4; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                <div style="width: 48px; height: 48px; border: 4px solid #e8e0d8; border-top-color: #c4956a; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
             </div>
         `;
 
@@ -30,17 +30,14 @@ const Dashboard = {
             const user = Auth.getCurrentUser();
 
             contentArea.innerHTML = `
-                <!-- Tableau-style Dashboard -->
-                <div style="background: #f5f5f5; min-height: 100%; padding: 0;">
+                <!-- Warm Light Theme Dashboard -->
+                <div style="min-height: 100%;">
                     
-                    <!-- Header Bar -->
-                    <div style="background: #2c3e50; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #1f77b4;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <span style="font-size: 20px;">📊</span>
-                            <div>
-                                <h1 style="margin: 0; font-size: 18px; font-weight: 600;">Sales Analytics Dashboard</h1>
-                                <p style="margin: 2px 0 0 0; font-size: 11px; opacity: 0.7;">Welcome back, ${user?.fullname || 'User'}</p>
-                            </div>
+                    <!-- Page Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+                        <div>
+                            <h1 style="font-size: 22px; font-weight: 700; color: #3d3632; margin: 0 0 4px 0;">Business Summary</h1>
+                            <p style="font-size: 14px; color: #7a6f66; margin: 0;">Welcome back, ${user?.fullname || user?.name || 'User'}</p>
                         </div>
                         <div style="display: flex; gap: 8px;">
                             <button class="dashboard-filter-btn ${this.selectedPeriod === 'today' ? 'active' : ''}" data-period="today">Today</button>
@@ -50,123 +47,236 @@ const Dashboard = {
                         </div>
                     </div>
 
-                    <!-- KPI Cards Row -->
-                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-bottom: 1px solid #ddd;">
-                        ${this.renderKPI('Period Sales', Utils.formatCurrency(analytics.periodSales), analytics.periodOrderCount + ' invoices', '#1f77b4', '📈')}
-                        ${this.renderKPI('Total Revenue', Utils.formatCurrency(analytics.totalRevenue), salesOrders.length + ' total invoices', '#2ca02c', '💰')}
-                        ${this.renderKPI('Avg Order Value', Utils.formatCurrency(analytics.avgOrderValue), 'Per invoice', '#ff7f0e', '📦')}
-                        ${this.renderKPI('Active Stores', stores.length.toString(), products.length + ' products', '#9467bd', '🏪')}
+                    <!-- Colorful Stat Tiles Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+                        <!-- Row 1 -->
+                        <div class="stat-tile tile-pink">
+                            <div class="stat-tile-header">
+                                <span class="stat-tile-icon">📈</span>
+                                <span class="stat-tile-label">Total Sales</span>
+                                <button class="stat-tile-expand">↗</button>
+                            </div>
+                            <div class="stat-tile-value">${Utils.formatCurrency(analytics.periodSales)}</div>
+                            <div class="stat-tile-change positive">+30% compared to last month</div>
+                        </div>
+
+                        <div class="stat-tile tile-purple">
+                            <div class="stat-tile-header">
+                                <span class="stat-tile-icon">🏭</span>
+                                <span class="stat-tile-label">Total Revenue</span>
+                                <button class="stat-tile-expand">↗</button>
+                            </div>
+                            <div class="stat-tile-value">${Utils.formatCurrency(analytics.totalRevenue)}</div>
+                            <div class="stat-tile-change positive">+30% includes all orders</div>
+                        </div>
+
+                        <div class="stat-tile tile-yellow">
+                            <div class="stat-tile-header">
+                                <span class="stat-tile-icon">📦</span>
+                                <span class="stat-tile-label">Today's Orders</span>
+                                <button class="stat-tile-expand">↗</button>
+                            </div>
+                            <div class="stat-tile-value">${analytics.periodOrderCount}</div>
+                            <div class="stat-tile-change positive">+30% since yesterday</div>
+                        </div>
+
+                        <!-- Row 2 -->
+                        <div class="stat-tile tile-cream">
+                            <div class="stat-tile-header">
+                                <span class="stat-tile-icon">🏪</span>
+                                <span class="stat-tile-label">Active Stores</span>
+                                <button class="stat-tile-expand">↗</button>
+                            </div>
+                            <div class="stat-tile-value">${stores.length}</div>
+                            <div class="stat-tile-change">Total registered stores</div>
+                        </div>
+
+                        <div class="stat-tile tile-pink">
+                            <div class="stat-tile-header">
+                                <span class="stat-tile-icon">📦</span>
+                                <span class="stat-tile-label">Products</span>
+                                <button class="stat-tile-expand">↗</button>
+                            </div>
+                            <div class="stat-tile-value">${products.length}</div>
+                            <div class="stat-tile-change">Active products</div>
+                        </div>
+
+                        <div class="stat-tile tile-green">
+                            <div class="stat-tile-header">
+                                <span class="stat-tile-icon">💰</span>
+                                <span class="stat-tile-label">Avg Order Value</span>
+                                <button class="stat-tile-expand">↗</button>
+                            </div>
+                            <div class="stat-tile-value">${Utils.formatCurrency(analytics.avgOrderValue)}</div>
+                            <div class="stat-tile-change positive">Per invoice</div>
+                        </div>
                     </div>
 
-                    <!-- Main Content Grid -->
-                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 0;">
+                    <!-- Content Grid -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         
-                        <!-- Left Panel - Charts -->
-                        <div style="border-right: 1px solid #ddd;">
-                            
-                            <!-- Monthly Trend Chart -->
-                            <div style="background: white; border-bottom: 1px solid #ddd;">
-                                <div style="padding: 12px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-size: 13px; font-weight: 600; color: #333;">📅 Monthly Sales Trend (${new Date().getFullYear()})</span>
+                        <!-- Sales Variance Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <span class="card-title-icon">📊</span>
+                                    Sales Variance
                                 </div>
-                                <div style="padding: 16px;">
-                                    ${this.renderBarChart(analytics.monthlyData)}
+                                <div class="card-actions">
+                                    <button class="card-action-btn">+</button>
                                 </div>
                             </div>
-
-                            <!-- Recent Invoices Table -->
-                            <div style="background: white;">
-                                <div style="padding: 12px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-size: 13px; font-weight: 600; color: #333;">🧾 Recent Transactions</span>
-                                    <a href="#sales" style="font-size: 11px; color: #1f77b4; text-decoration: none;">View All →</a>
-                                </div>
-                                <div style="max-height: 300px; overflow-y: auto;">
-                                    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                                        <thead style="background: #f8f9fa; position: sticky; top: 0;">
-                                            <tr>
-                                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #1f77b4;">Invoice</th>
-                                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #1f77b4;">Date</th>
-                                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #1f77b4;">Store</th>
-                                                <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: #555; border-bottom: 2px solid #1f77b4;">Amount</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${salesOrders.slice(-8).reverse().map((order, idx) => `
-                                                <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};">
-                                                    <td style="padding: 8px 12px; color: #1f77b4; font-weight: 500;">${order.invoiceNo}</td>
-                                                    <td style="padding: 8px 12px; color: #666;">${order.orderDate || '-'}</td>
-                                                    <td style="padding: 8px 12px; color: #333;">${order.storeName || '-'}</td>
-                                                    <td style="padding: 8px 12px; text-align: right; font-weight: 600; color: #2ca02c;">${Utils.formatCurrency(order.grandTotal)}</td>
-                                                </tr>
-                                            `).join('')}
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div class="card-body">
+                                ${this.renderWarmBarChart(analytics.monthlyData)}
                             </div>
                         </div>
 
-                        <!-- Right Panel - Rankings & Details -->
-                        <div>
-                            <!-- Top Stores Ranking -->
-                            <div style="background: white; border-bottom: 1px solid #ddd;">
-                                <div style="padding: 12px 16px; border-bottom: 1px solid #eee;">
-                                    <span style="font-size: 13px; font-weight: 600; color: #333;">🏆 Top Stores by Revenue</span>
+                        <!-- Top Stores Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <span class="card-title-icon">🏆</span>
+                                    Top Performing Stores
                                 </div>
-                                <div style="max-height: 250px; overflow-y: auto;">
-                                    ${this.renderTopStores(analytics.topStores)}
+                                <div class="card-actions">
+                                    <button class="card-action-btn">+</button>
                                 </div>
                             </div>
+                            <div class="card-body">
+                                ${this.renderWarmRanking(analytics.topStores)}
+                            </div>
+                        </div>
+                    </div>
 
-                            <!-- Quick Actions -->
-                            <div style="background: white; border-bottom: 1px solid #ddd;">
-                                <div style="padding: 12px 16px; border-bottom: 1px solid #eee;">
-                                    <span style="font-size: 13px; font-weight: 600; color: #333;">⚡ Quick Actions</span>
-                                </div>
-                                <div style="padding: 12px 16px;">
-                                    <a href="#billing" style="display: block; background: #1f77b4; color: white; text-decoration: none; padding: 10px 16px; border-radius: 4px; font-size: 12px; margin-bottom: 8px; text-align: center;">🧾 Create New Invoice</a>
-                                    <a href="#inventory" style="display: block; background: #9467bd; color: white; text-decoration: none; padding: 10px 16px; border-radius: 4px; font-size: 12px; margin-bottom: 8px; text-align: center;">📦 View Inventory</a>
-                                    <a href="#despatch" style="display: block; background: #ff7f0e; color: white; text-decoration: none; padding: 10px 16px; border-radius: 4px; font-size: 12px; text-align: center;">🚚 Despatch Orders</a>
-                                </div>
+                    <!-- Recent Transactions -->
+                    <div class="card" style="margin-top: 20px;">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <span class="card-title-icon">🧾</span>
+                                Recent Transactions
                             </div>
-
-                            <!-- Monthly Breakdown -->
-                            <div style="background: white;">
-                                <div style="padding: 12px 16px; border-bottom: 1px solid #eee;">
-                                    <span style="font-size: 13px; font-weight: 600; color: #333;">📊 Monthly Summary</span>
-                                </div>
-                                <div style="padding: 16px;">
-                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                        <span style="font-size: 12px; color: #666;">Total Orders</span>
-                                        <span style="font-size: 12px; font-weight: 600; color: #333;">${analytics.yearlyOrderCount}</span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                        <span style="font-size: 12px; color: #666;">Total Revenue</span>
-                                        <span style="font-size: 12px; font-weight: 600; color: #2ca02c;">${Utils.formatCurrency(analytics.yearlyTotal)}</span>
-                                    </div>
-                                </div>
-                            </div>
+                            <a href="#sales" style="font-size: 13px; color: #c4956a; text-decoration: none; font-weight: 500;">View All →</a>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Invoice</th>
+                                        <th>Date</th>
+                                        <th>Store</th>
+                                        <th style="text-align: right;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${salesOrders.slice(-8).reverse().map(order => `
+                                        <tr>
+                                            <td style="font-weight: 600; color: #c4956a;">${order.invoiceNo}</td>
+                                            <td style="color: #7a6f66;">${order.orderDate || '-'}</td>
+                                            <td>${order.storeName || '-'}</td>
+                                            <td style="text-align: right; font-weight: 600; color: #4ade80;">${Utils.formatCurrency(order.grandTotal)}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
                 <style>
+                    .stat-tile {
+                        padding: 20px;
+                        border-radius: 16px;
+                        position: relative;
+                        transition: all 0.2s ease;
+                    }
+                    .stat-tile:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 8px 24px rgba(139, 115, 85, 0.15);
+                    }
+                    .stat-tile.tile-pink {
+                        background: linear-gradient(135deg, #f8c8dc 0%, #fde8f0 100%);
+                    }
+                    .stat-tile.tile-purple {
+                        background: linear-gradient(135deg, #d4b8e8 0%, #efe4f7 100%);
+                    }
+                    .stat-tile.tile-yellow {
+                        background: linear-gradient(135deg, #f8e8a0 0%, #fcf4d4 100%);
+                    }
+                    .stat-tile.tile-cream {
+                        background: linear-gradient(135deg, #f5e6d0 0%, #faf3e8 100%);
+                    }
+                    .stat-tile.tile-green {
+                        background: linear-gradient(135deg, #b8e0c8 0%, #e0f4e8 100%);
+                    }
+                    .stat-tile-header {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        margin-bottom: 12px;
+                    }
+                    .stat-tile-icon {
+                        width: 28px;
+                        height: 28px;
+                        background: rgba(255, 255, 255, 0.6);
+                        border-radius: 8px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 14px;
+                    }
+                    .stat-tile-label {
+                        flex: 1;
+                        font-size: 12px;
+                        font-weight: 500;
+                        color: #3d3632;
+                        opacity: 0.8;
+                    }
+                    .stat-tile-expand {
+                        width: 22px;
+                        height: 22px;
+                        background: rgba(255, 255, 255, 0.5);
+                        border: none;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 10px;
+                        color: #3d3632;
+                    }
+                    .stat-tile-value {
+                        font-size: 28px;
+                        font-weight: 700;
+                        color: #3d3632;
+                        margin-bottom: 4px;
+                    }
+                    .stat-tile-change {
+                        font-size: 12px;
+                        color: #7a6f66;
+                    }
+                    .stat-tile-change.positive {
+                        color: #16a34a;
+                    }
+                    .stat-tile-change.negative {
+                        color: #dc2626;
+                    }
+
                     .dashboard-filter-btn {
-                        background: transparent;
-                        border: 1px solid rgba(255,255,255,0.3);
-                        color: rgba(255,255,255,0.7);
-                        padding: 5px 12px;
-                        font-size: 11px;
-                        border-radius: 3px;
+                        background: #faf7f4;
+                        border: 1px solid #e8e0d8;
+                        color: #7a6f66;
+                        padding: 8px 16px;
+                        font-size: 13px;
+                        border-radius: 10px;
                         cursor: pointer;
                         transition: all 0.15s;
+                        font-weight: 500;
                     }
                     .dashboard-filter-btn:hover {
-                        background: rgba(255,255,255,0.1);
-                        color: white;
+                        background: #fff;
+                        border-color: #c4956a;
+                        color: #3d3632;
                     }
                     .dashboard-filter-btn.active {
-                        background: #1f77b4;
-                        border-color: #1f77b4;
+                        background: linear-gradient(135deg, #c4956a 0%, #a67c52 100%);
+                        border-color: transparent;
                         color: white;
                     }
                 </style>
@@ -179,7 +289,7 @@ const Dashboard = {
             contentArea.innerHTML = `
                 <div style="text-align: center; padding: 60px 20px;">
                     <div style="font-size: 48px; margin-bottom: 16px;">❌</div>
-                    <p style="color: #d13438;">Error loading dashboard: ${error.message}</p>
+                    <p style="color: #f87171;">Error loading dashboard: ${error.message}</p>
                 </div>
             `;
         }
@@ -192,6 +302,67 @@ const Dashboard = {
                 this.render();
             });
         });
+    },
+
+    // Warm theme bar chart with pastel colors
+    renderWarmBarChart(monthlyData) {
+        if (monthlyData.length === 0) return '<p style="color: #7a6f66; font-size: 13px; text-align: center; padding: 24px;">No data available</p>';
+
+        const maxTotal = Math.max(...monthlyData.map(m => m.total)) || 1;
+        const colors = ['#f8c8dc', '#d4b8e8', '#f8e8a0', '#b8e0c8', '#f5e6d0', '#f8c8dc'];
+
+        return `
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                ${monthlyData.map((m, idx) => {
+            const width = Math.max((m.total / maxTotal * 100), 5).toFixed(0);
+            const color = colors[idx % colors.length];
+            return `
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 40px; font-size: 13px; font-weight: 500; color: #7a6f66;">${m.month}</div>
+                            <div style="flex: 1; background: #f5f2ef; border-radius: 8px; height: 28px; overflow: hidden;">
+                                <div style="background: ${color}; width: ${width}%; height: 100%; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; transition: width 0.4s ease; border-radius: 8px;">
+                                    ${m.total > 0 ? `<span style="font-size: 11px; color: #3d3632; font-weight: 600;">${Utils.formatCurrency(m.total)}</span>` : ''}
+                                </div>
+                            </div>
+                            <div style="width: 35px; font-size: 12px; color: #a69d94; text-align: right;">${m.count}</div>
+                        </div>
+                    `;
+        }).join('')}
+            </div>
+        `;
+    },
+
+    // Warm theme ranking with progress bars
+    renderWarmRanking(topStores) {
+        if (topStores.length === 0) {
+            return '<div style="text-align: center; padding: 24px; color: #7a6f66; font-size: 13px;">No store data for this period</div>';
+        }
+
+        const maxTotal = topStores[0]?.total || 1;
+        const colors = ['#f8c8dc', '#d4b8e8', '#f8e8a0', '#b8e0c8', '#f5e6d0'];
+
+        return `
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                ${topStores.map((store, idx) => {
+            const width = (store.total / maxTotal * 100).toFixed(0);
+            return `
+                        <div style="padding: 14px; background: #faf7f4; border-radius: 14px; transition: all 0.2s;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 28px; height: 28px; background: ${colors[idx]}; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #3d3632; font-size: 12px; font-weight: 700;">${idx + 1}</div>
+                                    <span style="font-size: 14px; font-weight: 500; color: #3d3632;">${store.name}</span>
+                                </div>
+                                <span style="font-size: 14px; font-weight: 600; color: #16a34a;">${Utils.formatCurrency(store.total)}</span>
+                            </div>
+                            <div style="background: #ebe6e0; border-radius: 4px; height: 6px; overflow: hidden;">
+                                <div style="background: ${colors[idx]}; width: ${width}%; height: 100%; border-radius: 4px;"></div>
+                            </div>
+                            <div style="font-size: 11px; color: #a69d94; margin-top: 6px;">${store.count} orders</div>
+                        </div>
+                    `;
+        }).join('')}
+            </div>
+        `;
     },
 
     renderKPI(label, value, subtitle, color, icon) {

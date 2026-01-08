@@ -91,8 +91,8 @@ const App = {
 
     // Setup navigation event listeners
     setupNavigation() {
-        // Support both old nav-tab and new nav-link classes
-        const navItems = document.querySelectorAll('.nav-link, .nav-tab');
+        // Support nav-tab, nav-link, and nav-dropdown-item classes
+        const navItems = document.querySelectorAll('.nav-link, .nav-tab, .nav-dropdown-item');
 
         navItems.forEach(item => {
             item.addEventListener('click', (e) => {

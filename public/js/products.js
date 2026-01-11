@@ -46,7 +46,7 @@ const Products = {
                     <!-- KPI Summary -->
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-bottom: 1px solid #ddd;">
                         ${this.renderKPI('Total Products', totalProducts.toString(), 'In catalog', '#2ca02c', '📦')}
-                        ${this.renderKPI('Catalog Value', Utils.formatCurrency(totalMRP), 'Total MRP', '#1f77b4', '💰')}
+                        ${this.renderKPI('Catalog Value', Utils.formatCurrency(totalMRP), 'Total MRP', '#3182ce', '💰')}
                         ${this.renderKPI('Product Sizes', categories.toString(), 'Unique weights', '#ff7f0e', '📊')}
                     </div>
 
@@ -72,8 +72,8 @@ const Products = {
                         color: white;
                     }
                     .prod-tab-btn.active {
-                        background: #1f77b4;
-                        border-color: #1f77b4;
+                        background: #3182ce;
+                        border-color: #3182ce;
                         color: white;
                     }
                 </style>
@@ -152,7 +152,7 @@ const Products = {
                             <td style="padding: 8px 12px; font-weight: 500; color: #333;">${p.productName}</td>
                             <td style="padding: 8px 12px; color: #666;">${p.weight || '-'}</td>
                             <td style="padding: 8px 12px; color: #666;">${p.hsnCode || '-'}</td>
-                            <td style="padding: 8px 12px; text-align: right; color: #1f77b4;">${p.gstRate ? p.gstRate + '%' : '-'}</td>
+                            <td style="padding: 8px 12px; text-align: right; color: #3182ce;">${p.gstRate ? p.gstRate + '%' : '-'}</td>
                             <td style="padding: 8px 12px; text-align: right; font-weight: 600; color: #2ca02c;">₹${parseFloat(p.mrp || 0).toFixed(2)}</td>
                             <td style="padding: 8px 12px; text-align: right; color: #ff7f0e;">${p.distributorMargin ? p.distributorMargin + '%' : '-'}</td>
                             <td style="padding: 8px 12px; text-align: center;">

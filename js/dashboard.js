@@ -243,7 +243,7 @@ const Dashboard = {
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <div style="width: 35px; font-size: 11px; font-weight: 500; color: #333;">${m.month}</div>
                             <div style="flex: 1; background: #e8e8e8; border-radius: 2px; height: 18px; overflow: hidden;">
-                                <div style="background: linear-gradient(90deg, #1f77b4, #4a9fd4); width: ${width}%; height: 100%; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px;">
+                                <div style="background: linear-gradient(90deg, #3182ce, #4a9fd4); width: ${width}%; height: 100%; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px;">
                                     ${m.total > 0 ? `<span style="font-size: 9px; color: white; font-weight: 600;">${Utils.formatCurrency(m.total)}</span>` : ''}
                                 </div>
                             </div>
@@ -260,7 +260,7 @@ const Dashboard = {
             return '<div style="padding: 20px; text-align: center; color: #666; font-size: 12px;">No store data for this period</div>';
         }
 
-        const colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
+        const colors = ['#3182ce', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
 
         return `
             <div style="padding: 0;">
@@ -322,10 +322,10 @@ const Dashboard = {
         const maxTotal = topStores[0]?.total || 1;
         const colors = [
             'linear-gradient(135deg, #6366f1, #8b5cf6)',
-            'linear-gradient(135deg, #10b981, #14b8a6)',
+            'linear-gradient(135deg, #48bb78, #14b8a6)',
             'linear-gradient(135deg, #f59e0b, #fbbf24)',
             'linear-gradient(135deg, #ec4899, #f472b6)',
-            'linear-gradient(135deg, #3b82f6, #60a5fa)'
+            'linear-gradient(135deg, #4299e1, #60a5fa)'
         ];
 
         return `
@@ -339,7 +339,7 @@ const Dashboard = {
                                     <div style="width: 24px; height: 24px; background: ${colors[idx]}; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700;">${idx + 1}</div>
                                     <span style="font-size: 14px; font-weight: 500; color: #1e293b;">${store.name}</span>
                                 </div>
-                                <span style="font-size: 14px; font-weight: 600; color: #10b981;">${Utils.formatCurrency(store.total)}</span>
+                                <span style="font-size: 14px; font-weight: 600; color: #48bb78;">${Utils.formatCurrency(store.total)}</span>
                             </div>
                             <div style="background: #e2e8f0; border-radius: 4px; height: 6px; overflow: hidden;">
                                 <div style="background: ${colors[idx]}; width: ${width}%; height: 100%; border-radius: 4px;"></div>
@@ -359,7 +359,7 @@ const Dashboard = {
         const maxTotal = Math.max(...weeklyData.map(w => w.total)) || 1;
         const colors = [
             'linear-gradient(135deg, #6366f1, #8b5cf6)',
-            'linear-gradient(135deg, #10b981, #14b8a6)',
+            'linear-gradient(135deg, #48bb78, #14b8a6)',
             'linear-gradient(135deg, #f59e0b, #fbbf24)',
             'linear-gradient(135deg, #ec4899, #f472b6)'
         ];
@@ -394,7 +394,7 @@ const Dashboard = {
         if (weeklyData.length === 0) return '<p style="color: #666; font-size: 12px;">No data available</p>';
 
         const maxTotal = Math.max(...weeklyData.map(w => w.total)) || 1;
-        const colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728'];
+        const colors = ['#3182ce', '#ff7f0e', '#2ca02c', '#d62728'];
 
         return `
             <div style="display: flex; justify-content: space-around; align-items: flex-end; height: 120px; padding-bottom: 30px; position: relative; border-bottom: 1px solid #ddd;">
@@ -424,7 +424,7 @@ const Dashboard = {
         }
 
         const maxTotal = topStores[0]?.total || 1;
-        const colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
+        const colors = ['#3182ce', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
 
         return `
             <div style="padding: 0;">
@@ -585,7 +585,7 @@ const Dashboard = {
                 <tr>
                     <td><strong>${m.month}</strong></td>
                     <td style="text-align: right;">${m.count}</td>
-                    <td style="text-align: right; font-weight: 600; color: #10b981;">${Utils.formatCurrency(m.total)}</td>
+                    <td style="text-align: right; font-weight: 600; color: #48bb78;">${Utils.formatCurrency(m.total)}</td>
                     <td style="text-align: right;">${Utils.formatCurrency(m.avg)}</td>
                     <td>${trend}</td>
                 </tr>
@@ -606,10 +606,10 @@ const Dashboard = {
                     <div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                             <span style="font-weight: 500;">${w.label}</span>
-                            <span style="font-weight: 600; color: #10b981;">${Utils.formatCurrency(w.total)}</span>
+                            <span style="font-weight: 600; color: #48bb78;">${Utils.formatCurrency(w.total)}</span>
                         </div>
                         <div style="background: #e2e8f0; border-radius: 4px; height: 8px; overflow: hidden;">
-                            <div style="background: linear-gradient(90deg, #10b981, #059669); height: 100%; width: ${(w.total / maxTotal * 100).toFixed(0)}%; border-radius: 4px;"></div>
+                            <div style="background: linear-gradient(90deg, #48bb78, #059669); height: 100%; width: ${(w.total / maxTotal * 100).toFixed(0)}%; border-radius: 4px;"></div>
                         </div>
                         <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">${w.count} invoices</div>
                     </div>
@@ -626,12 +626,12 @@ const Dashboard = {
         return `
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                 ${topStores.map((store, idx) => `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: #f9fafb; border-radius: 8px; border-left: 3px solid ${idx === 0 ? '#10b981' : '#e2e8f0'};">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: #f9fafb; border-radius: 8px; border-left: 3px solid ${idx === 0 ? '#48bb78' : '#e2e8f0'};">
                         <div>
                             <div style="font-weight: 600; color: #0f172a;">${idx + 1}. ${store.name}</div>
                             <div style="font-size: 0.75rem; color: #64748b;">${store.count} orders</div>
                         </div>
-                        <div style="font-weight: 700; color: #10b981;">${Utils.formatCurrency(store.total)}</div>
+                        <div style="font-weight: 700; color: #48bb78;">${Utils.formatCurrency(store.total)}</div>
                     </div>
                 `).join('')}
             </div>

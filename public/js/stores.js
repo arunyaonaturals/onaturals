@@ -14,7 +14,7 @@ const Stores = {
         const contentArea = document.getElementById('contentArea');
         contentArea.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: center; padding: 60px 20px;">
-                <div style="width: 48px; height: 48px; border: 4px solid #e0e0e0; border-top-color: #1f77b4; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                <div style="width: 48px; height: 48px; border: 4px solid #e0e0e0; border-top-color: #3182ce; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
             </div>
         `;
 
@@ -32,7 +32,7 @@ const Stores = {
                 <div style="background: #f5f5f5; min-height: 100%; padding: 0;">
                     
                     <!-- Header Bar -->
-                    <div style="background: #2c3e50; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #1f77b4;">
+                    <div style="background: #2c3e50; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #3182ce;">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <span style="font-size: 20px;">🏪</span>
                             <div>
@@ -50,7 +50,7 @@ const Stores = {
 
                     <!-- KPI Summary -->
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-bottom: 1px solid #ddd;">
-                        ${this.renderKPI('Total Stores', totalStores.toString(), 'Active outlets', '#1f77b4', '🏪')}
+                        ${this.renderKPI('Total Stores', totalStores.toString(), 'Active outlets', '#3182ce', '🏪')}
                         ${this.renderKPI('Coverage Areas', areas.toString(), 'Unique areas', '#ff7f0e', '📍')}
                         ${this.renderKPI('Sales Captains', captains.toString(), 'Team members', '#9467bd', '👤')}
                     </div>
@@ -80,8 +80,8 @@ const Stores = {
                         color: white;
                     }
                     .store-tab-btn.active {
-                        background: #1f77b4;
-                        border-color: #1f77b4;
+                        background: #3182ce;
+                        border-color: #3182ce;
                         color: white;
                     }
                 </style>
@@ -136,8 +136,8 @@ const Stores = {
         }
 
         const categoryColors = {
-            'CLASS A': '#10b981',
-            'CLASS B': '#3b82f6',
+            'CLASS A': '#48bb78',
+            'CLASS B': '#4299e1',
             'CLASS C': '#f59e0b',
             'CLASS D': '#ef4444'
         };
@@ -146,18 +146,18 @@ const Stores = {
             <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                 <thead style="background: #f8f9fa; position: sticky; top: 0;">
                     <tr>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #1f77b4;">Store ID</th>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #1f77b4;">Store Name</th>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #1f77b4;">Area</th>
-                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #1f77b4;">Category</th>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #1f77b4;">Sales Captain</th>
-                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #1f77b4;">Actions</th>
+                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Store ID</th>
+                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Store Name</th>
+                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Area</th>
+                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Category</th>
+                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Sales Captain</th>
+                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${stores.map((s, idx) => `
                         <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};">
-                            <td style="padding: 8px 12px; color: #1f77b4; font-weight: 500;">${s.storeId || '#' + s.id}</td>
+                            <td style="padding: 8px 12px; color: #3182ce; font-weight: 500;">${s.storeId || '#' + s.id}</td>
                             <td style="padding: 8px 12px; font-weight: 500; color: #333;">${s.storeName}</td>
                             <td style="padding: 8px 12px; color: #666;">${s.area || '-'}</td>
                             <td style="padding: 8px 12px; text-align: center;">
@@ -407,7 +407,7 @@ const Stores = {
         // Add tags
         this.selectedAreas.forEach(area => {
             const tag = document.createElement('span');
-            tag.style.cssText = 'background: #3b82f6; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem; display: flex; align-items: center; gap: 0.25rem;';
+            tag.style.cssText = 'background: #4299e1; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem; display: flex; align-items: center; gap: 0.25rem;';
             tag.innerHTML = `${area} <span style="cursor: pointer; font-weight: bold;" data-remove-area="${area}">×</span>`;
             container.appendChild(tag);
         });
@@ -633,7 +633,7 @@ const Stores = {
                     <div class="store-card-title">
                         <span class="store-number">${store.storeId || '#' + store.id}</span>
                         <h3>${store.storeName || 'Unnamed Store'}</h3>
-                        ${store.storeCategory ? `<span style="background: ${store.storeCategory === 'CLASS A' ? '#10b981' : store.storeCategory === 'CLASS B' ? '#3b82f6' : store.storeCategory === 'CLASS C' ? '#f59e0b' : '#ef4444'}; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600;">${store.storeCategory}</span>` : ''}
+                        ${store.storeCategory ? `<span style="background: ${store.storeCategory === 'CLASS A' ? '#48bb78' : store.storeCategory === 'CLASS B' ? '#4299e1' : store.storeCategory === 'CLASS C' ? '#f59e0b' : '#ef4444'}; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600;">${store.storeCategory}</span>` : ''}
                     </div>
                     <div class="store-card-actions">
                         <button class="btn-icon" data-action="edit" data-id="${store.id}" title="Edit">✏️</button>
@@ -699,8 +699,8 @@ const Stores = {
                 field: 'storeCategory', label: 'Category', formatter: (v) => {
                     if (!v) return '-';
                     const colors = {
-                        'CLASS A': '#10b981',
-                        'CLASS B': '#3b82f6',
+                        'CLASS A': '#48bb78',
+                        'CLASS B': '#4299e1',
                         'CLASS C': '#f59e0b',
                         'CLASS D': '#ef4444'
                     };

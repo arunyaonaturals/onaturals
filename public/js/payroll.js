@@ -12,7 +12,7 @@ const Payroll = {
         const contentArea = document.getElementById('contentArea');
         contentArea.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: center; padding: 60px 20px;">
-                <div style="width: 48px; height: 48px; border: 4px solid #e0e0e0; border-top-color: #10b981; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                <div style="width: 48px; height: 48px; border: 4px solid #e0e0e0; border-top-color: #48bb78; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
             </div>
         `;
 
@@ -38,7 +38,7 @@ const Payroll = {
                 <div style="background: #f5f5f5; min-height: 100%; padding: 0;">
                     
                     <!-- Header Bar -->
-                    <div style="background: #2c3e50; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #10b981;">
+                    <div style="background: #2c3e50; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #48bb78;">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <span style="font-size: 20px;">💳</span>
                             <div>
@@ -53,13 +53,13 @@ const Payroll = {
                             <select id="yearSelect" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; font-size: 11px; padding: 4px 8px; border-radius: 3px;">
                                 ${[2024, 2025, 2026].map(y => `<option value="${y}" ${y === this.currentYear ? 'selected' : ''} style="color: black;">${y}</option>`).join('')}
                             </select>
-                            <button class="pay-gen-btn" id="generatePayrollBtn" style="background: #10b981; border: 1px solid #10b981; color: white; padding: 6px 12px; font-size: 11px; border-radius: 3px; cursor: pointer;">⚙️ Generate</button>
+                            <button class="pay-gen-btn" id="generatePayrollBtn" style="background: #48bb78; border: 1px solid #48bb78; color: white; padding: 6px 12px; font-size: 11px; border-radius: 3px; cursor: pointer;">⚙️ Generate</button>
                         </div>
                     </div>
 
                     <!-- KPI Summary -->
                     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-bottom: 1px solid #ddd;">
-                        ${this.renderKPI('Total Staff', (summary.totalStaff || 0).toString(), 'On payroll', '#1f77b4', '👥')}
+                        ${this.renderKPI('Total Staff', (summary.totalStaff || 0).toString(), 'On payroll', '#3182ce', '👥')}
                         ${this.renderKPI('Total Gross', Utils.formatCurrency(summary.totalGross || 0), 'Earnings before tax', '#2ca02c', '💰')}
                         ${this.renderKPI('Deductions', Utils.formatCurrency(summary.totalDeductions || 0), 'PF, ESI, etc.', '#d62728', '📉')}
                         ${this.renderKPI('Net Payable', Utils.formatCurrency(summary.totalNet || 0), 'Awaiting disbursement', '#ff7f0e', '✅')}
@@ -70,7 +70,7 @@ const Payroll = {
                         <div style="padding: 12px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
                             <span style="font-size: 13px; font-weight: 600; color: #333;">📋 Payroll for ${monthNames[this.currentMonth]} ${this.currentYear}</span>
                             <div style="display: flex; gap: 12px;">
-                                <span style="font-size: 11px; color: #10b981; font-weight: 600;">✅ Paid: ${summary.paidCount || 0}</span>
+                                <span style="font-size: 11px; color: #48bb78; font-weight: 600;">✅ Paid: ${summary.paidCount || 0}</span>
                                 <span style="font-size: 11px; color: #f59e0b; font-weight: 600;">⏳ Pending: ${summary.pendingCount || 0}</span>
                             </div>
                         </div>
@@ -117,7 +117,7 @@ const Payroll = {
                                                 <td style="padding: 8px 12px; text-align: right;"><input type="number" id="pf-${s.id}" value="0" style="width: 60px; padding: 3px; border: 1px solid #ddd; border-radius: 3px; font-size: 11px; text-align: right;"></td>
                                                 <td style="padding: 8px 12px; text-align: right;"><input type="number" id="esi-${s.id}" value="0" style="width: 60px; padding: 3px; border: 1px solid #ddd; border-radius: 3px; font-size: 11px; text-align: right;"></td>
                                                 <td style="padding: 8px 12px; text-align: center;">
-                                                    <button onclick="Payroll.saveSalaryComponents(${s.id})" style="background: #1f77b4; color: white; border: none; padding: 4px 8px; border-radius: 3px; font-size: 10px; cursor: pointer;">💾</button>
+                                                    <button onclick="Payroll.saveSalaryComponents(${s.id})" style="background: #3182ce; color: white; border: none; padding: 4px 8px; border-radius: 3px; font-size: 10px; cursor: pointer;">💾</button>
                                                 </td>
                                             </tr>
                                         `).join('')}
@@ -169,14 +169,14 @@ const Payroll = {
                 <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                     <thead style="background: #f8f9fa; position: sticky; top: 0;">
                         <tr>
-                            <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #10b981;">Staff Name</th>
-                            <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #10b981;">Designation</th>
-                            <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #10b981;">Days</th>
-                            <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: #555; border-bottom: 2px solid #10b981;">Gross</th>
-                            <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: #555; border-bottom: 2px solid #10b981;">Deductions</th>
-                            <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: #555; border-bottom: 2px solid #10b981;">Net Salary</th>
-                            <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #10b981;">Status</th>
-                            <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #10b981;">Actions</th>
+                            <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #48bb78;">Staff Name</th>
+                            <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #48bb78;">Designation</th>
+                            <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #48bb78;">Days</th>
+                            <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: #555; border-bottom: 2px solid #48bb78;">Gross</th>
+                            <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: #555; border-bottom: 2px solid #48bb78;">Deductions</th>
+                            <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: #555; border-bottom: 2px solid #48bb78;">Net Salary</th>
+                            <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #48bb78;">Status</th>
+                            <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #48bb78;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>

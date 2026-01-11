@@ -55,7 +55,7 @@ const Purchase = {
 
                     <!-- KPI Summary -->
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-bottom: 1px solid #ddd;">
-                        ${this.renderKPI('Total Orders', totalOrders.toString(), 'In system', '#1f77b4', '📜')}
+                        ${this.renderKPI('Total Orders', totalOrders.toString(), 'In system', '#3182ce', '📜')}
                         ${this.renderKPI('Pending', pendingOrders.toString(), 'Awaiting delivery', '#ff7f0e', '⏳')}
                         ${this.renderKPI('Total Value', Utils.formatCurrency(totalValue), 'All time procurement', '#2ca02c', '💰')}
                     </div>
@@ -156,7 +156,7 @@ const Purchase = {
             const sc = statusColors[o.status] || { bg: '#f3f2f1', text: '#605e5c' };
             return `
                                 <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};">
-                                    <td style="padding: 8px 12px; color: #1f77b4; font-weight: 600;">${o.orderNo}</td>
+                                    <td style="padding: 8px 12px; color: #3182ce; font-weight: 600;">${o.orderNo}</td>
                                     <td style="padding: 8px 12px; color: #666;">${o.orderDate || '-'}</td>
                                     <td style="padding: 8px 12px; font-weight: 500; color: #333;">${o.supplierName || '-'}</td>
                                     <td style="padding: 8px 12px; text-align: right; font-weight: 600; color: #333;">${Utils.formatCurrency(parseFloat(o.grandTotal || 0))}</td>

@@ -57,7 +57,7 @@ const Inventory = {
 
                     <!-- KPI Summary -->
                     <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; border-bottom: 1px solid #ddd;">
-                        ${this.renderKPI('Total Products', this.products.length.toString(), 'In catalog', '#1f77b4', '📦')}
+                        ${this.renderKPI('Total Products', this.products.length.toString(), 'In catalog', '#3182ce', '📦')}
                         ${this.renderKPI('Active Batches', stats.activeBatches.toString(), 'With stock', '#2ca02c', '📋')}
                         ${this.renderKPI('Total Stock', stats.totalStock.toString(), 'Units available', '#9467bd', '📊')}
                         ${this.renderKPI('Low Stock', this.lowStockItems.length.toString(), 'Need reorder', '#ff7f0e', '⚠️')}
@@ -86,8 +86,8 @@ const Inventory = {
                         color: white;
                     }
                     .inv-tab-btn.active {
-                        background: #1f77b4;
-                        border-color: #1f77b4;
+                        background: #3182ce;
+                        border-color: #3182ce;
                         color: white;
                     }
                 </style>
@@ -204,7 +204,7 @@ const Inventory = {
                             <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};" class="stock-row">
                                 <td style="padding: 8px 12px; font-weight: 500; color: #333;">${item.productName}</td>
                                 <td style="padding: 8px 12px; color: #666;">${item.category || 'Uncategorized'}</td>
-                                <td style="padding: 8px 12px; text-align: right; color: #1f77b4;">${item.batchCount}</td>
+                                <td style="padding: 8px 12px; text-align: right; color: #3182ce;">${item.batchCount}</td>
                                 <td style="padding: 8px 12px; text-align: right; font-weight: 600; color: ${status.valueColor};">${item.totalStock}</td>
                                 <td style="padding: 8px 12px; text-align: center;">
                                     <span style="padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; background: ${status.bg}; color: ${status.color};">${status.label}</span>
@@ -248,7 +248,7 @@ const Inventory = {
         });
 
         const catArray = Object.entries(categories).sort((a, b) => b[1].totalStock - a[1].totalStock);
-        const colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
+        const colors = ['#3182ce', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
 
         return catArray.map(([cat, data], idx) => `
             <div style="padding: 10px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">

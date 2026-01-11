@@ -61,7 +61,7 @@ const Despatch = {
 
                     <!-- KPI Summary -->
                     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-bottom: 1px solid #ddd;">
-                        ${this.renderKPI('Total Orders', (this.summary.total || 0).toString(), 'All invoices', '#1f77b4', '📋')}
+                        ${this.renderKPI('Total Orders', (this.summary.total || 0).toString(), 'All invoices', '#3182ce', '📋')}
                         ${this.renderKPI('Pending', (this.summary.pending || 0).toString(), 'Not yet dispatched', '#ff7f0e', '⏳')}
                         ${this.renderKPI('Partial', (this.summary.partial || 0).toString(), 'Partially delivered', '#9467bd', '📦')}
                         ${this.renderKPI('Delivered', (this.summary.delivered || 0).toString(), 'Fully delivered', '#2ca02c', '✅')}
@@ -110,7 +110,7 @@ const Despatch = {
                                     <span style="font-size: 13px; font-weight: 600; color: #333;">⚡ Quick Actions</span>
                                 </div>
                                 <div style="padding: 12px 16px;">
-                                    <button id="initAllDeliveries" style="width: 100%; background: #1f77b4; color: white; border: none; padding: 10px; border-radius: 4px; margin-bottom: 8px; cursor: pointer; font-size: 12px;">
+                                    <button id="initAllDeliveries" style="width: 100%; background: #3182ce; color: white; border: none; padding: 10px; border-radius: 4px; margin-bottom: 8px; cursor: pointer; font-size: 12px;">
                                         🔄 Initialize All Pending Deliveries
                                     </button>
                                     <button id="viewLowStock" style="width: 100%; background: #ff7f0e; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">
@@ -212,7 +212,7 @@ const Despatch = {
             const statusStyle = this.getStatusStyle(order.deliveryStatus || 'pending');
             return `
                             <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};" class="order-row">
-                                <td style="padding: 8px 12px; font-weight: 500; color: #1f77b4;">${order.invoiceNo}</td>
+                                <td style="padding: 8px 12px; font-weight: 500; color: #3182ce;">${order.invoiceNo}</td>
                                 <td style="padding: 8px 12px; color: #666;">${order.orderDate || '-'}</td>
                                 <td style="padding: 8px 12px; color: #333;">${order.storeName || '-'}</td>
                                 <td style="padding: 8px 12px; color: #666;">${order.salesmanName || '-'}</td>
@@ -250,7 +250,7 @@ const Despatch = {
         return this.captainStats.map((captain, idx) => {
             const total = captain.totalOrders || 1;
             const deliveryRate = Math.round((captain.delivered || 0) / total * 100);
-            const colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
+            const colors = ['#3182ce', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
 
             return `
                 <div style="padding: 10px 16px; border-bottom: 1px solid #eee;">
@@ -366,7 +366,7 @@ const Despatch = {
                 <div style="margin-bottom: 16px; padding: 12px; background: #f8f9fa; border-radius: 4px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <div style="font-weight: 600; color: #1f77b4;">${order.invoiceNo}</div>
+                            <div style="font-weight: 600; color: #3182ce;">${order.invoiceNo}</div>
                             <div style="font-size: 12px; color: #333; margin-top: 2px;">${order.storeName}</div>
                         </div>
                         <span style="padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; background: ${this.getStatusStyle(deliveryStatus.status || 'pending').bg}; color: ${this.getStatusStyle(deliveryStatus.status || 'pending').color};">

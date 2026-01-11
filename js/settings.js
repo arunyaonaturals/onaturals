@@ -30,7 +30,7 @@ const Settings = {
                                 <p style="margin: 2px 0 0 0; font-size: 11px; opacity: 0.7;">Configure company details and preferences</p>
                             </div>
                         </div>
-                        <button type="submit" form="settingsForm" style="background: #1f77b4; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer;">💾 Save Changes</button>
+                        <button type="submit" form="settingsForm" style="background: #3182ce; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer;">💾 Save Changes</button>
                     </div>
 
                     <div style="padding: 20px; max-width: 1000px; margin: 0 auto;">
@@ -142,7 +142,7 @@ const Settings = {
                 <style>
                     .form-group input:focus, .form-group textarea:focus {
                         outline: none;
-                        border-color: #1f77b4 !important;
+                        border-color: #3182ce !important;
                         box-shadow: 0 0 0 2px rgba(31,119,180,0.1);
                     }
                 </style>

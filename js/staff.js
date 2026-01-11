@@ -14,7 +14,7 @@ const Staff = {
         const contentArea = document.getElementById('contentArea');
         contentArea.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: center; padding: 60px 20px;">
-                <div style="width: 48px; height: 48px; border: 4px solid #e0e0e0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                <div style="width: 48px; height: 48px; border: 4px solid #e0e0e0; border-top-color: #4299e1; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
             </div>
         `;
 
@@ -32,7 +32,7 @@ const Staff = {
                 <div style="background: #f5f5f5; min-height: 100%; padding: 0;">
                     
                     <!-- Header Bar -->
-                    <div style="background: #2c3e50; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #3b82f6;">
+                    <div style="background: #2c3e50; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #4299e1;">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <span style="font-size: 20px;">👥</span>
                             <div>
@@ -50,7 +50,7 @@ const Staff = {
 
                     <!-- KPI Summary -->
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-bottom: 1px solid #ddd;">
-                        ${this.renderKPI('Total Staff', totalStaff.toString(), 'On payroll', '#1f77b4', '👥')}
+                        ${this.renderKPI('Total Staff', totalStaff.toString(), 'On payroll', '#3182ce', '👥')}
                         ${this.renderKPI('Active', activeStaff.toString(), 'Currently working', '#2ca02c', '✅')}
                         ${this.renderKPI('Designations', departments.toString(), 'Roles defined', '#9467bd', '💼')}
                     </div>
@@ -80,8 +80,8 @@ const Staff = {
                         color: white;
                     }
                     .staff-tab-btn.active {
-                        background: #3b82f6;
-                        border-color: #3b82f6;
+                        background: #4299e1;
+                        border-color: #4299e1;
                         color: white;
                     }
                 </style>
@@ -143,19 +143,19 @@ const Staff = {
             <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                 <thead style="background: #f8f9fa; position: sticky; top: 0;">
                     <tr>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3b82f6;">Name</th>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3b82f6;">Designation</th>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3b82f6;">Phone</th>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3b82f6;">DOB</th>
-                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #3b82f6;">Status</th>
-                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #3b82f6;">Actions</th>
+                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #4299e1;">Name</th>
+                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #4299e1;">Designation</th>
+                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #4299e1;">Phone</th>
+                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #4299e1;">DOB</th>
+                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #4299e1;">Status</th>
+                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #4299e1;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${staff.map((s, idx) => `
                         <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};">
                             <td style="padding: 8px 12px;">
-                                <div style="font-weight: 600; color: #1f77b4;">${s.name}</div>
+                                <div style="font-weight: 600; color: #3182ce;">${s.name}</div>
                                 ${s.email ? `<div style="font-size: 10px; color: #888;">${s.email}</div>` : ''}
                             </td>
                             <td style="padding: 8px 12px; color: #333;">${s.designation || '-'}</td>
@@ -354,11 +354,11 @@ const Staff = {
             container.innerHTML = `
                 <!-- Summary Stats -->
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
-                    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 1rem; border-radius: 0.75rem; color: white;">
+                    <div style="background: linear-gradient(135deg, #48bb78 0%, #059669 100%); padding: 1rem; border-radius: 0.75rem; color: white;">
                         <div style="font-size: 0.75rem; opacity: 0.9;">Total Staff</div>
                         <div style="font-size: 1.75rem; font-weight: 700;">${this.attendanceSummary.length}</div>
                     </div>
-                    <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 1rem; border-radius: 0.75rem; color: white;">
+                    <div style="background: linear-gradient(135deg, #4299e1 0%, #2563eb 100%); padding: 1rem; border-radius: 0.75rem; color: white;">
                         <div style="font-size: 0.75rem; opacity: 0.9;">Working Days</div>
                         <div style="font-size: 1.75rem; font-weight: 700;">${totalDaysInMonth}</div>
                     </div>
@@ -391,7 +391,7 @@ const Staff = {
                 const total = (s.presentDays || 0) + (s.absentDays || 0) + (s.halfDays || 0) + (s.leaveDays || 0);
                 const effectiveDays = (s.presentDays || 0) + ((s.halfDays || 0) * 0.5);
                 const percentage = total > 0 ? Math.round((effectiveDays / total) * 100) : 0;
-                const color = percentage >= 90 ? '#10b981' : percentage >= 75 ? '#f59e0b' : '#ef4444';
+                const color = percentage >= 90 ? '#48bb78' : percentage >= 75 ? '#f59e0b' : '#ef4444';
 
                 return `
                                     <tr>

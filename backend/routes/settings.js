@@ -132,4 +132,45 @@ router.post('/logo', upload.single('logo'), (req, res) => {
     );
 });
 
+// Master reset - clears all business data except staff and products
+router.post('/master-reset', async (req, res) => {
+    const tables = [
+        'sales_orders',
+        'sales_order_items',
+        'billing',
+        'store_product_margins'
+    ];
+
+    const runQuery = (sql) => {
+        return new Promise((resolve, reject) => {
+            db.run(sql, [], function (err) {
+                if (err) {
+                    // Table might not exist, that's ok
+                    console.warn(`Warning on ${sql}:`, err.message);
+                    resolve(); // Continue anyway
+                } else {
+                    console.log(`Executed: ${sql}`);
+                    resolve();
+                }
+            });
+        });
+    };
+
+    try {
+        // Clear each table
+        for (const table of tables) {
+            await runQuery(`DELETE FROM ${table}`);
+        }
+
+        // Reset product stock quantities to 0
+        await runQuery('UPDATE products SET stock = 0');
+
+        console.log('Master reset completed successfully');
+        res.json({ message: 'Master reset completed successfully' });
+    } catch (error) {
+        console.error('Master reset error:', error);
+        res.status(500).json({ error: 'Master reset failed: ' + error.message });
+    }
+});
+
 export default router;

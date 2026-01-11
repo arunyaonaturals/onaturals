@@ -132,13 +132,25 @@ router.post('/logo', upload.single('logo'), (req, res) => {
     );
 });
 
-// Master reset - clears all business data except staff and products
+// Master reset - clears ALL data except users
 router.post('/master-reset', async (req, res) => {
+    // All tables to clear (everything except 'users' and 'settings')
     const tables = [
+        'sales_order_items',      // Must be before sales_orders (foreign key)
         'sales_orders',
-        'sales_order_items',
+        'purchase_order_items',   // Must be before purchase_orders (foreign key)
+        'purchase_orders',
         'billing',
-        'store_product_margins'
+        'store_product_margins',
+        'attendance',             // Must be before staff (foreign key)
+        'salary_components',      // Must be before staff (foreign key)
+        'payroll',                // Must be before staff (foreign key)
+        'staff',
+        'stores',
+        'products',
+        'suppliers',
+        'beats',
+        'company_settings'
     ];
 
     const runQuery = (sql) => {
@@ -162,11 +174,8 @@ router.post('/master-reset', async (req, res) => {
             await runQuery(`DELETE FROM ${table}`);
         }
 
-        // Reset product stock quantities to 0
-        await runQuery('UPDATE products SET stock = 0');
-
-        console.log('Master reset completed successfully');
-        res.json({ message: 'Master reset completed successfully' });
+        console.log('Master reset completed successfully - all data cleared except users');
+        res.json({ message: 'Master reset completed successfully. All data cleared except user accounts.' });
     } catch (error) {
         console.error('Master reset error:', error);
         res.status(500).json({ error: 'Master reset failed: ' + error.message });

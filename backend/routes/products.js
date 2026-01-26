@@ -112,4 +112,18 @@ router.delete('/', (req, res) => {
     });
 });
 
+// Reset all product margins to 0
+router.put('/reset-margins', (req, res) => {
+    db.run('UPDATE products SET distributorMargin = 0', [], function (err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json({
+            message: 'All product margins reset to 0',
+            changes: this.changes
+        });
+    });
+});
+
 export default router;

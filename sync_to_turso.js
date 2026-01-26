@@ -35,7 +35,10 @@ const tables = [
     'salary_components',
     'payroll',
     'purchase_orders',
-    'purchase_order_items'
+    'purchase_order_items',
+    'raw_material_stock',
+    'production_batches',
+    'batch_materials'
 ];
 
 async function getLocalData(table) {
@@ -59,14 +62,14 @@ async function migrateTable(table, rows) {
 
     const columns = Object.keys(rows[0]);
     const placeholders = columns.map(() => '?').join(', ');
-    
+
     let successCount = 0;
     let errorCount = 0;
 
     for (const row of rows) {
         const values = columns.map(col => row[col]);
         const sql = `INSERT OR REPLACE INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})`;
-        
+
         try {
             await turso.execute({ sql, args: values });
             successCount++;
@@ -105,7 +108,7 @@ async function main() {
     }
 
     console.log('\n✅ Migration complete!');
-    
+
     // Close local database
     localDb.close();
     process.exit(0);

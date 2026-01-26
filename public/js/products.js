@@ -141,7 +141,6 @@ const Products = {
                         <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #2ca02c;">HSN</th>
                         <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: #555; border-bottom: 2px solid #2ca02c;">GST%</th>
                         <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: #555; border-bottom: 2px solid #2ca02c;">MRP</th>
-                        <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: #555; border-bottom: 2px solid #2ca02c;">Margin%</th>
                         <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #2ca02c;">Actions</th>
                     </tr>
                 </thead>
@@ -154,7 +153,6 @@ const Products = {
                             <td style="padding: 8px 12px; color: #666;">${p.hsnCode || '-'}</td>
                             <td style="padding: 8px 12px; text-align: right; color: #3182ce;">${p.gstRate ? p.gstRate + '%' : '-'}</td>
                             <td style="padding: 8px 12px; text-align: right; font-weight: 600; color: #2ca02c;">₹${parseFloat(p.mrp || 0).toFixed(2)}</td>
-                            <td style="padding: 8px 12px; text-align: right; color: #ff7f0e;">${p.distributorMargin ? p.distributorMargin + '%' : '-'}</td>
                             <td style="padding: 8px 12px; text-align: center;">
                                 <button data-action="edit" data-id="${p.id}" style="background: #f3f2f1; border: 1px solid #ddd; padding: 3px 8px; border-radius: 3px; font-size: 10px; cursor: pointer; margin-right: 4px;">✏️</button>
                                 <button data-action="delete" data-id="${p.id}" style="background: #fde7e9; border: 1px solid #f3d6d8; padding: 3px 8px; border-radius: 3px; font-size: 10px; cursor: pointer; color: #d13438;">🗑️</button>
@@ -200,10 +198,6 @@ const Products = {
                             <div>
                                 <label style="display: block; font-size: 11px; font-weight: 600; color: #555; margin-bottom: 4px; text-transform: uppercase;">MRP (₹) *</label>
                                 <input type="number" name="mrp" value="${p?.mrp || ''}" placeholder="0.00" step="0.01" required style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 3px; font-size: 12px;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 11px; font-weight: 600; color: #555; margin-bottom: 4px; text-transform: uppercase;">Margin (%)</label>
-                                <input type="number" name="distributorMargin" value="${p?.distributorMargin || ''}" placeholder="e.g., 20" step="0.01" style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 3px; font-size: 12px;">
                             </div>
                         </div>
                         <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #eee; display: flex; gap: 10px;">
@@ -356,7 +350,7 @@ const Products = {
                 </div>
                 <div class="card-body">
                     <p style="margin-bottom: 1rem; color: #6b7280;">
-                        Upload a CSV file with columns: <strong>serialNumber, productName, weight, mrp, hsnCode, gstRate, distributorMargin</strong>
+                        Upload a CSV file with columns: <strong>serialNumber, productName, weight, mrp, hsnCode, gstRate</strong>
                     </p>
                     <div style="display: flex; gap: 1rem; align-items: center;">
                         <input type="file" id="fileInput" accept=".csv" class="form-input" style="flex: 1;">

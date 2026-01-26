@@ -110,22 +110,22 @@ const Sales = {
 
                             <!-- Product Selection Table -->
                             <div>
-                                <h3 style="margin-bottom: var(--spacing-md);">Select Products</h3>
-                                <div style="border: 1px solid var(--gray-300); border-radius: var(--radius-md);">
-                                    <table class="table" style="margin: 0;">
-                                        <thead style="background: var(--gray-100);">
+                                <h3 style="margin-bottom: 12px; font-size: 16px; font-weight: 600; color: #1e40af;">📦 Select Products</h3>
+                                <div style="border: 2px solid #3b82f6; border-radius: 8px; overflow: hidden;">
+                                    <table class="table" style="margin: 0; width: 100%; border-collapse: collapse;">
+                                        <thead style="background: #1e40af;">
                                             <tr>
-                                                <th style="width: 40px;">☑️</th>
-                                                <th>S.No.</th>
-                                                <th>Product</th>
-                                                <th>Weight</th>
-                                                <th>HSN/SAC</th>
-                                                <th>GST%</th>
-                                                <th>MRP (₹)</th>
-                                                <th style="width: 80px;">Qty</th>
-                                                <th style="width: 80px;">Margin%</th>
-                                                <th>Dist. Price</th>
-                                                <th>Amount</th>
+                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: left; width: 40px;">☑️</th>
+                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: left;">S.No.</th>
+                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: left;">Product</th>
+                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: left;">Weight</th>
+                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: left;">HSN/SAC</th>
+                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: center;">GST%</th>
+                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: right;">MRP (₹)</th>
+                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: center; width: 70px;">Qty</th>
+                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: center; width: 80px;">Margin%</th>
+                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: right;">Dist. Price</th>
+                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: right;">Amount</th>
                                             </tr>
                                         </thead>
                                         <tbody id="productsTableBody">

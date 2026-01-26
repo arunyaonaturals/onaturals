@@ -42,6 +42,7 @@ const Stores = {
                         </div>
                         <div style="display: flex; gap: 8px;">
                             <button class="store-tab-btn ${this.viewMode === 'list' ? 'active' : ''}" data-view="list">📋 List</button>
+                            <button class="store-tab-btn ${this.viewMode === 'margins' ? 'active' : ''}" data-view="margins" style="${this.viewMode === 'margins' ? 'background: #9333ea; border-color: #9333ea;' : ''}">💰 Margins</button>
                             <button class="store-tab-btn" id="importJsonBtn" style="background: #ff7f0e; border-color: #ff7f0e; color: white;">📥 Import JSON</button>
                             <button class="store-tab-btn ${this.viewMode === 'form' ? 'active' : ''}" data-view="form" style="${this.viewMode === 'form' ? 'background: #2ca02c; border-color: #2ca02c;' : ''}">${this.editingStore ? '✏️ Edit' : '➕ Add'}</button>
                         </div>
@@ -56,7 +57,9 @@ const Stores = {
 
                     <!-- Main Content -->
                     <div id="storeContent">
-                        ${this.viewMode === 'list' ? this.renderListView() : this.renderAddStoreForm()}
+                        ${this.viewMode === 'list' ? this.renderListView() :
+                    this.viewMode === 'margins' ? this.renderMarginsView() :
+                        this.renderAddStoreForm()}
                     </div>
                 </div>
 
@@ -1135,8 +1138,32 @@ const Stores = {
         }
 
         return `
+            <!-- Bulk Margin Controls -->
+            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                <h3 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #0369a1;">⚡ Quick Bulk Margin Setting</h3>
+                
+                <!-- Quick Margin Buttons -->
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+                    <span style="font-size: 12px; color: #64748b; line-height: 32px; min-width: 100px;">Quick Set All:</span>
+                    <button class="bulk-margin-btn" data-margin="10" style="background: #10b981; color: white; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">10%</button>
+                    <button class="bulk-margin-btn" data-margin="15" style="background: #3b82f6; color: white; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">15%</button>
+                    <button class="bulk-margin-btn" data-margin="20" style="background: #8b5cf6; color: white; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">20%</button>
+                    <button class="bulk-margin-btn" data-margin="25" style="background: #f59e0b; color: white; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">25%</button>
+                    <button class="bulk-margin-btn" data-margin="30" style="background: #ef4444; color: white; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">30%</button>
+                </div>
+                
+                <!-- Custom Margin Input -->
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span style="font-size: 12px; color: #64748b; min-width: 100px;">Custom Margin:</span>
+                    <input type="number" id="bulkMarginInput" placeholder="Enter %" min="0" max="100" step="0.5" 
+                        style="width: 80px; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; text-align: center;">
+                    <button id="applyBulkMarginBtn" style="background: #0ea5e9; color: white; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Apply to All</button>
+                    <button id="clearAllMarginsBtn" style="background: #64748b; color: white; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; font-size: 12px;">Clear All</button>
+                </div>
+            </div>
+            
             <div style="margin-bottom: var(--spacing-md); display: flex; justify-content: space-between; align-items: center;">
-                <p style="color: var(--gray-600);">Set custom margins for each product at this store. Leave blank to use the default product margin.</p>
+                <p style="color: var(--gray-600);">Set custom margins for each product at this store. Leave blank to use the default product margin (0%).</p>
                 <button class="btn btn-primary" id="saveMarginsBtn">💾 Save Margins</button>
             </div>
             
@@ -1229,6 +1256,31 @@ const Stores = {
             await this.saveStoreMargins();
         });
 
+        // Bulk margin quick-set buttons
+        document.querySelectorAll('.bulk-margin-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const margin = parseFloat(e.target.dataset.margin);
+                this.applyBulkMargin(margin);
+            });
+        });
+
+        // Apply custom bulk margin
+        document.getElementById('applyBulkMarginBtn')?.addEventListener('click', () => {
+            const input = document.getElementById('bulkMarginInput');
+            const margin = parseFloat(input.value);
+            if (isNaN(margin) || margin < 0 || margin > 100) {
+                UI.showToast('Please enter a valid margin between 0 and 100', 'error');
+                return;
+            }
+            this.applyBulkMargin(margin);
+            input.value = '';
+        });
+
+        // Clear all margins
+        document.getElementById('clearAllMarginsBtn')?.addEventListener('click', () => {
+            this.applyBulkMargin(null); // null clears all
+        });
+
         // Update effective margin display on input change
         document.querySelectorAll('.margin-input').forEach(input => {
             input.addEventListener('input', (e) => {
@@ -1247,6 +1299,35 @@ const Stores = {
                 }
             });
         });
+    },
+
+    // Apply bulk margin to all products
+    applyBulkMargin(margin) {
+        const inputs = document.querySelectorAll('.margin-input');
+        inputs.forEach(input => {
+            if (margin === null) {
+                // Clear all
+                input.value = '';
+            } else {
+                input.value = margin;
+            }
+
+            // Update effective margin display
+            const productId = input.dataset.productId;
+            const product = this.currentProducts.find(p => p.productId == productId);
+            const display = document.querySelector(`.effective-margin-display[data-product-id="${productId}"]`);
+
+            if (display) {
+                const effectiveMargin = margin === null ? (product?.defaultMargin || 0) : margin;
+                display.textContent = effectiveMargin.toFixed(2) + '%';
+            }
+        });
+
+        if (margin === null) {
+            UI.showToast('All margins cleared', 'info');
+        } else {
+            UI.showToast(`${margin}% margin applied to all ${inputs.length} products`, 'success');
+        }
     },
 
     async saveStoreMargins() {

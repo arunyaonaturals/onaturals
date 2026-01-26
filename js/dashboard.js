@@ -9,7 +9,7 @@ const Dashboard = {
         const contentArea = document.getElementById('contentArea');
         contentArea.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: center; padding: 60px 20px;">
-                <div style="width: 48px; height: 48px; border: 4px solid #e8e0d8; border-top-color: #c4956a; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                <div class="loading-spinner"></div>
             </div>
         `;
 

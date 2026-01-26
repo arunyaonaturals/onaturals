@@ -16,8 +16,8 @@ const Inventory = {
     async render() {
         const contentArea = document.getElementById('contentArea');
         contentArea.innerHTML = `
-            <div style="display: flex; align-items: center; justify-content: center; padding: 60px 20px;">
-                <div style="width: 48px; height: 48px; border: 4px solid #e0e0e0; border-top-color: #9467bd; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+            <div style="display: flex; align-items: center; justify-content: center; padding: 100px;">
+                <div class="loading-spinner"></div>
             </div>
         `;
 
@@ -43,40 +43,31 @@ const Inventory = {
 
             contentArea.innerHTML = `
                 <!-- Page Header -->
-                <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h1 class="page-title">Inventory Management</h1>
-                        <p class="page-subtitle">Batch-based stock tracking and production</p>
+                <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div class="header-title-wrapper">
+                        <h1>Inventory Management</h1>
+                        <p>Batch-based stock tracking and production</p>
                     </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-secondary ${this.selectedTab === 'stock' ? 'active-tab' : ''}" onclick="Inventory.switchTab('stock')">📊 Finished Stock</button>
-                        <button class="btn btn-secondary ${this.selectedTab === 'batches' ? 'active-tab' : ''}" onclick="Inventory.switchTab('batches')">📋 Batches</button>
-                    <button class="btn btn-secondary ${this.selectedTab === 'raw-materials' ? 'active-tab' : ''}" onclick="Inventory.switchTab('raw-materials')">🌾 Raw Materials</button>
-                        <button class="btn btn-secondary ${this.selectedTab === 'production' ? 'active-tab' : ''}" onclick="Inventory.switchTab('production')">🏭 Production</button>
+                    <div class="tab-nav">
+                        <button class="tab-btn ${this.selectedTab === 'stock' ? 'active' : ''}" onclick="Inventory.switchTab('stock')">📊 Finished Stock</button>
+                        <button class="tab-btn ${this.selectedTab === 'batches' ? 'active' : ''}" onclick="Inventory.switchTab('batches')">📋 Batches</button>
+                        <button class="tab-btn ${this.selectedTab === 'raw-materials' ? 'active' : ''}" onclick="Inventory.switchTab('raw-materials')">🌾 Raw Materials</button>
+                        <button class="tab-btn ${this.selectedTab === 'production' ? 'active' : ''}" onclick="Inventory.switchTab('production')">🏭 Production</button>
                     </div>
                 </div>
 
                 <!-- KPI Stats -->
                 <div class="stats-grid">
-                    ${this.renderKPI('Total Products', this.products.length.toString(), 'In catalog', 'info', '📦')}
-                    ${this.renderKPI('Active Batches', stats.activeBatches.toString(), 'With stock', 'success', '📋')}
-                    ${this.renderKPI('Total Stock', stats.totalStock.toString(), 'Units available', 'warning', '📊')}
-                    ${this.renderKPI('Low Stock', this.lowStockItems.length.toString(), 'Need reorder', 'danger', '⚠️')}
+                    ${this.renderKPI('Total Products', this.products.length.toString(), 'In catalog', 'blue', '📦')}
+                    ${this.renderKPI('Active Batches', stats.activeBatches.toString(), 'With stock', 'green', '📋')}
+                    ${this.renderKPI('Total Stock', stats.totalStock.toString(), 'Units available', 'orange', '📊')}
+                    ${this.renderKPI('Low Stock', this.lowStockItems.length.toString(), 'Need reorder', 'red', '⚠️')}
                 </div>
 
                 <!-- Main Content -->
-                <div id="inventoryTabContent" class="card card-body" style="min-height: 400px;">
+                <div id="inventoryTabContent">
                     ${this.renderTabContent()}
                 </div>
-
-                <style>
-                    .active-tab {
-                        background: var(--primary) !important;
-                        color: white !important;
-                        border-color: var(--primary) !important;
-                    }
-                </style>
-            `;
             `;
 
             this.attachEventListeners();
@@ -84,11 +75,11 @@ const Inventory = {
         } catch (error) {
             console.error('Inventory render error:', error);
             contentArea.innerHTML = `
-                < div style = "text-align: center; padding: 60px 20px;" >
-                    <div style="font-size: 48px; margin-bottom: 16px;">❌</div>
-                    <p style="color: #d13438;">Error loading inventory: ${error.message}</p>
-                </div >
-    `;
+                <div class="empty-state">
+                    <div class="empty-state-icon">❌</div>
+                    <p style="color: var(--danger);">Error loading inventory: ${error.message}</p>
+                </div>
+            `;
         }
     },
 
@@ -100,20 +91,19 @@ const Inventory = {
         return { activeBatches, totalStock, outOfStock };
     },
 
-    renderKPI(label, value, subtitle, color, icon) {
+    renderKPI(label, value, subtitle, colorClass, icon) {
         return `
-    < div style = "background: white; padding: 14px 16px; border-right: 1px solid #ddd; position: relative;" >
-                <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: ${color};"></div>
-                <div style="display: flex; align-items: flex-start; justify-content: space-between;">
-                    <div>
-                        <div style="font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px;">${label}</div>
-                        <div style="font-size: 20px; font-weight: 700; color: #333;">${value}</div>
-                        <div style="font-size: 10px; color: #888; margin-top: 3px;">${subtitle}</div>
-                    </div>
-                    <div style="font-size: 20px; opacity: 0.3;">${icon}</div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>${label}</h3>
+                    <div class="value">${value}</div>
+                    <div class="stat-label">${subtitle}</div>
                 </div>
-            </div >
-    `;
+                <div class="stat-icon ${colorClass}">
+                    ${icon}
+                </div>
+            </div>
+        `;
     },
 
     renderTabContent() {
@@ -133,14 +123,17 @@ const Inventory = {
 
     renderStockTab() {
         return `
-    < div style = "display: grid; grid-template-columns: 2fr 1fr; gap: 0;" >
-                < !--Left: Stock Table-- >
-                <div style="border-right: 1px solid #ddd;">
-                    <div style="background: white; min-height: 400px;">
-                        <div style="padding: 12px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 13px; font-weight: 600; color: #333;">📊 Stock Levels by Product</span>
-                            <input type="text" id="stockSearch" placeholder="Search products..." style="padding: 5px 10px; border: 1px solid #ddd; border-radius: 3px; font-size: 11px; width: 200px;">
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+                <!-- Left: Stock Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Stock Levels by Product</h3>
+                        <div style="position: relative;">
+                            <input type="text" id="stockSearch" placeholder="Search products..." class="form-input" style="width: 200px; padding-left: 28px; padding-top: 6px; padding-bottom: 6px;">
+                            <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; opacity: 0.5;">🔍</span>
                         </div>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
                         <div style="max-height: 500px; overflow-y: auto;">
                             ${this.renderStockTable()}
                         </div>
@@ -173,57 +166,67 @@ const Inventory = {
 
     renderStockTable() {
         if (this.stockSummary.length === 0) {
-            return '<div style="padding: 40px; text-align: center; color: #666;">No products found. Add products first.</div>';
+            return `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📦</div>
+                    <p>No products found. Add products first.</p>
+                </div>`;
         }
 
         return `
-    < table style = "width: 100%; border-collapse: collapse; font-size: 12px;" >
-                <thead style="background: #f8f9fa; position: sticky; top: 0;">
-                    <tr>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #9467bd;">Product</th>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #9467bd;">Category</th>
-                        <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: #555; border-bottom: 2px solid #9467bd;">Batches</th>
-                        <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: #555; border-bottom: 2px solid #9467bd;">Total Stock</th>
-                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #9467bd;">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${this.stockSummary.map((item, idx) => {
+            <div class="table-container" style="border: none; border-radius: 0;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th style="text-align: right;">Batches</th>
+                            <th style="text-align: right;">Total Stock</th>
+                            <th style="text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${this.stockSummary.map((item) => {
             const status = this.getStockStatus(item.totalStock);
+            let badgeType = 'success';
+            if (status.label === 'OUT OF STOCK') badgeType = 'danger';
+            else if (status.label === 'LOW STOCK') badgeType = 'warning';
+
             return `
-                            <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};" class="stock-row">
-                                <td style="padding: 8px 12px; font-weight: 500; color: #333;">${item.productName}</td>
-                                <td style="padding: 8px 12px; color: #666;">${item.category || 'Uncategorized'}</td>
-                                <td style="padding: 8px 12px; text-align: right; color: #3182ce;">${item.batchCount}</td>
-                                <td style="padding: 8px 12px; text-align: right; font-weight: 600; color: ${status.valueColor};">${item.totalStock}</td>
-                                <td style="padding: 8px 12px; text-align: center;">
-                                    <span style="padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; background: ${status.bg}; color: ${status.color};">${status.label}</span>
-                                </td>
-                            </tr>
-                        `;
+                                <tr>
+                                    <td style="font-weight: 500; color: var(--text-main);">${item.productName}</td>
+                                    <td style="color: var(--text-muted);">${item.category || 'Uncategorized'}</td>
+                                    <td style="text-align: right; color: var(--primary);">${item.batchCount}</td>
+                                    <td style="text-align: right; font-weight: 600;">${item.totalStock}</td>
+                                    <td style="text-align: center;">
+                                        <span class="badge badge-${badgeType}">${status.label}</span>
+                                    </td>
+                                </tr>
+                            `;
         }).join('')}
-                </tbody>
-            </table >
-    `;
+                    </tbody>
+                </table>
+            </div>
+        `;
     },
 
     renderLowStockList() {
         if (this.lowStockItems.length === 0) {
-            return '<div style="padding: 20px; text-align: center; color: #2ca02c; font-size: 12px;">✅ All products have sufficient stock</div>';
+            return '<div style="padding: 20px; text-align: center; color: var(--success); font-size: 13px;">✅ All products have sufficient stock</div>';
         }
 
-        return this.lowStockItems.map((item, idx) => `
-    < div style = "padding: 10px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: ${item.totalStock === 0 ? '#fde7e9' : '#fff'};" >
+        return this.lowStockItems.map((item) => `
+            <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: ${item.totalStock === 0 ? 'var(--danger-bg)' : 'transparent'};">
                 <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #333;">${item.productName}</div>
-                    <div style="font-size: 10px; color: #888;">${item.category || 'Uncategorized'}</div>
+                    <div style="font-size: 13px; font-weight: 500; color: var(--text-main);">${item.productName}</div>
+                    <div style="font-size: 11px; color: var(--text-light);">${item.category || 'Uncategorized'}</div>
                 </div>
                 <div style="text-align: right;">
-                    <div style="font-size: 14px; font-weight: 700; color: ${item.totalStock === 0 ? '#d13438' : '#ff7f0e'};">${item.totalStock}</div>
-                    <div style="font-size: 10px; color: #888;">units</div>
+                    <div style="font-size: 14px; font-weight: 700; color: ${item.totalStock === 0 ? 'var(--danger)' : 'var(--accent)'};">${item.totalStock}</div>
+                    <div style="font-size: 11px; color: var(--text-light);">units</div>
                 </div>
-            </div >
-    `).join('');
+            </div>
+        `).join('');
     },
 
     renderCategorySummary() {
@@ -238,20 +241,20 @@ const Inventory = {
         });
 
         const catArray = Object.entries(categories).sort((a, b) => b[1].totalStock - a[1].totalStock);
-        const colors = ['#3182ce', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
+        const colors = ['#2563eb', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'];
 
         return catArray.map(([cat, data], idx) => `
-    < div style = "padding: 10px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;" >
-                <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
                     <div style="width: 8px; height: 8px; background: ${colors[idx % colors.length]}; border-radius: 50%;"></div>
-                    <span style="font-size: 12px; color: #333;">${cat}</span>
+                    <span style="font-size: 13px; color: var(--text-main); font-weight: 500;">${cat}</span>
                 </div>
                 <div style="text-align: right;">
-                    <div style="font-size: 12px; font-weight: 600; color: ${colors[idx % colors.length]};">${data.totalStock} units</div>
-                    <div style="font-size: 10px; color: #888;">${data.count} products</div>
+                    <div style="font-size: 13px; font-weight: 600; color: var(--text-body);">${data.totalStock} units</div>
+                    <div style="font-size: 11px; color: var(--text-light);">${data.count} products</div>
                 </div>
-            </div >
-    `).join('');
+            </div>
+        `).join('');
     },
 
     // ===== RAW MATERIALS TAB =====
@@ -260,268 +263,294 @@ const Inventory = {
         const totalValue = this.rawMaterials.reduce((sum, m) => sum + (m.remainingQty * m.rate), 0);
 
         return `
-    < div style = "background: white; min-height: 400px;" >
-                <div style="padding: 12px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #dcfce7;">
-                    <span style="font-size: 13px; font-weight: 600; color: #166534;">🌾 Raw Materials from Purchases (${totalMaterials})</span>
-                    <span style="font-size: 12px; color: #166534;">Total Value: ₹${totalValue.toFixed(2)}</span>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Raw Materials from Purchases (${totalMaterials})</h3>
+                    <div class="badge badge-success" style="font-size: 12px;">Total Value: ₹${totalValue.toFixed(2)}</div>
                 </div>
-                <div style="max-height: 550px; overflow-y: auto;">
-                    ${this.rawMaterials.length === 0 ?
-                '<div style="padding: 60px; text-align: center; color: #666;"><p style="font-size: 16px; margin-bottom: 8px;">📦 No raw materials in stock</p><p style="font-size: 12px;">When you receive a purchase order, raw materials will appear here.</p></div>' :
+                <div class="card-body" style="padding: 0;">
+                    <div style="max-height: 550px; overflow-y: auto;">
+                        ${this.rawMaterials.length === 0 ?
+                `<div class="empty-state">
+                                <div class="empty-state-icon">🌾</div>
+                                <p>No raw materials in stock. When you receive a purchase order, raw materials will appear here.</p>
+                            </div>` :
                 this.renderRawMaterialsTable()
             }
+                    </div>
                 </div>
-            </div >
-    `;
+            </div>
+        `;
     },
 
     renderRawMaterialsTable() {
         return `
-    < table style = "width: 100%; border-collapse: collapse; font-size: 12px;" >
-                <thead style="background: #059669; position: sticky; top: 0;">
-                    <tr>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: white;">Material Name</th>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: white;">Weight</th>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: white;">Vendor</th>
-                        <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: white;">Rate (₹)</th>
-                        <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: white;">Initial</th>
-                        <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: white;">Remaining</th>
-                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: white;">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${this.rawMaterials.map((m, idx) => {
+            <div class="table-container" style="border: none; border-radius: 0;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Material Name</th>
+                            <th>Weight</th>
+                            <th>Vendor</th>
+                            <th style="text-align: right;">Rate (₹)</th>
+                            <th style="text-align: right;">Initial</th>
+                            <th style="text-align: right;">Remaining</th>
+                            <th style="text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${this.rawMaterials.map((m) => {
             const percent = m.initialQty > 0 ? (m.remainingQty / m.initialQty * 100) : 0;
-            const statusColor = percent === 0 ? '#d13438' : percent < 30 ? '#ff7f0e' : '#2ca02c';
-            const statusBg = percent === 0 ? '#fee2e2' : percent < 30 ? '#fef3c7' : '#dcfce7';
-            const statusLabel = percent === 0 ? 'EMPTY' : percent < 30 ? 'LOW' : 'OK';
+            let statusClass = 'success';
+            let statusLabel = 'OK';
+
+            if (percent === 0) { statusClass = 'danger'; statusLabel = 'EMPTY'; }
+            else if (percent < 30) { statusClass = 'warning'; statusLabel = 'LOW'; }
+
             return `
-                            <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};">
-                                <td style="padding: 8px 12px; font-weight: 500; color: #333;">${m.materialName}</td>
-                                <td style="padding: 8px 12px; color: #666;">${m.weight || '-'}</td>
-                                <td style="padding: 8px 12px; color: #666;">${m.vendorName || '-'}</td>
-                                <td style="padding: 8px 12px; text-align: right; color: #333;">₹${parseFloat(m.rate || 0).toFixed(2)}</td>
-                                <td style="padding: 8px 12px; text-align: right; color: #666;">${m.initialQty}</td>
-                                <td style="padding: 8px 12px; text-align: right; font-weight: 600; color: ${statusColor};">${m.remainingQty}</td>
-                                <td style="padding: 8px 12px; text-align: center;">
-                                    <span style="background: ${statusBg}; color: ${statusColor}; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600;">${statusLabel}</span>
-                                </td>
-                            </tr>
-                        `;
+                                <tr>
+                                    <td style="font-weight: 500;">${m.materialName}</td>
+                                    <td style="color: var(--text-muted);">${m.weight || '-'}</td>
+                                    <td style="color: var(--text-muted);">${m.vendorName || '-'}</td>
+                                    <td style="text-align: right;">₹${parseFloat(m.rate || 0).toFixed(2)}</td>
+                                    <td style="text-align: right; color: var(--text-muted);">${m.initialQty}</td>
+                                    <td style="text-align: right; font-weight: 600;">${m.remainingQty}</td>
+                                    <td style="text-align: center;">
+                                        <span class="badge badge-${statusClass}">${statusLabel}</span>
+                                    </td>
+                                </tr>
+                            `;
         }).join('')}
-                </tbody>
-            </table >
-    `;
+                    </tbody>
+                </table>
+            </div>
+        `;
     },
 
     // ===== PRODUCTION TAB =====
+    // ===== PRODUCTION TAB =====
     renderProductionTab() {
         return `
-    < div style = "display: grid; grid-template-columns: 1fr 1fr; gap: 0; min-height: 450px;" >
-                < !--Left: Create Production Batch-- >
-                <div style="border-right: 1px solid #ddd;">
-                    <div style="padding: 12px 16px; border-bottom: 1px solid #eee; background: #dc2626;">
-                        <span style="font-size: 13px; font-weight: 600; color: white;">🏭 Create Production Batch</span>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <!-- Left: Create Production Batch -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">🏭 Create Production Batch</h3>
                     </div>
-                    <div style="padding: 20px;">
+                    <div class="card-body">
                         ${this.renderProductionForm()}
                     </div>
                 </div>
                 
-                <!--Right: Recent Production Batches-- >
-    <div>
-        <div style="padding: 12px 16px; border-bottom: 1px solid #eee; background: #f8f9fa;">
-            <span style="font-size: 13px; font-weight: 600; color: #333;">📋 Production History (${this.productionBatches.length})</span>
-        </div>
-        <div style="max-height: 500px; overflow-y: auto;">
-            ${this.renderProductionBatchesList()}
-        </div>
-    </div>
-            </div >
-    `;
+                <!-- Right: Recent Production Batches -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Production History (${this.productionBatches.length})</h3>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <div style="max-height: 550px; overflow-y: auto;">
+                            ${this.renderProductionBatchesList()}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     },
 
     renderProductionForm() {
         const availableMaterials = this.rawMaterials.filter(m => m.remainingQty > 0);
         return `
-    < form id = "productionForm" >
-                <div style="margin-bottom: 16px;">
-                    <label style="display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px;">Finished Product *</label>
-                    <select id="prodProductId" class="form-select" style="width: 100%;" required>
+            <form id="productionForm">
+                <div class="form-group">
+                    <label class="form-label">Finished Product *</label>
+                    <select id="prodProductId" class="form-select" required>
                         <option value="">Select finished product to make</option>
                         ${this.products.map(p => `<option value="${p.id}" data-name="${p.productName}">${p.productName} (${p.weight || 'N/A'})</option>`).join('')}
                     </select>
                 </div>
                 
-                <div style="margin-bottom: 16px;">
-                    <label style="display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px;">Quantity to Produce *</label>
+                <div class="form-group">
+                    <label class="form-label">Quantity to Produce *</label>
                     <input type="number" id="prodQuantity" class="form-input" min="1" required placeholder="Number of units">
                 </div>
                 
-                <div style="margin-bottom: 16px;">
-                    <label style="display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px;">Batch Number</label>
+                <div class="form-group">
+                    <label class="form-label">Batch Number</label>
                     <div style="display: flex; gap: 8px;">
-                        <input type="text" id="prodBatchNumber" class="form-input" style="flex: 1;" placeholder="Auto-generated">
-                        <button type="button" id="generateProdBatchNo" style="background: #dc2626; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 11px; cursor: pointer;">Generate</button>
+                        <input type="text" id="prodBatchNumber" class="form-input" placeholder="Auto-generated">
+                        <button type="button" id="generateProdBatchNo" class="btn btn-secondary" style="white-space: nowrap;">Generate</button>
                     </div>
                 </div>
                 
-                <div style="margin-bottom: 16px;">
-                    <label style="display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px;">Raw Materials Used</label>
-                    <div id="materialsUsedList" style="border: 1px solid #ddd; border-radius: 4px; padding: 8px; min-height: 60px; background: #f8f9fa;">
-                        <p style="color: #666; font-size: 11px; margin: 0; padding: 4px;">Add raw materials below</p>
+                <div class="form-group">
+                    <label class="form-label">Raw Materials Used</label>
+                    <div id="materialsUsedList" style="border: 1px solid var(--border-light); border-radius: 8px; padding: 12px; min-height: 60px; background: var(--bg-surface);">
+                        <p style="color: var(--text-muted); font-size: 11px; margin: 0;">Add raw materials below</p>
                     </div>
                 </div>
                 
-                <div style="margin-bottom: 16px; display: grid; grid-template-columns: 2fr 1fr auto; gap: 8px; align-items: end;">
-                    <div>
-                        <label style="display: block; font-size: 11px; color: #666; margin-bottom: 4px;">Raw Material</label>
-                        <select id="addMaterialSelect" class="form-select" style="font-size: 11px;">
+                <div class="form-row" style="align-items: end;">
+                    <div class="form-group" style="margin: 0; flex: 2;">
+                        <label class="form-label">Raw Material</label>
+                        <select id="addMaterialSelect" class="form-select">
                             <option value="">Select material</option>
                             ${availableMaterials.map(m => `<option value="${m.id}" data-name="${m.materialName}" data-remaining="${m.remainingQty}">${m.materialName} (${m.remainingQty} left)</option>`).join('')}
                         </select>
                     </div>
-                    <div>
-                        <label style="display: block; font-size: 11px; color: #666; margin-bottom: 4px;">Qty Used</label>
-                        <input type="number" id="addMaterialQty" class="form-input" style="font-size: 11px;" min="0.1" step="0.1" placeholder="0">
+                    <div class="form-group" style="margin: 0; flex: 1;">
+                        <label class="form-label">Qty Used</label>
+                        <input type="number" id="addMaterialQty" class="form-input" min="0.1" step="0.1" placeholder="0">
                     </div>
-                    <button type="button" id="addMaterialBtn" style="background: #2563eb; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;">+ Add</button>
+                    <button type="button" id="addMaterialBtn" class="btn btn-secondary" style="height: 42px;">+ Add</button>
                 </div>
                 
-                <div style="margin-bottom: 16px;">
-                    <label style="display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px;">Production Date</label>
+                <div class="form-group" style="margin-top: 16px;">
+                    <label class="form-label">Production Date</label>
                     <input type="date" id="prodDate" class="form-input" value="${new Date().toISOString().split('T')[0]}">
                 </div>
                 
-                <div style="padding-top: 16px; border-top: 1px solid #eee;">
-                    <button type="submit" style="background: #059669; color: white; border: none; padding: 10px 24px; border-radius: 4px; font-size: 13px; cursor: pointer; width: 100%;">
-                        🏭 Create Production Batch
+                <div style="margin-top: 24px;">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        Create Production Batch
                     </button>
                 </div>
-            </form >
-    `;
+            </form>
+        `;
     },
 
     renderProductionBatchesList() {
         if (this.productionBatches.length === 0) {
-            return '<div style="padding: 40px; text-align: center; color: #666;"><p>No production batches yet</p></div>';
+            return `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🏭</div>
+                    <p>No production batches yet</p>
+                </div>`;
         }
 
         return this.productionBatches.map((batch, idx) => `
-    < div style = "padding: 12px 16px; border-bottom: 1px solid #eee; background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};" >
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <div style="font-weight: 600; color: #dc2626;">${batch.batchNumber}</div>
-                <div style="font-size: 12px; color: #333;">${batch.productName}</div>
-                <div style="font-size: 11px; color: #666;">${batch.productionDate || '-'}</div>
+            <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: ${idx % 2 === 0 ? 'transparent' : 'var(--bg-surface)'};">
+                <div>
+                    <div style="font-weight: 600; color: var(--primary);">${batch.batchNumber}</div>
+                    <div style="font-size: 13px; color: var(--text-main); font-weight: 500;">${batch.productName}</div>
+                    <div style="font-size: 11px; color: var(--text-light);">${batch.productionDate || '-'}</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 16px; font-weight: 700; color: var(--success);">${batch.quantityProduced}</div>
+                    <div style="font-size: 11px; color: var(--text-light);">units</div>
+                </div>
             </div>
-            <div style="text-align: right;">
-                <div style="font-size: 18px; font-weight: 700; color: #059669;">${batch.quantityProduced}</div>
-                <div style="font-size: 10px; color: #666;">units</div>
-            </div>
-        </div>
-            </div >
-    `).join('');
+        `).join('');
     },
 
     renderBatchesTab() {
         return `
-    < div style = "background: white; min-height: 400px;" >
-                <div style="padding: 12px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 13px; font-weight: 600; color: #333;">📋 Product Batches</span>
-                    <input type="text" id="batchSearch" placeholder="Search batches..." style="padding: 5px 10px; border: 1px solid #ddd; border-radius: 3px; font-size: 11px; width: 250px;">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Product Batches</h3>
+                    <div style="position: relative;">
+                        <input type="text" id="batchSearch" placeholder="Search batches..." class="form-input" style="width: 250px; padding-left: 28px; padding-top: 6px; padding-bottom: 6px;">
+                        <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; opacity: 0.5;">🔍</span>
+                    </div>
                 </div>
-                <div style="max-height: 550px; overflow-y: auto;">
-                    ${this.renderBatchTable()}
+                <div class="card-body" style="padding: 0;">
+                    <div style="max-height: 550px; overflow-y: auto;">
+                        ${this.renderBatchTable()}
+                    </div>
                 </div>
-            </div >
-    `;
+            </div>
+        `;
     },
 
     renderBatchTable() {
         if (this.batches.length === 0) {
-            return '<div style="padding: 40px; text-align: center; color: #666;">No batches created yet. Click "Create Batch" to add stock from purchases.</div>';
+            return `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <p>No batches created yet. Click "Create Batch" to add stock from purchases.</p>
+                </div>`;
         }
 
         return `
-    < table style = "width: 100%; border-collapse: collapse; font-size: 12px;" >
-                <thead style="background: #f8f9fa; position: sticky; top: 0;">
-                    <tr>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #9467bd;">Batch #</th>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #9467bd;">Product</th>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #9467bd;">Size</th>
-                        <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: #555; border-bottom: 2px solid #9467bd;">Initial</th>
-                        <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: #555; border-bottom: 2px solid #9467bd;">Remaining</th>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #9467bd;">Received</th>
-                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #9467bd;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${this.batches.map((batch, idx) => `
-                        <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};" class="batch-row">
-                            <td style="padding: 8px 12px; font-weight: 500; color: #9467bd;">${batch.batchNumber}</td>
-                            <td style="padding: 8px 12px; color: #333;">${batch.productName || 'Unknown'}</td>
-                            <td style="padding: 8px 12px; color: #666;">${batch.packageSize || '-'}</td>
-                            <td style="padding: 8px 12px; text-align: right; color: #666;">${batch.quantity}</td>
-                            <td style="padding: 8px 12px; text-align: right; font-weight: 600; color: ${batch.remainingQty > 0 ? '#2ca02c' : '#d62728'};">${batch.remainingQty}</td>
-                            <td style="padding: 8px 12px; color: #666;">${batch.receivedDate || '-'}</td>
-                            <td style="padding: 8px 12px; text-align: center;">
-                                <button class="adjust-batch-btn" data-batch-id="${batch.id}" style="background: #f3f2f1; border: 1px solid #ddd; padding: 3px 8px; border-radius: 3px; font-size: 10px; cursor: pointer;">Adjust</button>
-                            </td>
+            <div class="table-container" style="border: none; border-radius: 0;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Batch #</th>
+                            <th>Product</th>
+                            <th>Size</th>
+                            <th style="text-align: right;">Initial</th>
+                            <th style="text-align: right;">Remaining</th>
+                            <th>Received</th>
+                            <th style="text-align: center;">Actions</th>
                         </tr>
-                    `).join('')}
-                </tbody>
-            </table >
-    `;
+                    </thead>
+                    <tbody>
+                        ${this.batches.map((batch, idx) => `
+                            <tr class="batch-row">
+                                <td style="font-weight: 600; color: var(--primary);">${batch.batchNumber}</td>
+                                <td style="font-weight: 500;">${batch.productName || 'Unknown'}</td>
+                                <td style="color: var(--text-muted);">${batch.packageSize || '-'}</td>
+                                <td style="text-align: right; color: var(--text-muted);">${batch.quantity}</td>
+                                <td style="text-align: right; font-weight: 600; color: ${batch.remainingQty > 0 ? 'var(--success)' : 'var(--danger)'};">${batch.remainingQty}</td>
+                                <td style="color: var(--text-muted);">${batch.receivedDate || '-'}</td>
+                                <td style="text-align: center;">
+                                    <button class="btn btn-secondary adjust-batch-btn" data-batch-id="${batch.id}" style="padding: 2px 8px; font-size: 11px;">Adjust</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
     },
 
     renderCreateBatchTab() {
         return `
-    < div style = "background: white; padding: 20px; max-width: 600px; margin: 0 auto;" >
-                <h3 style="margin: 0 0 20px 0; font-size: 16px; color: #333; display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 20px;">📦</span> Create New Product Batch
-                </h3>
-                <p style="color: #666; font-size: 12px; margin-bottom: 20px;">
-                    Create a batch for products manufactured/packed.
-                </p>
-                
-                <form id="createBatchForm">
-                    <div style="display: grid; gap: 16px;">
-                        <div>
-                            <label style="display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px;">Product *</label>
-                            <select id="batchProductId" class="form-select" style="width: 100%;" required>
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <div class="card-header">
+                    <h3 class="card-title">Create New Product Batch</h3>
+                </div>
+                <div class="card-body">
+                    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 24px;">
+                        Create a batch for products manufactured/packed.
+                    </p>
+                    
+                    <form id="createBatchForm">
+                        <div class="form-group">
+                            <label class="form-label">Product *</label>
+                            <select id="batchProductId" class="form-select" required>
                                 <option value="">Select Product</option>
                                 ${this.products.map(p => `<option value="${p.id}">${p.productName} (${p.weight || 'No size'})</option>`).join('')}
                             </select>
                         </div>
                         
-                        <div>
-                            <label style="display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px;">Quantity (pieces) *</label>
+                        <div class="form-group">
+                            <label class="form-label">Quantity (pieces) *</label>
                             <input type="number" id="batchQuantity" class="form-input" min="1" required placeholder="Number of pieces">
                         </div>
 
-                        <div>
-                            <label style="display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px;">Batch Number *</label>
+                        <div class="form-group">
+                            <label class="form-label">Batch Number *</label>
                             <div style="display: flex; gap: 8px;">
-                                <input type="text" id="batchNumber" class="form-input" style="flex: 1;" required placeholder="Auto-generated or custom">
-                                <button type="button" id="generateBatchNo" style="background: #9467bd; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 11px; cursor: pointer;">Generate</button>
+                                <input type="text" id="batchNumber" class="form-input" required placeholder="Auto-generated or custom">
+                                <button type="button" id="generateBatchNo" class="btn btn-secondary">Generate</button>
                             </div>
                         </div>
 
-                        <div>
-                            <label style="display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px;">Packed Date</label>
+                        <div class="form-group">
+                            <label class="form-label">Packed Date</label>
                             <input type="date" id="batchReceivedDate" class="form-input" value="${new Date().toISOString().split('T')[0]}">
                         </div>
 
-                        <div style="padding-top: 16px; border-top: 1px solid #eee;">
-                            <button type="submit" style="background: #2ca02c; color: white; border: none; padding: 10px 24px; border-radius: 4px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                                <span>📦</span> Create Batch
+                        <div style="margin-top: 32px;">
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                Create Batch
                             </button>
                         </div>
-                    </div>
-                </form>
-            </div >
-    `;
+                    </form>
+                </div>
+            </div>
+        `;
     },
 
     getStockStatus(qty) {
@@ -595,7 +624,7 @@ const Inventory = {
 
             const remaining = parseFloat(option.dataset.remaining);
             if (qty > remaining) {
-                UI.showToast(`Only ${ remaining } units available`, 'error');
+                UI.showToast(`Only ${remaining} units available`, 'error');
                 return;
             }
 
@@ -615,7 +644,7 @@ const Inventory = {
             div.dataset.qty = qty;
             div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 6px; background: white; border: 1px solid #eee; margin-bottom: 4px; border-radius: 3px; font-size: 11px;';
             div.innerHTML = `
-    < span > ${ option.dataset.name } (${ qty } units)</span >
+    < span > ${option.dataset.name} (${qty} units)</span >
         <button type="button" onclick="this.parentElement.remove()" style="color: #dc2626; background: none; border: none; cursor: pointer;">✕</button>
 `;
             list.appendChild(div);
@@ -689,7 +718,7 @@ const Inventory = {
             }
 
             try {
-                const res = await fetch(`/ api / product - batches / generate - batch - number / ${ productId } `);
+                const res = await fetch(`/ api / product - batches / generate - batch - number / ${productId} `);
                 const data = await res.json();
                 document.getElementById('batchNumber').value = data.batchNumber;
             } catch (error) {
@@ -773,7 +802,7 @@ const Inventory = {
             const notes = document.getElementById('adjustNotes').value;
 
             try {
-                const res = await fetch(`/ api / product - batches / ${ batchId } `, {
+                const res = await fetch(`/ api / product - batches / ${batchId} `, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ remainingQty: newQty, notes })

@@ -344,7 +344,7 @@ const Payroll = {
                 </head>
                 <body>
                     <div class="header">
-                        <h1>${settings.companyName || 'ARUNAYA CONSUMABLES PRIVATE LIMITED'}</h1>
+                        <h1>${settings.companyName || 'ARUNYA CONSUMABLES PRIVATE LIMITED'}</h1>
                         <p>${settings.address || 'Chennai'}</p>
                     </div>
 

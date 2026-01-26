@@ -808,7 +808,7 @@ const Sales = {
             console.error('Error fetching settings:', error);
             // Use defaults if settings fetch fails
             settings = {
-                companyName: 'ARUNAYA CONSUMABLES PRIVATE LIMITED',
+                companyName: 'ARUNYA CONSUMABLES PRIVATE LIMITED',
                 address: 'No. 14, Barnaby Road, Kilpauk, Chennai - 600 010',
                 gstin: '33AAXCA3298E1ZC',
                 state: 'Tamil Nadu',
@@ -965,7 +965,7 @@ const Sales = {
             <img src="${settings.logoPath ? window.location.origin + settings.logoPath : window.location.origin + '/public/assets/company-logo.jpg'}" alt="Logo" style="height: 70px;">
         </div>
         <div style="text-align: right; flex-grow: 1; padding-left: 20px;">
-            <h1 style="margin: 0; font-size: 16px;">${settings.companyName || 'ARUNAYA CONSUMABLES PRIVATE LIMITED'}</h1>
+            <h1 style="margin: 0; font-size: 16px;">${settings.companyName || 'ARUNYA CONSUMABLES PRIVATE LIMITED'}</h1>
             <div style="font-size: 10px; margin-top: 4px;">${settings.address || 'No. 14, Barnaby Road, Kilpauk, Chennai - 600 010'}</div>
             <div style="font-size: 10px;">GSTIN/UIN: ${settings.gstin || '33AAXCA3298E1ZC'} | State: ${settings.state || 'Tamil Nadu'}, Code: ${settings.stateCode || '33'}</div>
             ${settings.phone ? `<div style="font-size: 10px;">Phone: ${settings.phone}</div>` : ''}
@@ -1123,7 +1123,7 @@ const Sales = {
     ` : ''}
 
     <div class="signature">
-        <div style="margin-bottom: 50px;">For ${settings.companyName || 'ARUNAYA CONSUMABLES PRIVATE LIMITED'}</div>
+        <div style="margin-bottom: 50px;">For ${settings.companyName || 'ARUNYA CONSUMABLES PRIVATE LIMITED'}</div>
         <div>Authorised Signatory</div>
     </div>
 

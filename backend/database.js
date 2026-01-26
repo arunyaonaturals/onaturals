@@ -285,7 +285,7 @@ function initDb() {
         )`,
         `CREATE TABLE IF NOT EXISTS settings (
             id INTEGER PRIMARY KEY CHECK(id = 1),
-            companyName TEXT DEFAULT 'ARUNAYA CONSUMABLES PRIVATE LIMITED',
+            companyName TEXT DEFAULT 'ARUNYA CONSUMABLES PRIVATE LIMITED',
             address TEXT DEFAULT 'No. 14, Barnaby Road, Kilpauk, Chennai - 600 010',
             phone TEXT DEFAULT '9444741534',
             email TEXT DEFAULT 'arunyaconsumables@gmail.com',

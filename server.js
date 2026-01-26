@@ -17,6 +17,8 @@ import authRoutes from './backend/routes/auth.js';
 import inventoryRoutes from './backend/routes/inventory.js';
 import productBatchesRoutes from './backend/routes/product-batches.js';
 import orderDeliveryRoutes from './backend/routes/order-delivery.js';
+import rawMaterialsRoutes from './backend/routes/raw-materials.js';
+import productionBatchesRoutes from './backend/routes/production-batches.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -50,6 +52,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/product-batches', productBatchesRoutes);
 app.use('/api/order-delivery', orderDeliveryRoutes);
+app.use('/api/raw-materials', rawMaterialsRoutes);
+app.use('/api/production-batches', productionBatchesRoutes);
 
 app.get('/login.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'login.html'));

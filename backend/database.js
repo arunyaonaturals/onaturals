@@ -416,6 +416,49 @@ function initDb() {
             name TEXT,
             createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
             updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`,
+        `CREATE TABLE IF NOT EXISTS raw_material_stock (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            purchaseOrderId INTEGER,
+            purchaseItemId INTEGER,
+            materialName TEXT NOT NULL,
+            weight TEXT,
+            initialQty REAL DEFAULT 0,
+            remainingQty REAL DEFAULT 0,
+            unit TEXT DEFAULT 'units',
+            rate REAL DEFAULT 0,
+            vendorId INTEGER,
+            vendorName TEXT,
+            purchaseDate TEXT,
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (purchaseOrderId) REFERENCES purchase_orders(id),
+            FOREIGN KEY (vendorId) REFERENCES suppliers(id)
+        )`,
+        `CREATE TABLE IF NOT EXISTS production_batches (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            batchNumber TEXT UNIQUE NOT NULL,
+            productId INTEGER,
+            productName TEXT NOT NULL,
+            quantityProduced INTEGER DEFAULT 0,
+            productionDate TEXT,
+            expiryDate TEXT,
+            status TEXT DEFAULT 'active',
+            notes TEXT,
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (productId) REFERENCES products(id)
+        )`,
+        `CREATE TABLE IF NOT EXISTS batch_materials (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            batchId INTEGER NOT NULL,
+            rawMaterialId INTEGER NOT NULL,
+            materialName TEXT,
+            quantityUsed REAL DEFAULT 0,
+            unit TEXT,
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (batchId) REFERENCES production_batches(id) ON DELETE CASCADE,
+            FOREIGN KEY (rawMaterialId) REFERENCES raw_material_stock(id)
         )`
     ];
 

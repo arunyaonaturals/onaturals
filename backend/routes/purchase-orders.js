@@ -180,14 +180,69 @@ router.put('/:id/receive', (req, res) => {
     const { items, receivedDate, invoiceNo } = req.body;
     const orderId = req.params.id;
 
-    // Update each item's received quantity
-    const updateItemSql = `UPDATE purchase_order_items SET receivedQty = ? WHERE id = ?`;
+    // First get order details for vendor info
+    db.get('SELECT supplierId, supplierName, orderDate FROM purchase_orders WHERE id = ?', [orderId], (err, order) => {
+        if (err || !order) {
+            res.status(404).json({ error: 'Order not found' });
+            return;
+        }
 
-    items.forEach(item => {
-        db.run(updateItemSql, [item.receivedQty, item.id]);
+        // Prepare statements
+        const updateItemSql = `UPDATE purchase_order_items SET receivedQty = ? WHERE id = ?`;
+
+        // Loop through items
+        let processed = 0;
+
+        items.forEach(async (item) => {
+            // Get previous received qty to calculate difference
+            db.get('SELECT receivedQty, productName, weight, rate, productId FROM purchase_order_items WHERE id = ?', [item.id], (err, currentItem) => {
+                if (!err && currentItem) {
+                    const prevQty = currentItem.receivedQty || 0;
+                    const newQty = item.receivedQty || 0;
+                    const diff = newQty - prevQty;
+
+                    if (diff > 0) {
+                        // Add to raw material stock
+                        // Check if entry exists for this line item
+                        db.get('SELECT id, remainingQty FROM raw_material_stock WHERE purchaseItemId = ?', [item.id], (err, stockEntry) => {
+                            if (!err) {
+                                if (stockEntry) {
+                                    // Update existing
+                                    db.run(
+                                        'UPDATE raw_material_stock SET initialQty = initialQty + ?, remainingQty = remainingQty + ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?',
+                                        [diff, diff, stockEntry.id]
+                                    );
+                                } else {
+                                    // Insert new
+                                    db.run(
+                                        `INSERT INTO raw_material_stock 
+                                        (purchaseOrderId, purchaseItemId, materialName, weight, initialQty, remainingQty, unit, rate, vendorId, vendorName, purchaseDate)
+                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                                        [
+                                            orderId, item.id, currentItem.productName, currentItem.weight,
+                                            diff, diff, 'units', currentItem.rate,
+                                            order.supplierId, order.supplierName, receivedDate || order.orderDate
+                                        ]
+                                    );
+                                }
+                            }
+                        });
+                    }
+
+                    // Update PO item
+                    db.run(updateItemSql, [newQty, item.id]);
+                }
+
+                processed++;
+                if (processed === items.length) {
+                    updateOrderStatus(orderId, receivedDate, invoiceNo, res);
+                }
+            });
+        });
     });
+});
 
-    // Check if all items received
+function updateOrderStatus(orderId, receivedDate, invoiceNo, res) {
     db.all(`SELECT quantity, receivedQty FROM purchase_order_items WHERE orderId = ?`, [orderId], (err, orderItems) => {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -209,11 +264,11 @@ router.put('/:id/receive', (req, res) => {
                     res.status(500).json({ error: err.message });
                     return;
                 }
-                res.json({ message: 'Items received successfully', status });
+                res.json({ message: 'Items received and added to stock', status });
             }
         );
     });
-});
+}
 
 // Delete purchase order
 router.delete('/:id', (req, res) => {

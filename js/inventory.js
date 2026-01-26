@@ -42,62 +42,41 @@ const Inventory = {
             const stats = this.calculateStats();
 
             contentArea.innerHTML = `
-                <!-- Tableau-style Inventory Dashboard -->
-                <div style="background: #f5f5f5; min-height: 100%; padding: 0;">
-                    
-                    <!-- Header Bar -->
-                    <div style="background: #2c3e50; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #9467bd;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <span style="font-size: 20px;">📦</span>
-                            <div>
-                                <h1 style="margin: 0; font-size: 18px; font-weight: 600;">Inventory Management</h1>
-                                <p style="margin: 2px 0 0 0; font-size: 11px; opacity: 0.7;">Batch-based stock tracking</p>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                            <button class="inv-tab-btn ${this.selectedTab === 'raw-materials' ? 'active' : ''}" data-tab="raw-materials" style="${this.selectedTab === 'raw-materials' ? 'background: #059669; border-color: #059669;' : ''}">🌾 Raw Materials</button>
-                            <button class="inv-tab-btn ${this.selectedTab === 'production' ? 'active' : ''}" data-tab="production" style="${this.selectedTab === 'production' ? 'background: #dc2626; border-color: #dc2626;' : ''}">🏭 Production</button>
-                            <button class="inv-tab-btn ${this.selectedTab === 'stock' ? 'active' : ''}" data-tab="stock">📊 Finished Stock</button>
-                            <button class="inv-tab-btn ${this.selectedTab === 'batches' ? 'active' : ''}" data-tab="batches">📋 Batches</button>
-                        </div>
+                <!-- Page Header -->
+                <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1 class="page-title">Inventory Management</h1>
+                        <p class="page-subtitle">Batch-based stock tracking and production</p>
                     </div>
-
-                    <!-- KPI Summary -->
-                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; border-bottom: 1px solid #ddd;">
-                        ${this.renderKPI('Total Products', this.products.length.toString(), 'In catalog', '#3182ce', '📦')}
-                        ${this.renderKPI('Active Batches', stats.activeBatches.toString(), 'With stock', '#2ca02c', '📋')}
-                        ${this.renderKPI('Total Stock', stats.totalStock.toString(), 'Units available', '#9467bd', '📊')}
-                        ${this.renderKPI('Low Stock', this.lowStockItems.length.toString(), 'Need reorder', '#ff7f0e', '⚠️')}
-                        ${this.renderKPI('Out of Stock', stats.outOfStock.toString(), 'Zero stock', '#d62728', '🚨')}
-                    </div>
-
-                    <!-- Main Content -->
-                    <div id="inventoryTabContent">
-                        ${this.renderTabContent()}
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-secondary ${this.selectedTab === 'stock' ? 'active-tab' : ''}" onclick="Inventory.switchTab('stock')">📊 Finished Stock</button>
+                        <button class="btn btn-secondary ${this.selectedTab === 'batches' ? 'active-tab' : ''}" onclick="Inventory.switchTab('batches')">📋 Batches</button>
+                    <button class="btn btn-secondary ${this.selectedTab === 'raw-materials' ? 'active-tab' : ''}" onclick="Inventory.switchTab('raw-materials')">🌾 Raw Materials</button>
+                        <button class="btn btn-secondary ${this.selectedTab === 'production' ? 'active-tab' : ''}" onclick="Inventory.switchTab('production')">🏭 Production</button>
                     </div>
                 </div>
 
+                <!-- KPI Stats -->
+                <div class="stats-grid">
+                    ${this.renderKPI('Total Products', this.products.length.toString(), 'In catalog', 'info', '📦')}
+                    ${this.renderKPI('Active Batches', stats.activeBatches.toString(), 'With stock', 'success', '📋')}
+                    ${this.renderKPI('Total Stock', stats.totalStock.toString(), 'Units available', 'warning', '📊')}
+                    ${this.renderKPI('Low Stock', this.lowStockItems.length.toString(), 'Need reorder', 'danger', '⚠️')}
+                </div>
+
+                <!-- Main Content -->
+                <div id="inventoryTabContent" class="card card-body" style="min-height: 400px;">
+                    ${this.renderTabContent()}
+                </div>
+
                 <style>
-                    .inv-tab-btn {
-                        background: transparent;
-                        border: 1px solid rgba(255,255,255,0.3);
-                        color: rgba(255,255,255,0.7);
-                        padding: 6px 14px;
-                        font-size: 11px;
-                        border-radius: 3px;
-                        cursor: pointer;
-                        transition: all 0.15s;
-                    }
-                    .inv-tab-btn:hover {
-                        background: rgba(255,255,255,0.1);
-                        color: white;
-                    }
-                    .inv-tab-btn.active {
-                        background: #3182ce;
-                        border-color: #3182ce;
-                        color: white;
+                    .active-tab {
+                        background: var(--primary) !important;
+                        color: white !important;
+                        border-color: var(--primary) !important;
                     }
                 </style>
+            `;
             `;
 
             this.attachEventListeners();
@@ -105,11 +84,11 @@ const Inventory = {
         } catch (error) {
             console.error('Inventory render error:', error);
             contentArea.innerHTML = `
-                <div style="text-align: center; padding: 60px 20px;">
+                < div style = "text-align: center; padding: 60px 20px;" >
                     <div style="font-size: 48px; margin-bottom: 16px;">❌</div>
                     <p style="color: #d13438;">Error loading inventory: ${error.message}</p>
-                </div>
-            `;
+                </div >
+    `;
         }
     },
 
@@ -123,7 +102,7 @@ const Inventory = {
 
     renderKPI(label, value, subtitle, color, icon) {
         return `
-            <div style="background: white; padding: 14px 16px; border-right: 1px solid #ddd; position: relative;">
+    < div style = "background: white; padding: 14px 16px; border-right: 1px solid #ddd; position: relative;" >
                 <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: ${color};"></div>
                 <div style="display: flex; align-items: flex-start; justify-content: space-between;">
                     <div>
@@ -133,8 +112,8 @@ const Inventory = {
                     </div>
                     <div style="font-size: 20px; opacity: 0.3;">${icon}</div>
                 </div>
-            </div>
-        `;
+            </div >
+    `;
     },
 
     renderTabContent() {
@@ -154,8 +133,8 @@ const Inventory = {
 
     renderStockTab() {
         return `
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 0;">
-                <!-- Left: Stock Table -->
+    < div style = "display: grid; grid-template-columns: 2fr 1fr; gap: 0;" >
+                < !--Left: Stock Table-- >
                 <div style="border-right: 1px solid #ddd;">
                     <div style="background: white; min-height: 400px;">
                         <div style="padding: 12px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
@@ -168,28 +147,28 @@ const Inventory = {
                     </div>
                 </div>
 
-                <!-- Right: Low Stock Alerts -->
-                <div>
-                    <div style="background: white; border-bottom: 1px solid #ddd;">
-                        <div style="padding: 12px 16px; border-bottom: 1px solid #eee; background: #fff4ce;">
-                            <span style="font-size: 13px; font-weight: 600; color: #835c00;">⚠️ Low Stock Alerts (< 10 units)</span>
-                        </div>
-                        <div style="max-height: 300px; overflow-y: auto;">
-                            ${this.renderLowStockList()}
-                        </div>
-                    </div>
-
-                    <div style="background: white;">
-                        <div style="padding: 12px 16px; border-bottom: 1px solid #eee;">
-                            <span style="font-size: 13px; font-weight: 600; color: #333;">📈 Stock by Category</span>
-                        </div>
-                        <div style="max-height: 250px; overflow-y: auto;">
-                            ${this.renderCategorySummary()}
-                        </div>
-                    </div>
-                </div>
+                <!--Right: Low Stock Alerts-- >
+    <div>
+        <div style="background: white; border-bottom: 1px solid #ddd;">
+            <div style="padding: 12px 16px; border-bottom: 1px solid #eee; background: #fff4ce;">
+                <span style="font-size: 13px; font-weight: 600; color: #835c00;">⚠️ Low Stock Alerts (< 10 units)</span>
             </div>
-        `;
+            <div style="max-height: 300px; overflow-y: auto;">
+                ${this.renderLowStockList()}
+            </div>
+        </div>
+
+        <div style="background: white;">
+            <div style="padding: 12px 16px; border-bottom: 1px solid #eee;">
+                <span style="font-size: 13px; font-weight: 600; color: #333;">📈 Stock by Category</span>
+            </div>
+            <div style="max-height: 250px; overflow-y: auto;">
+                ${this.renderCategorySummary()}
+            </div>
+        </div>
+    </div>
+            </div >
+    `;
     },
 
     renderStockTable() {
@@ -198,7 +177,7 @@ const Inventory = {
         }
 
         return `
-            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+    < table style = "width: 100%; border-collapse: collapse; font-size: 12px;" >
                 <thead style="background: #f8f9fa; position: sticky; top: 0;">
                     <tr>
                         <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #9467bd;">Product</th>
@@ -224,8 +203,8 @@ const Inventory = {
                         `;
         }).join('')}
                 </tbody>
-            </table>
-        `;
+            </table >
+    `;
     },
 
     renderLowStockList() {
@@ -234,7 +213,7 @@ const Inventory = {
         }
 
         return this.lowStockItems.map((item, idx) => `
-            <div style="padding: 10px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: ${item.totalStock === 0 ? '#fde7e9' : '#fff'};">
+    < div style = "padding: 10px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: ${item.totalStock === 0 ? '#fde7e9' : '#fff'};" >
                 <div>
                     <div style="font-size: 12px; font-weight: 500; color: #333;">${item.productName}</div>
                     <div style="font-size: 10px; color: #888;">${item.category || 'Uncategorized'}</div>
@@ -243,8 +222,8 @@ const Inventory = {
                     <div style="font-size: 14px; font-weight: 700; color: ${item.totalStock === 0 ? '#d13438' : '#ff7f0e'};">${item.totalStock}</div>
                     <div style="font-size: 10px; color: #888;">units</div>
                 </div>
-            </div>
-        `).join('');
+            </div >
+    `).join('');
     },
 
     renderCategorySummary() {
@@ -262,7 +241,7 @@ const Inventory = {
         const colors = ['#3182ce', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
 
         return catArray.map(([cat, data], idx) => `
-            <div style="padding: 10px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+    < div style = "padding: 10px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;" >
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <div style="width: 8px; height: 8px; background: ${colors[idx % colors.length]}; border-radius: 50%;"></div>
                     <span style="font-size: 12px; color: #333;">${cat}</span>
@@ -271,8 +250,8 @@ const Inventory = {
                     <div style="font-size: 12px; font-weight: 600; color: ${colors[idx % colors.length]};">${data.totalStock} units</div>
                     <div style="font-size: 10px; color: #888;">${data.count} products</div>
                 </div>
-            </div>
-        `).join('');
+            </div >
+    `).join('');
     },
 
     // ===== RAW MATERIALS TAB =====
@@ -281,7 +260,7 @@ const Inventory = {
         const totalValue = this.rawMaterials.reduce((sum, m) => sum + (m.remainingQty * m.rate), 0);
 
         return `
-            <div style="background: white; min-height: 400px;">
+    < div style = "background: white; min-height: 400px;" >
                 <div style="padding: 12px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #dcfce7;">
                     <span style="font-size: 13px; font-weight: 600; color: #166534;">🌾 Raw Materials from Purchases (${totalMaterials})</span>
                     <span style="font-size: 12px; color: #166534;">Total Value: ₹${totalValue.toFixed(2)}</span>
@@ -292,13 +271,13 @@ const Inventory = {
                 this.renderRawMaterialsTable()
             }
                 </div>
-            </div>
-        `;
+            </div >
+    `;
     },
 
     renderRawMaterialsTable() {
         return `
-            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+    < table style = "width: 100%; border-collapse: collapse; font-size: 12px;" >
                 <thead style="background: #059669; position: sticky; top: 0;">
                     <tr>
                         <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: white;">Material Name</th>
@@ -331,15 +310,15 @@ const Inventory = {
                         `;
         }).join('')}
                 </tbody>
-            </table>
-        `;
+            </table >
+    `;
     },
 
     // ===== PRODUCTION TAB =====
     renderProductionTab() {
         return `
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0; min-height: 450px;">
-                <!-- Left: Create Production Batch -->
+    < div style = "display: grid; grid-template-columns: 1fr 1fr; gap: 0; min-height: 450px;" >
+                < !--Left: Create Production Batch-- >
                 <div style="border-right: 1px solid #ddd;">
                     <div style="padding: 12px 16px; border-bottom: 1px solid #eee; background: #dc2626;">
                         <span style="font-size: 13px; font-weight: 600; color: white;">🏭 Create Production Batch</span>
@@ -349,23 +328,23 @@ const Inventory = {
                     </div>
                 </div>
                 
-                <!-- Right: Recent Production Batches -->
-                <div>
-                    <div style="padding: 12px 16px; border-bottom: 1px solid #eee; background: #f8f9fa;">
-                        <span style="font-size: 13px; font-weight: 600; color: #333;">📋 Production History (${this.productionBatches.length})</span>
-                    </div>
-                    <div style="max-height: 500px; overflow-y: auto;">
-                        ${this.renderProductionBatchesList()}
-                    </div>
-                </div>
-            </div>
-        `;
+                <!--Right: Recent Production Batches-- >
+    <div>
+        <div style="padding: 12px 16px; border-bottom: 1px solid #eee; background: #f8f9fa;">
+            <span style="font-size: 13px; font-weight: 600; color: #333;">📋 Production History (${this.productionBatches.length})</span>
+        </div>
+        <div style="max-height: 500px; overflow-y: auto;">
+            ${this.renderProductionBatchesList()}
+        </div>
+    </div>
+            </div >
+    `;
     },
 
     renderProductionForm() {
         const availableMaterials = this.rawMaterials.filter(m => m.remainingQty > 0);
         return `
-            <form id="productionForm">
+    < form id = "productionForm" >
                 <div style="margin-bottom: 16px;">
                     <label style="display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px;">Finished Product *</label>
                     <select id="prodProductId" class="form-select" style="width: 100%;" required>
@@ -419,8 +398,8 @@ const Inventory = {
                         🏭 Create Production Batch
                     </button>
                 </div>
-            </form>
-        `;
+            </form >
+    `;
     },
 
     renderProductionBatchesList() {
@@ -429,25 +408,25 @@ const Inventory = {
         }
 
         return this.productionBatches.map((batch, idx) => `
-            <div style="padding: 12px 16px; border-bottom: 1px solid #eee; background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="font-weight: 600; color: #dc2626;">${batch.batchNumber}</div>
-                        <div style="font-size: 12px; color: #333;">${batch.productName}</div>
-                        <div style="font-size: 11px; color: #666;">${batch.productionDate || '-'}</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 18px; font-weight: 700; color: #059669;">${batch.quantityProduced}</div>
-                        <div style="font-size: 10px; color: #666;">units</div>
-                    </div>
-                </div>
+    < div style = "padding: 12px 16px; border-bottom: 1px solid #eee; background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};" >
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <div style="font-weight: 600; color: #dc2626;">${batch.batchNumber}</div>
+                <div style="font-size: 12px; color: #333;">${batch.productName}</div>
+                <div style="font-size: 11px; color: #666;">${batch.productionDate || '-'}</div>
             </div>
-        `).join('');
+            <div style="text-align: right;">
+                <div style="font-size: 18px; font-weight: 700; color: #059669;">${batch.quantityProduced}</div>
+                <div style="font-size: 10px; color: #666;">units</div>
+            </div>
+        </div>
+            </div >
+    `).join('');
     },
 
     renderBatchesTab() {
         return `
-            < div style = "background: white; min-height: 400px;" >
+    < div style = "background: white; min-height: 400px;" >
                 <div style="padding: 12px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-size: 13px; font-weight: 600; color: #333;">📋 Product Batches</span>
                     <input type="text" id="batchSearch" placeholder="Search batches..." style="padding: 5px 10px; border: 1px solid #ddd; border-radius: 3px; font-size: 11px; width: 250px;">
@@ -616,12 +595,12 @@ const Inventory = {
 
             const remaining = parseFloat(option.dataset.remaining);
             if (qty > remaining) {
-                UI.showToast(`Only ${remaining} units available`, 'error');
+                UI.showToast(`Only ${ remaining } units available`, 'error');
                 return;
             }
 
             // check if already added
-            const existingItem = document.querySelector(`.material-item[data-id="${option.value}"]`);
+            const existingItem = document.querySelector(`.material - item[data - id="${option.value}"]`);
             if (existingItem) {
                 UI.showToast('Material already added', 'warning');
                 return;
@@ -636,9 +615,9 @@ const Inventory = {
             div.dataset.qty = qty;
             div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 6px; background: white; border: 1px solid #eee; margin-bottom: 4px; border-radius: 3px; font-size: 11px;';
             div.innerHTML = `
-                <span>${option.dataset.name} (${qty} units)</span>
-                <button type="button" onclick="this.parentElement.remove()" style="color: #dc2626; background: none; border: none; cursor: pointer;">✕</button>
-            `;
+    < span > ${ option.dataset.name } (${ qty } units)</span >
+        <button type="button" onclick="this.parentElement.remove()" style="color: #dc2626; background: none; border: none; cursor: pointer;">✕</button>
+`;
             list.appendChild(div);
 
             // Reset inputs
@@ -710,7 +689,7 @@ const Inventory = {
             }
 
             try {
-                const res = await fetch(`/ api / product - batches / generate - batch - number / ${productId} `);
+                const res = await fetch(`/ api / product - batches / generate - batch - number / ${ productId } `);
                 const data = await res.json();
                 document.getElementById('batchNumber').value = data.batchNumber;
             } catch (error) {
@@ -794,7 +773,7 @@ const Inventory = {
             const notes = document.getElementById('adjustNotes').value;
 
             try {
-                const res = await fetch(`/ api / product - batches / ${batchId} `, {
+                const res = await fetch(`/ api / product - batches / ${ batchId } `, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ remainingQty: newQty, notes })

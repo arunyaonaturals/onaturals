@@ -88,17 +88,19 @@ router.get('/:id', (req, res) => {
 router.post('/', (req, res) => {
     const {
         orderNo, orderDate, supplierId, supplierName, expectedDeliveryDate,
-        subtotal, gstTotal, grandTotal, notes, items
+        subtotal, gstTotal, grandTotal, notes, items,
+        paymentStatus, paymentAmount, paymentDate
     } = req.body;
 
     const orderSql = `INSERT INTO purchase_orders 
                       (orderNo, orderDate, supplierId, supplierName, expectedDeliveryDate,
-                       subtotal, gstTotal, grandTotal, notes, status)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`;
+                       subtotal, gstTotal, grandTotal, notes, status, paymentStatus, paymentAmount, paymentDate)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)`;
 
     db.run(orderSql, [
         orderNo, orderDate, supplierId, supplierName, expectedDeliveryDate,
-        subtotal, gstTotal, grandTotal, notes
+        subtotal, gstTotal, grandTotal, notes,
+        paymentStatus || 'unpaid', paymentAmount || 0, paymentDate || null
     ], function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -114,17 +116,18 @@ router.post('/', (req, res) => {
 
         // Insert order items
         const itemSql = `INSERT INTO purchase_order_items 
-                         (orderId, productId, productName, hsnCode, quantity, rate, amount, gstRate, gstAmount, totalAmount)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                         (orderId, productId, productName, weight, hsnCode, quantity, rate, amount, gstRate, gstAmount, totalAmount)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
         const stmt = db.prepare(itemSql);
 
         items.forEach(item => {
             stmt.run([
                 orderId,
-                item.productId,
+                item.productId || null,
                 item.productName,
-                item.hsnCode,
+                item.weight || '',
+                item.hsnCode || '',
                 item.quantity,
                 item.rate,
                 item.amount,

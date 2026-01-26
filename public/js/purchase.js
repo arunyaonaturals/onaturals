@@ -141,19 +141,26 @@ const Purchase = {
                 </div>
                 <div style="max-height: 550px; overflow-y: auto;">
                     <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                        <thead style="background: #f8f9fa; position: sticky; top: 0;">
+                        <thead style="background: #1e40af; position: sticky; top: 0;">
                             <tr>
-                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #d62728;">PO Number</th>
-                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #d62728;">Date</th>
-                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #d62728;">Supplier</th>
-                                <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: #555; border-bottom: 2px solid #d62728;">Total</th>
-                                <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #d62728;">Status</th>
-                                <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #d62728;">Actions</th>
+                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: white;">PO Number</th>
+                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: white;">Date</th>
+                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: white;">Vendor</th>
+                                <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: white;">Total</th>
+                                <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: white;">Status</th>
+                                <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: white;">Payment</th>
+                                <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: white;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${this.currentOrders.map((o, idx) => {
             const sc = statusColors[o.status] || { bg: '#f3f2f1', text: '#605e5c' };
+            const paymentColors = {
+                'paid': { bg: '#dcfce7', text: '#166534', label: '✅ PAID' },
+                'partial': { bg: '#fef3c7', text: '#92400e', label: '⏳ PARTIAL' },
+                'unpaid': { bg: '#fee2e2', text: '#991b1b', label: '❌ UNPAID' }
+            };
+            const pc = paymentColors[o.paymentStatus] || paymentColors['unpaid'];
             return `
                                 <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};">
                                     <td style="padding: 8px 12px; color: #3182ce; font-weight: 600;">${o.orderNo}</td>
@@ -163,6 +170,11 @@ const Purchase = {
                                     <td style="padding: 8px 12px; text-align: center;">
                                         <span style="background: ${sc.bg}; color: ${sc.text}; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600;">
                                             ${(o.status || 'pending').toUpperCase()}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 8px 12px; text-align: center;">
+                                        <span style="background: ${pc.bg}; color: ${pc.text}; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600;">
+                                            ${pc.label}
                                         </span>
                                     </td>
                                     <td style="padding: 8px 12px; text-align: center;">
@@ -215,29 +227,29 @@ const Purchase = {
             <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <h1 class="page-title">📝 New Purchase Order</h1>
-                    <p class="page-subtitle">Create a new purchase order for supplier</p>
+                    <p class="page-subtitle">Create a new purchase order for vendor</p>
                 </div>
                 <button class="btn btn-secondary" onclick="Purchase.cancelForm()">← Back to List</button>
             </div>
 
             <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Order Details</h2>
+                <div class="card-header" style="background: #dc2626; color: white;">
+                    <h2 class="card-title" style="color: white;">📋 Order Details</h2>
                 </div>
                 <div class="card-body">
                     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
                         <div class="form-group">
                             <label class="form-label">PO Number</label>
-                            <input type="text" id="poNumber" class="form-input" value="${this.nextPoNo || ''}" readonly style="background: #f1f5f9;">
+                            <input type="text" id="poNumber" class="form-input" value="${this.nextPoNo || ''}" readonly style="background: #f1f5f9; font-weight: 600;">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Order Date</label>
+                            <label class="form-label">Order Date *</label>
                             <input type="date" id="poDate" class="form-input" value="${today}">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Supplier *</label>
+                            <label class="form-label">Vendor/Supplier *</label>
                             <select id="supplierSelect" class="form-input" required>
-                                <option value="">Select Supplier</option>
+                                <option value="">Select Vendor</option>
                                 ${this.currentSuppliers.map(s => `
                                     <option value="${s.id}" data-name="${s.supplierName}">${s.supplierCode} - ${s.supplierName}</option>
                                 `).join('')}
@@ -248,50 +260,67 @@ const Purchase = {
                             <input type="date" id="expectedDelivery" class="form-input">
                         </div>
                     </div>
+                    
+                    <!-- Payment Section -->
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+                        <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #059669;">💰 Payment Details</h3>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">Payment Status</label>
+                                <select id="paymentStatus" class="form-input">
+                                    <option value="unpaid">❌ Unpaid</option>
+                                    <option value="partial">⏳ Partial</option>
+                                    <option value="paid">✅ Paid</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Payment Amount (₹)</label>
+                                <input type="number" id="paymentAmount" class="form-input" placeholder="0.00" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Payment Date</label>
+                                <input type="date" id="paymentDate" class="form-input">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="card" style="margin-top: 1.5rem;">
-                <div class="card-header">
-                    <h2 class="card-title">Add Products</h2>
+                <div class="card-header" style="background: #2563eb; color: white;">
+                    <h2 class="card-title" style="color: white;">📦 Add Products</h2>
                 </div>
                 <div class="card-body">
-                    <div style="display: grid; grid-template-columns: 3fr 1fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: 1rem; align-items: end;">
                         <div class="form-group" style="margin-bottom: 0;">
-                            <label class="form-label">Product</label>
-                            <select id="productSelect" class="form-input">
-                                <option value="">Select Product</option>
-                                ${this.currentProducts.map(p => `
-                                    <option value="${p.id}" 
-                                            data-name="${p.productName}" 
-                                            data-hsn="${p.hsnCode || ''}"
-                                            data-gst="${p.gstRate || 5}"
-                                            data-mrp="${p.mrp || 0}">
-                                        ${p.serialNumber} - ${p.productName}
-                                    </option>
-                                `).join('')}
-                            </select>
+                            <label class="form-label">Product Name *</label>
+                            <input type="text" id="productName" class="form-input" placeholder="Type product name (e.g., Salt, Sugar, Dal)">
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
-                            <label class="form-label">Quantity</label>
+                            <label class="form-label">Weight/Unit</label>
+                            <input type="text" id="productWeight" class="form-input" placeholder="e.g., 10 KG, 5 L">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Quantity *</label>
                             <input type="number" id="productQty" class="form-input" value="1" min="1">
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
-                            <label class="form-label">Rate</label>
+                            <label class="form-label">Rate (₹) *</label>
                             <input type="number" id="productRate" class="form-input" step="0.01" placeholder="0.00">
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
                             <label class="form-label">GST %</label>
                             <input type="number" id="productGst" class="form-input" value="5" step="0.5">
                         </div>
-                        <button class="btn btn-success" onclick="Purchase.addProduct()" style="margin-bottom: 0;">➕ Add</button>
+                        <button class="btn btn-success" onclick="Purchase.addProduct()" style="margin-bottom: 0; height: 36px;">➕ Add</button>
                     </div>
+                    <p style="font-size: 11px; color: #6b7280; margin-top: 8px;">💡 Tip: Type product name directly (no need to select from existing products)</p>
                 </div>
             </div>
 
             <div class="card" style="margin-top: 1.5rem;">
                 <div class="card-header">
-                    <h2 class="card-title">Order Items</h2>
+                    <h2 class="card-title">🧾 Order Items</h2>
                 </div>
                 <div class="card-body" style="padding: 0;">
                     <div id="poItemsTable">
@@ -301,32 +330,23 @@ const Purchase = {
             </div>
 
             <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
-                <button class="btn btn-primary" onclick="Purchase.savePurchaseOrder()">💾 Save Purchase Order</button>
+                <button class="btn btn-primary" onclick="Purchase.savePurchaseOrder()" style="background: #059669;">💾 Save Purchase Order</button>
                 <button class="btn btn-secondary" onclick="Purchase.cancelForm()">Cancel</button>
             </div>
         `;
-
-        // Auto-fill GST when product selected
-        document.getElementById('productSelect').addEventListener('change', (e) => {
-            const option = e.target.selectedOptions[0];
-            if (option && option.dataset.gst) {
-                document.getElementById('productGst').value = option.dataset.gst;
-            }
-        });
     },
 
     addProduct() {
-        const select = document.getElementById('productSelect');
-        const option = select.selectedOptions[0];
-        if (!option || !option.value) {
-            UI.showToast('Please select a product', 'error');
-            return;
-        }
-
-        const productId = parseInt(option.value);
+        const productName = document.getElementById('productName').value.trim();
+        const weight = document.getElementById('productWeight').value.trim();
         const qty = parseInt(document.getElementById('productQty').value) || 1;
         const rate = parseFloat(document.getElementById('productRate').value) || 0;
         const gstRate = parseFloat(document.getElementById('productGst').value) || 5;
+
+        if (!productName) {
+            UI.showToast('Please enter a product name', 'error');
+            return;
+        }
 
         if (rate <= 0) {
             UI.showToast('Please enter a valid rate', 'error');
@@ -337,10 +357,14 @@ const Purchase = {
         const gstAmount = amount * (gstRate / 100);
         const totalAmount = amount + gstAmount;
 
-        this.selectedProducts.set(productId, {
-            productId,
-            productName: option.dataset.name,
-            hsnCode: option.dataset.hsn,
+        // Use a unique key based on product name + weight
+        const productKey = `${productName}-${weight}`;
+
+        this.selectedProducts.set(productKey, {
+            productId: null, // Manual entry, no product ID
+            productName,
+            weight,
+            hsnCode: '',
             quantity: qty,
             rate,
             amount,
@@ -353,9 +377,12 @@ const Purchase = {
         document.getElementById('poItemsTable').innerHTML = this.renderItemsTable();
 
         // Reset form
-        select.value = '';
+        document.getElementById('productName').value = '';
+        document.getElementById('productWeight').value = '';
         document.getElementById('productQty').value = 1;
         document.getElementById('productRate').value = '';
+
+        UI.showToast('Product added to order!', 'success');
     },
 
     removeProduct(productId) {
@@ -375,45 +402,45 @@ const Purchase = {
 
     renderItemsTable() {
         if (this.selectedProducts.size === 0) {
-            return `<div class="empty-state" style="padding: 2rem;"><p style="color: #64748b;">No products added yet</p></div>`;
+            return `<div class="empty-state" style="padding: 2rem;"><p style="color: #64748b;">No products added yet. Add products above.</p></div>`;
         }
 
         let rows = '';
-        this.selectedProducts.forEach((item, id) => {
+        this.selectedProducts.forEach((item, key) => {
             rows += `
                 <tr>
-                    <td>${item.productName}</td>
-                    <td>${item.hsnCode || '-'}</td>
+                    <td style="font-weight: 500;">${item.productName}</td>
+                    <td>${item.weight || '-'}</td>
                     <td class="text-center">${item.quantity}</td>
                     <td class="text-right">₹${item.rate.toFixed(2)}</td>
                     <td class="text-right">₹${item.amount.toFixed(2)}</td>
                     <td class="text-center">${item.gstRate}%</td>
                     <td class="text-right">₹${item.gstAmount.toFixed(2)}</td>
-                    <td class="text-right">₹${item.totalAmount.toFixed(2)}</td>
-                    <td><button class="btn btn-sm btn-danger" onclick="Purchase.removeProduct(${id})">🗑️</button></td>
+                    <td class="text-right" style="font-weight: 600;">₹${item.totalAmount.toFixed(2)}</td>
+                    <td><button class="btn btn-sm btn-danger" onclick="Purchase.removeProduct('${key}')">🗑️</button></td>
                 </tr>
             `;
         });
 
         return `
             <table class="table">
-                <thead>
+                <thead style="background: #1e40af; color: white;">
                     <tr>
-                        <th>Product</th>
-                        <th>HSN</th>
-                        <th style="text-align: center;">Qty</th>
-                        <th style="text-align: right;">Rate</th>
-                        <th style="text-align: right;">Amount</th>
-                        <th style="text-align: center;">GST %</th>
-                        <th style="text-align: right;">GST Amt</th>
-                        <th style="text-align: right;">Total</th>
-                        <th>Action</th>
+                        <th style="color: white;">Product</th>
+                        <th style="color: white;">Weight</th>
+                        <th style="text-align: center; color: white;">Qty</th>
+                        <th style="text-align: right; color: white;">Rate</th>
+                        <th style="text-align: right; color: white;">Amount</th>
+                        <th style="text-align: center; color: white;">GST %</th>
+                        <th style="text-align: right; color: white;">GST Amt</th>
+                        <th style="text-align: right; color: white;">Total</th>
+                        <th style="color: white;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${rows}
                 </tbody>
-                <tfoot style="background: #f8fafc; font-weight: 600;">
+                <tfoot style="background: #dcfce7; font-weight: 600;">
                     <tr>
                         <td colspan="4" style="text-align: right;">Subtotal:</td>
                         <td style="text-align: right;">₹${this.orderTotals.subtotal.toFixed(2)}</td>
@@ -438,7 +465,7 @@ const Purchase = {
         const option = supplierSelect.selectedOptions[0];
 
         if (!option || !option.value) {
-            UI.showToast('Please select a supplier', 'error');
+            UI.showToast('Please select a vendor', 'error');
             return;
         }
 
@@ -446,6 +473,11 @@ const Purchase = {
             UI.showToast('Please add at least one product', 'error');
             return;
         }
+
+        // Get payment details
+        const paymentStatus = document.getElementById('paymentStatus').value;
+        const paymentAmount = parseFloat(document.getElementById('paymentAmount').value) || 0;
+        const paymentDate = document.getElementById('paymentDate').value;
 
         const orderData = {
             orderNo: document.getElementById('poNumber').value,
@@ -456,6 +488,9 @@ const Purchase = {
             subtotal: this.orderTotals.subtotal,
             gstTotal: this.orderTotals.gstTotal,
             grandTotal: this.orderTotals.grandTotal,
+            paymentStatus,
+            paymentAmount,
+            paymentDate,
             items: Array.from(this.selectedProducts.values())
         };
 
@@ -468,9 +503,10 @@ const Purchase = {
 
             if (!response.ok) throw new Error('Save failed');
 
-            UI.showToast('Purchase order created successfully!', 'success');
+            UI.showToast('✅ Purchase order created successfully!', 'success');
             this.cancelForm();
         } catch (error) {
+            console.error('Error saving purchase order:', error);
             UI.showToast('Error saving purchase order', 'error');
         }
     },

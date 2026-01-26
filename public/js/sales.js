@@ -43,28 +43,15 @@ const Sales = {
             }
 
             contentArea.innerHTML = `
-                <!-- Tableau-style Sales Invoice -->
-                <div style="background: #f5f5f5; min-height: 100%; padding: 0;">
-                    
-                    <!-- Header Bar -->
-                    <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                        <div style="display: flex; align-items: center; gap: 14px;">
-                            <span style="font-size: 28px;">📄</span>
-                            <div>
-                                <h1 style="margin: 0; font-size: 22px; font-weight: 700; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Create Tax Invoice</h1>
-                                <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9;">GST invoice with automatic calculations</p>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            <span style="background: rgba(255,255,255,0.25); padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500;">
-                                📦 ${this.products.length} Products | 🏪 ${this.stores.length} Stores
-                            </span>
-                        </div>
-                    </div>
+                <!-- Page Title Header -->
+                <div style="background: #2563eb; color: white; padding: 20px; margin: -20px -20px 20px -20px; border-bottom: 4px solid #1d4ed8;">
+                    <h1 style="margin: 0; font-size: 24px; font-weight: 700;">📄 Create Tax Invoice</h1>
+                    <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Generate GST-compliant invoices • ${this.products.length} Products • ${this.stores.length} Stores</p>
+                </div>
 
-                    <!-- Main Form -->
-                    <div style="background: white; padding: 20px;">
-                        <div style="max-width: 1200px; margin: 0 auto;">
+                <!-- Main Form Container -->
+                <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <div style="max-width: 1200px; margin: 0 auto;">
                             
                             <!-- Invoice Header -->
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #eee;">

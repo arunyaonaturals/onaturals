@@ -47,16 +47,16 @@ const Sales = {
                 <div style="background: #f5f5f5; min-height: 100%; padding: 0;">
                     
                     <!-- Header Bar -->
-                    <div style="background: #2c3e50; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #2ca02c;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <span style="font-size: 20px;">📄</span>
+                    <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: center; gap: 14px;">
+                            <span style="font-size: 28px;">📄</span>
                             <div>
-                                <h1 style="margin: 0; font-size: 18px; font-weight: 600;">Create Tax Invoice</h1>
-                                <p style="margin: 2px 0 0 0; font-size: 11px; opacity: 0.7;">GST invoice with automatic calculations</p>
+                                <h1 style="margin: 0; font-size: 22px; font-weight: 700; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Create Tax Invoice</h1>
+                                <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9;">GST invoice with automatic calculations</p>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 8px;">
-                            <span style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 3px; font-size: 11px;">
+                        <div style="display: flex; gap: 10px;">
+                            <span style="background: rgba(255,255,255,0.25); padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500;">
                                 📦 ${this.products.length} Products | 🏪 ${this.stores.length} Stores
                             </span>
                         </div>

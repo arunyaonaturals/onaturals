@@ -119,31 +119,34 @@ router.post('/', (req, res) => {
                          (orderId, productId, productName, weight, hsnCode, quantity, rate, amount, gstRate, gstAmount, totalAmount)
                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-        const stmt = db.prepare(itemSql);
-
-        items.forEach(item => {
-            stmt.run([
-                orderId,
-                item.productId || null,
-                item.productName,
-                item.weight || '',
-                item.hsnCode || '',
-                item.quantity,
-                item.rate,
-                item.amount,
-                item.gstRate,
-                item.gstAmount,
-                item.totalAmount
-            ]);
+        const promises = items.map(item => {
+            return new Promise((resolve, reject) => {
+                db.run(itemSql, [
+                    orderId,
+                    item.productId || null,
+                    item.productName,
+                    item.weight || '',
+                    item.hsnCode || '',
+                    item.quantity,
+                    item.rate,
+                    item.amount,
+                    item.gstRate,
+                    item.gstAmount,
+                    item.totalAmount
+                ], (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                });
+            });
         });
 
-        stmt.finalize((err) => {
-            if (err) {
+        Promise.all(promises)
+            .then(() => {
+                res.json({ id: orderId, orderNo, message: 'Purchase order created successfully with items' });
+            })
+            .catch(err => {
                 res.status(500).json({ error: err.message });
-                return;
-            }
-            res.json({ id: orderId, orderNo, message: 'Purchase order created successfully with items' });
-        });
+            });
     });
 });
 

@@ -42,9 +42,8 @@ const Stores = {
                         </div>
                         <div style="display: flex; gap: 8px;">
                             <button class="store-tab-btn ${this.viewMode === 'list' ? 'active' : ''}" data-view="list">📋 List</button>
-                            <button class="store-tab-btn ${this.viewMode === 'beat' ? 'active' : ''}" data-view="beat">🚶 Beat</button>
-                            <button class="store-tab-btn ${this.viewMode === 'margins' ? 'active' : ''}" data-view="margins">💰 Margins</button>
-                            <button class="store-tab-btn ${this.viewMode === 'form' ? 'active' : ''}" data-view="form" style="${this.viewMode === 'form' ? 'background: #2ca02c; border-color: #2ca02c;' : ''}">➕ ${this.editingStore ? 'Edit' : 'Add'}</button>
+                            <button class="store-tab-btn" id="importJsonBtn" style="background: #ff7f0e; border-color: #ff7f0e; color: white;">📥 Import JSON</button>
+                            <button class="store-tab-btn ${this.viewMode === 'form' ? 'active' : ''}" data-view="form" style="${this.viewMode === 'form' ? 'background: #2ca02c; border-color: #2ca02c;' : ''}">${this.editingStore ? '✏️ Edit' : '➕ Add'}</button>
                         </div>
                     </div>
 
@@ -57,10 +56,7 @@ const Stores = {
 
                     <!-- Main Content -->
                     <div id="storeContent">
-                        ${this.viewMode === 'list' ? this.renderListView() :
-                    this.viewMode === 'beat' ? this.renderBeatView() :
-                        this.viewMode === 'margins' ? this.renderMarginsView() :
-                            this.renderAddStoreForm()}
+                        ${this.viewMode === 'list' ? this.renderListView() : this.renderAddStoreForm()}
                     </div>
                 </div>
 
@@ -766,6 +762,11 @@ const Stores = {
             this.showImportSection();
         });
 
+        // Import JSON button (in header)
+        document.getElementById('importJsonBtn')?.addEventListener('click', () => {
+            this.showJsonImportDialog();
+        });
+
         // Clear All button (only in manage view)
         document.getElementById('clearStoresBtn')?.addEventListener('click', async () => {
             if (confirm('Delete ALL stores? This cannot be undone.')) {
@@ -972,6 +973,62 @@ const Stores = {
             } else {
                 UI.showToast('Unsupported file format. Please upload .csv or .json', 'error');
             }
+        });
+    },
+
+    showJsonImportDialog() {
+        const content = `
+            <div>
+                <p style="margin-bottom: 16px; color: #555;">
+                    Upload a JSON file with the store data.<br>
+                    <small style="color: #888;">Format: Array of store objects with fields like storeName, storeId, area, etc.</small>
+                </p>
+                <div style="border: 2px dashed #ccc; border-radius: 8px; padding: 30px; text-align: center; background: #f9f9f9;">
+                    <input type="file" id="jsonFileInput" accept=".json" style="display: none;">
+                    <button id="selectJsonFileBtn" style="background: #3182ce; color: white; border: none; padding: 10px 24px; border-radius: 5px; cursor: pointer; font-size: 14px;">📁 Select JSON File</button>
+                    <p id="selectedFileName" style="margin-top: 12px; color: #666; font-size: 12px;">No file selected</p>
+                </div>
+            </div>
+        `;
+
+        const buttons = [
+            { label: 'Cancel', type: 'secondary', action: 'close' },
+            { label: '📥 Import', type: 'primary', action: 'import-json' }
+        ];
+
+        UI.createModal('Import Stores from JSON', content, buttons);
+
+        // Handle file selection button
+        document.getElementById('selectJsonFileBtn')?.addEventListener('click', () => {
+            document.getElementById('jsonFileInput')?.click();
+        });
+
+        // Handle file input change
+        document.getElementById('jsonFileInput')?.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('selectedFileName').textContent = `Selected: ${file.name}`;
+                document.getElementById('selectedFileName').style.color = '#2ca02c';
+            }
+        });
+
+        // Handle import button
+        document.querySelector('[data-action="import-json"]')?.addEventListener('click', () => {
+            const fileInput = document.getElementById('jsonFileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                UI.showToast('Please select a JSON file', 'error');
+                return;
+            }
+
+            if (!file.name.endsWith('.json')) {
+                UI.showToast('Please select a .json file', 'error');
+                return;
+            }
+
+            this.importJSON(file);
+            UI.closeModal();
         });
     },
 

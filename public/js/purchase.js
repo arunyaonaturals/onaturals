@@ -220,10 +220,9 @@ const Purchase = {
     },
 
     renderForm() {
-        const contentArea = document.getElementById('contentArea');
         const today = new Date().toISOString().split('T')[0];
 
-        contentArea.innerHTML = `
+        return `
             <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <h1 class="page-title">📝 New Purchase Order</h1>

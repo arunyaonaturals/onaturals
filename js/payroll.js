@@ -59,7 +59,7 @@ const Payroll = {
 
                     <!-- KPI Summary -->
                     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-bottom: 1px solid #ddd;">
-                        ${this.renderKPI('Total Staff', (summary.totalStaff || 0).toString(), 'On payroll', '#3182ce', '👥')}
+                        ${this.renderKPI('Total Staff', (summary.totalStaff || 0).toString(), 'On payroll', '#059669', '👥')}
                         ${this.renderKPI('Total Gross', Utils.formatCurrency(summary.totalGross || 0), 'Earnings before tax', '#2ca02c', '💰')}
                         ${this.renderKPI('Deductions', Utils.formatCurrency(summary.totalDeductions || 0), 'PF, ESI, etc.', '#d62728', '📉')}
                         ${this.renderKPI('Net Payable', Utils.formatCurrency(summary.totalNet || 0), 'Awaiting disbursement', '#ff7f0e', '✅')}
@@ -117,7 +117,7 @@ const Payroll = {
                                                 <td style="padding: 8px 12px; text-align: right;"><input type="number" id="pf-${s.id}" value="0" style="width: 60px; padding: 3px; border: 1px solid #ddd; border-radius: 3px; font-size: 11px; text-align: right;"></td>
                                                 <td style="padding: 8px 12px; text-align: right;"><input type="number" id="esi-${s.id}" value="0" style="width: 60px; padding: 3px; border: 1px solid #ddd; border-radius: 3px; font-size: 11px; text-align: right;"></td>
                                                 <td style="padding: 8px 12px; text-align: center;">
-                                                    <button onclick="Payroll.saveSalaryComponents(${s.id})" style="background: #3182ce; color: white; border: none; padding: 4px 8px; border-radius: 3px; font-size: 10px; cursor: pointer;">💾</button>
+                                                    <button onclick="Payroll.saveSalaryComponents(${s.id})" style="background: #059669; color: white; border: none; padding: 4px 8px; border-radius: 3px; font-size: 10px; cursor: pointer;">💾</button>
                                                 </td>
                                             </tr>
                                         `).join('')}

@@ -11,7 +11,7 @@ const Suppliers = {
         const contentArea = document.getElementById('contentArea');
         contentArea.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: center; padding: 60px 20px;">
-                <div style="width: 48px; height: 48px; border: 4px solid #e0e0e0; border-top-color: #3182ce; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                <div style="width: 48px; height: 48px; border: 4px solid #e0e0e0; border-top-color: #059669; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
             </div>
         `;
 
@@ -29,7 +29,7 @@ const Suppliers = {
                 <div style="background: #f5f5f5; min-height: 100%; padding: 0;">
                     
                     <!-- Header Bar -->
-                    <div style="background: #2c3e50; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #3182ce;">
+                    <div style="background: #2c3e50; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #059669;">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <span style="font-size: 20px;">🏭</span>
                             <div>
@@ -45,7 +45,7 @@ const Suppliers = {
 
                     <!-- KPI Summary -->
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-bottom: 1px solid #ddd;">
-                        ${this.renderKPI('Total Suppliers', totalSuppliers.toString(), 'Registered in system', '#3182ce', '🏭')}
+                        ${this.renderKPI('Total Suppliers', totalSuppliers.toString(), 'Registered in system', '#059669', '🏭')}
                         ${this.renderKPI('Active', activeSuppliers.toString(), 'Currently operational', '#2ca02c', '✅')}
                         ${this.renderKPI('Cities', cities.toString(), 'Diverse locations', '#9467bd', '📍')}
                     </div>
@@ -72,8 +72,8 @@ const Suppliers = {
                         color: white;
                     }
                     .sup-tab-btn.active {
-                        background: #3182ce;
-                        border-color: #3182ce;
+                        background: #059669;
+                        border-color: #059669;
                         color: white;
                     }
                 </style>
@@ -121,19 +121,19 @@ const Suppliers = {
                     <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                         <thead style="background: #f8f9fa; position: sticky; top: 0;">
                             <tr>
-                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Code</th>
-                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Supplier Name</th>
-                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Contact</th>
-                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Phone</th>
-                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">City</th>
-                                <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Status</th>
-                                <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Actions</th>
+                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #059669;">Code</th>
+                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #059669;">Supplier Name</th>
+                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #059669;">Contact</th>
+                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #059669;">Phone</th>
+                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #059669;">City</th>
+                                <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #059669;">Status</th>
+                                <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #059669;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${this.currentSuppliers.map((s, idx) => `
                                 <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};">
-                                    <td style="padding: 8px 12px; color: #3182ce; font-weight: 600;">${s.supplierCode || '-'}</td>
+                                    <td style="padding: 8px 12px; color: #059669; font-weight: 600;">${s.supplierCode || '-'}</td>
                                     <td style="padding: 8px 12px; font-weight: 500; color: #333;">${s.supplierName}</td>
                                     <td style="padding: 8px 12px; color: #666;">${s.contactPerson || '-'}</td>
                                     <td style="padding: 8px 12px; color: #666;">${s.phone || '-'}</td>

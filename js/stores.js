@@ -14,7 +14,7 @@ const Stores = {
         const contentArea = document.getElementById('contentArea');
         contentArea.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: center; padding: 60px 20px;">
-                <div style="width: 48px; height: 48px; border: 4px solid #e0e0e0; border-top-color: #3182ce; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                <div style="width: 48px; height: 48px; border: 4px solid #e0e0e0; border-top-color: #059669; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
             </div>
         `;
 
@@ -32,7 +32,7 @@ const Stores = {
                 <div style="background: #f5f5f5; min-height: 100%; padding: 0;">
                     
                     <!-- Header Bar -->
-                    <div style="background: #2c3e50; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #3182ce;">
+                    <div style="background: #2c3e50; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #059669;">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <span style="font-size: 20px;">🏪</span>
                             <div>
@@ -50,7 +50,7 @@ const Stores = {
 
                     <!-- KPI Summary -->
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-bottom: 1px solid #ddd;">
-                        ${this.renderKPI('Total Stores', totalStores.toString(), 'Active outlets', '#3182ce', '🏪')}
+                        ${this.renderKPI('Total Stores', totalStores.toString(), 'Active outlets', '#059669', '🏪')}
                         ${this.renderKPI('Coverage Areas', areas.toString(), 'Unique areas', '#ff7f0e', '📍')}
                         ${this.renderKPI('Sales Captains', captains.toString(), 'Team members', '#9467bd', '👤')}
                     </div>
@@ -79,8 +79,8 @@ const Stores = {
                         color: white;
                     }
                     .store-tab-btn.active {
-                        background: #3182ce;
-                        border-color: #3182ce;
+                        background: #059669;
+                        border-color: #059669;
                         color: white;
                     }
                 </style>
@@ -145,18 +145,18 @@ const Stores = {
             <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                 <thead style="background: #f8f9fa; position: sticky; top: 0;">
                     <tr>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Store ID</th>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Store Name</th>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Area</th>
-                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Category</th>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Sales Captain</th>
-                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #3182ce;">Actions</th>
+                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #059669;">Store ID</th>
+                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #059669;">Store Name</th>
+                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #059669;">Area</th>
+                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #059669;">Category</th>
+                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #059669;">Sales Captain</th>
+                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #555; border-bottom: 2px solid #059669;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${stores.map((s, idx) => `
                         <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};">
-                            <td style="padding: 8px 12px; color: #3182ce; font-weight: 500;">${s.storeId || '#' + s.id}</td>
+                            <td style="padding: 8px 12px; color: #059669; font-weight: 500;">${s.storeId || '#' + s.id}</td>
                             <td style="padding: 8px 12px; font-weight: 500; color: #333;">${s.storeName}</td>
                             <td style="padding: 8px 12px; color: #666;">${s.area || '-'}</td>
                             <td style="padding: 8px 12px; text-align: center;">
@@ -988,7 +988,7 @@ const Stores = {
                 </p>
                 <div style="border: 2px dashed #ccc; border-radius: 8px; padding: 30px; text-align: center; background: #f9f9f9;">
                     <input type="file" id="jsonFileInput" accept=".json" style="display: none;">
-                    <button id="selectJsonFileBtn" style="background: #3182ce; color: white; border: none; padding: 10px 24px; border-radius: 5px; cursor: pointer; font-size: 14px;">📁 Select JSON File</button>
+                    <button id="selectJsonFileBtn" style="background: #059669; color: white; border: none; padding: 10px 24px; border-radius: 5px; cursor: pointer; font-size: 14px;">📁 Select JSON File</button>
                     <p id="selectedFileName" style="margin-top: 12px; color: #666; font-size: 12px;">No file selected</p>
                 </div>
             </div>

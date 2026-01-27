@@ -50,7 +50,7 @@ const Staff = {
 
                     <!-- KPI Summary -->
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-bottom: 1px solid #ddd;">
-                        ${this.renderKPI('Total Staff', totalStaff.toString(), 'On payroll', '#3182ce', '👥')}
+                        ${this.renderKPI('Total Staff', totalStaff.toString(), 'On payroll', '#059669', '👥')}
                         ${this.renderKPI('Active', activeStaff.toString(), 'Currently working', '#2ca02c', '✅')}
                         ${this.renderKPI('Designations', departments.toString(), 'Roles defined', '#9467bd', '💼')}
                     </div>
@@ -155,7 +155,7 @@ const Staff = {
                     ${staff.map((s, idx) => `
                         <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};">
                             <td style="padding: 8px 12px;">
-                                <div style="font-weight: 600; color: #3182ce;">${s.name}</div>
+                                <div style="font-weight: 600; color: #059669;">${s.name}</div>
                                 ${s.email ? `<div style="font-size: 10px; color: #888;">${s.email}</div>` : ''}
                             </td>
                             <td style="padding: 8px 12px; color: #333;">${s.designation || '-'}</td>

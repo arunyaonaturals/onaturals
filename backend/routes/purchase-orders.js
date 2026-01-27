@@ -296,15 +296,31 @@ function updateOrderStatus(orderId, receivedDate, invoiceNo, res) {
     });
 }
 
-// Delete purchase order
+// Delete purchase order (cascade delete raw materials and items)
 router.delete('/:id', (req, res) => {
-    const sql = `DELETE FROM purchase_orders WHERE id = ?`;
-    db.run(sql, [req.params.id], function (err) {
+    const orderId = req.params.id;
+
+    // First delete associated raw materials
+    db.run('DELETE FROM raw_material_stock WHERE purchaseOrderId = ?', [orderId], (err) => {
         if (err) {
-            res.status(500).json({ error: err.message });
-            return;
+            console.error('Error deleting raw materials:', err.message);
         }
-        res.json({ message: 'Purchase order deleted successfully', changes: this.changes });
+
+        // Then delete order items
+        db.run('DELETE FROM purchase_order_items WHERE orderId = ?', [orderId], (err) => {
+            if (err) {
+                console.error('Error deleting order items:', err.message);
+            }
+
+            // Finally delete the order
+            db.run('DELETE FROM purchase_orders WHERE id = ?', [orderId], function (err) {
+                if (err) {
+                    res.status(500).json({ error: err.message });
+                    return;
+                }
+                res.json({ message: 'Purchase order deleted successfully', changes: this.changes });
+            });
+        });
     });
 });
 

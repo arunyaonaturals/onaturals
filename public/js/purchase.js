@@ -146,6 +146,7 @@ const Purchase = {
                                 <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: white;">PO Number</th>
                                 <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: white;">Date</th>
                                 <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: white;">Vendor</th>
+                                <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: white;">Items</th>
                                 <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: white;">Total</th>
                                 <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: white;">Status</th>
                                 <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: white;">Payment</th>
@@ -166,6 +167,7 @@ const Purchase = {
                                     <td style="padding: 8px 12px; color: #059669; font-weight: 600;">${o.orderNo}</td>
                                     <td style="padding: 8px 12px; color: #666;">${o.orderDate || '-'}</td>
                                     <td style="padding: 8px 12px; font-weight: 500; color: #333;">${o.supplierName || '-'}</td>
+                                    <td style="padding: 8px 12px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #666;" title="${o.itemNames || ''}">${o.itemNames || '-'}</td>
                                     <td style="padding: 8px 12px; text-align: right; font-weight: 600; color: #333;">${Utils.formatCurrency(parseFloat(o.grandTotal || 0))}</td>
                                     <td style="padding: 8px 12px; text-align: center;">
                                         <span style="background: ${sc.bg}; color: ${sc.text}; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600;">
@@ -511,28 +513,137 @@ const Purchase = {
     },
 
     async viewOrder(id) {
-        // Simple alert for now - can be expanded to full view
-        const order = this.currentOrders.find(o => o.id === id);
-        if (order) {
-            alert(`PO: ${order.orderNo}\nSupplier: ${order.supplierName}\nTotal: ₹${order.grandTotal}\nStatus: ${order.status}`);
+        try {
+            const res = await fetch(`/api/purchase-orders/${id}`);
+            if (!res.ok) throw new Error('Failed to fetch order details');
+            const order = await res.json();
+
+            const itemsHtml = order.items.map(item => `
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 8px; font-weight: 500;">${item.productName}</td>
+                    <td style="padding: 8px;">${item.weight || '-'}</td>
+                    <td style="padding: 8px; text-align: center;">${item.quantity} ${item.unit || 'KG'}</td>
+                    <td style="padding: 8px; text-align: right;">₹${parseFloat(item.rate || 0).toFixed(2)}</td>
+                    <td style="padding: 8px; text-align: right; font-weight: 600;">₹${parseFloat(item.totalAmount || 0).toFixed(2)}</td>
+                </tr>
+            `).join('');
+
+            UI.createModal(`Purchase Order: ${order.orderNo}`, `
+                <div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; background: #f8fafc; padding: 12px; border-radius: 6px;">
+                        <div>
+                            <div style="font-size: 11px; color: #666; text-transform: uppercase;">Vendor</div>
+                            <div style="font-weight: 600;">${order.supplierName}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 11px; color: #666; text-transform: uppercase;">Date</div>
+                            <div style="font-weight: 600;">${order.orderDate}</div>
+                        </div>
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                        <thead style="background: #f1f5f9;">
+                            <tr>
+                                <th style="padding: 8px; text-align: left;">Product</th>
+                                <th style="padding: 8px; text-align: left;">Weight</th>
+                                <th style="padding: 8px; text-align: center;">Qty</th>
+                                <th style="padding: 8px; text-align: right;">Rate</th>
+                                <th style="padding: 8px; text-align: right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>${itemsHtml}</tbody>
+                    </table>
+                    <div style="margin-top: 15px; text-align: right; font-weight: 700; font-size: 16px; color: #059669;">
+                        Total: ₹${Utils.formatCurrency(order.grandTotal)}
+                    </div>
+                </div>
+            `, [{ label: 'Close', type: 'secondary', action: 'close' }]);
+        } catch (e) {
+            UI.showToast('Error loading details', 'error');
         }
     },
 
     async receiveOrder(id) {
-        if (!confirm('Mark this order as received?')) return;
-
         try {
-            const response = await fetch(`/api/purchase-orders/${id}/status`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'received', receivedDate: new Date().toISOString().split('T')[0] })
-            });
+            const res = await fetch(`/api/purchase-orders/${id}`);
+            if (!res.ok) throw new Error('Failed to fetch order');
+            const order = await res.json();
 
-            if (!response.ok) throw new Error('Update failed');
-            UI.showToast('Order marked as received', 'success');
-            this.render();
-        } catch (error) {
-            UI.showToast('Error updating order', 'error');
+            const content = `
+                <div style="padding: 10px;">
+                    <p style="font-size: 13px; margin-bottom: 15px;">Receive items for <b>${order.orderNo}</b></p>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 12px; margin-bottom: 5px;">Invoice Number</label>
+                        <input type="text" id="receiveInvoiceNo" class="form-input" placeholder="Enter supplier invoice number">
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                        <thead>
+                            <tr style="background: #f1f5f9;">
+                                <th style="padding: 8px; text-align: left;">Item</th>
+                                <th style="padding: 8px; text-align: right;">Ordered</th>
+                                <th style="padding: 8px; text-align: right;">Already Received</th>
+                                <th style="padding: 8px; text-align: right;">Receiving Now</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${order.items.map(item => `
+                                <tr class="receive-row" data-id="${item.id}">
+                                    <td style="padding: 8px;">${item.productName}</td>
+                                    <td style="padding: 8px; text-align: right;">${item.quantity}</td>
+                                    <td style="padding: 8px; text-align: right;">${item.receivedQty || 0}</td>
+                                    <td style="padding: 8px; text-align: right;">
+                                        <input type="number" class="receive-qty-input" style="width: 60px; text-align: right;" 
+                                               value="${item.quantity - (item.receivedQty || 0)}" min="0" 
+                                               max="${item.quantity - (item.receivedQty || 0)}">
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            UI.createModal('Receive Items', content, [
+                { label: 'Cancel', type: 'secondary', action: 'close' },
+                { label: 'Submit Receipt', type: 'primary', action: 'receive' }
+            ]);
+
+            document.querySelector('[data-action="receive"]').onclick = async () => {
+                const invoiceNo = document.getElementById('receiveInvoiceNo').value;
+                const items = [];
+                document.querySelectorAll('.receive-row').forEach(row => {
+                    const receivingQty = parseFloat(row.querySelector('.receive-qty-input').value) || 0;
+                    const prevReceived = order.items.find(i => i.id == row.dataset.id).receivedQty || 0;
+                    items.push({
+                        id: parseInt(row.dataset.id),
+                        receivedQty: receivingQty + prevReceived
+                    });
+                });
+
+                try {
+                    const saveRes = await fetch(`/api/purchase-orders/${id}/receive`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            items,
+                            receivedDate: new Date().toISOString().split('T')[0],
+                            invoiceNo
+                        })
+                    });
+
+                    if (saveRes.ok) {
+                        UI.showToast('✅ Order received and stock updated!', 'success');
+                        UI.closeModal();
+                        this.render();
+                    } else {
+                        const err = await saveRes.json();
+                        UI.showToast(err.error || 'Failed to receive items', 'error');
+                    }
+                } catch (err) {
+                    UI.showToast('Error sending receive request', 'error');
+                }
+            };
+        } catch (e) {
+            UI.showToast('Error opening receive modal', 'error');
         }
     },
 

@@ -302,7 +302,7 @@ const Inventory = {
                 <thead style="background: #059669; position: sticky; top: 0;">
                     <tr>
                         <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: white;">Material Name</th>
-                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: white;">Weight</th>
+                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: white;">Unit</th>
                         <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: white;">Vendor</th>
                         <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: white;">Rate (₹)</th>
                         <th style="padding: 8px 12px; text-align: right; font-weight: 600; color: white;">Initial</th>
@@ -319,7 +319,7 @@ const Inventory = {
             return `
                             <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};">
                                 <td style="padding: 8px 12px; font-weight: 500; color: #333;">${m.materialName}</td>
-                                <td style="padding: 8px 12px; color: #666;">${m.weight || '-'}</td>
+                                <td style="padding: 8px 12px; color: #666;"><span class="badge" style="background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 4px; font-size: 10px;">${m.unit || 'KG'}</span></td>
                                 <td style="padding: 8px 12px; color: #666;">${m.vendorName || '-'}</td>
                                 <td style="padding: 8px 12px; text-align: right; color: #333;">₹${parseFloat(m.rate || 0).toFixed(2)}</td>
                                 <td style="padding: 8px 12px; text-align: right; color: #666;">${m.initialQty}</td>

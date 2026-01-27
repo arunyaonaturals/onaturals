@@ -472,6 +472,28 @@ function initDb() {
             }
         }
 
+        // --- MIGRATION: ADD MISSING COLUMNS ---
+        // This ensures existing production databases get the new columns
+        const migrations = [
+            `ALTER TABLE purchase_order_items ADD COLUMN unit TEXT DEFAULT 'KG'`,
+            `ALTER TABLE raw_material_stock ADD COLUMN unit TEXT DEFAULT 'KG'`,
+            `ALTER TABLE raw_material_stock ADD COLUMN weight TEXT`
+            // weight column might be missing if table was old, though it was in initial schema? 
+            // It's safer to try. If it exists, it will fail harmlessly.
+        ];
+
+        for (const sql of migrations) {
+            try {
+                await run(sql);
+            } catch (err) {
+                // Ignore "duplicate column name" errors
+                if (!err.message.includes('duplicate column')) {
+                    console.warn('Migration step warning:', err.message);
+                }
+            }
+        }
+        // ---------------------------------------
+
         // Seed admin user
         const adminPassword = bcrypt.hashSync('demo123', 10);
         db.run(`INSERT OR IGNORE INTO users (username, password, role, name) VALUES (?, ?, ?, ?)`,

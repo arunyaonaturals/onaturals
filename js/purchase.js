@@ -497,10 +497,71 @@ const Purchase = {
     },
 
     async viewOrder(id) {
-        // Simple alert for now - can be expanded to full view
-        const order = this.currentOrders.find(o => o.id === id);
-        if (order) {
-            alert(`PO: ${order.orderNo}\nSupplier: ${order.supplierName}\nTotal: ₹${order.grandTotal}\nStatus: ${order.status}`);
+        try {
+            const res = await fetch(`/api/purchase-orders/${id}`);
+            if (!res.ok) throw new Error('Failed to fetch order details');
+
+            const order = await res.json();
+            const items = order.items || [];
+
+            const itemsHtml = items.map(item => `
+                <tr>
+                    <td style="padding: 8px;">${item.productName}</td>
+                    <td style="padding: 8px; text-align: center;">${item.quantity} ${item.unit || 'units'}</td>
+                    <td style="padding: 8px; text-align: right;">₹${parseFloat(item.rate).toFixed(2)}</td>
+                    <td style="padding: 8px; text-align: right;">₹${parseFloat(item.totalAmount).toFixed(2)}</td>
+                    <td style="padding: 8px; text-align: center;">${item.receivedQty}</td>
+                </tr>
+            `).join('');
+
+            const content = `
+                <div style="padding: 16px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                        <div>
+                            <h3 style="margin: 0 0 8px 0; color: var(--primary);">Order Details</h3>
+                            <p><strong>PO Number:</strong> ${order.orderNo}</p>
+                            <p><strong>Date:</strong> ${order.orderDate}</p>
+                            <p><strong>Status:</strong> <span class="badge badge-${order.status === 'received' ? 'success' : 'warning'}">${order.status.toUpperCase()}</span></p>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0 0 8px 0; color: var(--primary);">Supplier</h3>
+                            <p><strong>Name:</strong> ${order.supplierName}</p>
+                            <p><strong>Address:</strong> ${order.supplierAddress || 'N/A'}</p>
+                            <p><strong>GSTIN:</strong> ${order.supplierGstin || 'N/A'}</p>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 12px;">Order Items</h3>
+                    <div class="table-container">
+                        <table class="table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: var(--bg-surface); border-bottom: 1px solid var(--border-light);">
+                                    <th style="padding: 8px; text-align: left;">Item</th>
+                                    <th style="padding: 8px; text-align: center;">Qty</th>
+                                    <th style="padding: 8px; text-align: right;">Rate</th>
+                                    <th style="padding: 8px; text-align: right;">Total</th>
+                                    <th style="padding: 8px; text-align: center;">Received</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${itemsHtml.length ? itemsHtml : '<tr><td colspan="5" style="text-align: center; padding: 16px;">No items found</td></tr>'}
+                            </tbody>
+                            <tfoot>
+                                <tr style="border-top: 2px solid var(--border-light); font-weight: bold;">
+                                    <td colspan="3" style="text-align: right; padding: 8px;">Grand Total:</td>
+                                    <td style="text-align: right; padding: 8px;">₹${parseFloat(order.grandTotal).toFixed(2)}</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            UI.createModal('Purchase Order Details', content);
+        } catch (error) {
+            console.error(error);
+            UI.showToast('Error loading order details', 'error');
         }
     },
 

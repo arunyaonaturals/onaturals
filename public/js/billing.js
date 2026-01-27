@@ -53,7 +53,7 @@ const Billing = {
 
                     <!-- KPI Summary -->
                     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-bottom: 1px solid #ddd;">
-                        ${this.renderKPI('Total Bills', totalBills.toString(), 'Invoices', '#3182ce', '🧾')}
+                        ${this.renderKPI('Total Bills', totalBills.toString(), 'Invoices', '#059669', '🧾')}
                         ${this.renderKPI('Total Amount', Utils.formatCurrency(totalAmount), 'Billed', '#2ca02c', '💰')}
                         ${this.renderKPI('Paid', Utils.formatCurrency(totalPaid), 'Collected', '#9467bd', '✅')}
                         ${this.renderKPI('Pending', Utils.formatCurrency(pending), 'Outstanding', '#d62728', '⏳')}
@@ -155,7 +155,7 @@ const Billing = {
             const isPaid = paid >= amount;
             return `
                             <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};">
-                                <td style="padding: 8px 12px; color: #3182ce; font-weight: 500;">${b.billNo}</td>
+                                <td style="padding: 8px 12px; color: #059669; font-weight: 500;">${b.billNo}</td>
                                 <td style="padding: 8px 12px; font-weight: 500; color: #333;">${b.storeName || '-'}</td>
                                 <td style="padding: 8px 12px; color: #666;">${b.salesCaptain || '-'}</td>
                                 <td style="padding: 8px 12px; color: #666;">${Utils.formatDateDDMMYYYY(b.billDate)}</td>

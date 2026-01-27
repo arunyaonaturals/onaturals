@@ -9,7 +9,7 @@ const Dashboard = {
         const contentArea = document.getElementById('contentArea');
         contentArea.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: center; padding: 60px 20px;">
-                <div style="width: 48px; height: 48px; border: 4px solid #e8e0d8; border-top-color: #c4956a; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                <div class="loading-spinner"></div>
             </div>
         `;
 
@@ -231,23 +231,23 @@ const Dashboard = {
     },
 
     renderBarChart(monthlyData) {
-        if (monthlyData.length === 0) return '<p style="color: #666; font-size: 12px;">No data available</p>';
+        if (monthlyData.length === 0) return '<p style="color: #64748b; font-size: 12px;">No data available</p>';
 
         const maxTotal = Math.max(...monthlyData.map(m => m.total)) || 1;
 
         return `
-            <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
                 ${monthlyData.map(m => {
-            const width = (m.total / maxTotal * 100).toFixed(0);
+            const width = Math.max((m.total / maxTotal * 100), 3).toFixed(0);
             return `
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <div style="width: 35px; font-size: 11px; font-weight: 500; color: #333;">${m.month}</div>
-                            <div style="flex: 1; background: #e8e8e8; border-radius: 2px; height: 18px; overflow: hidden;">
-                                <div style="background: linear-gradient(90deg, #3182ce, #4a9fd4); width: ${width}%; height: 100%; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px;">
-                                    ${m.total > 0 ? `<span style="font-size: 9px; color: white; font-weight: 600;">${Utils.formatCurrency(m.total)}</span>` : ''}
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 38px; font-size: 12px; font-weight: 500; color: #064e3b;">${m.month}</div>
+                            <div style="flex: 1; background: #ecfdf5; border-radius: 8px; height: 24px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #059669, #10b981); width: ${width}%; height: 100%; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; border-radius: 8px; transition: width 0.3s ease;">
+                                    ${m.total > 0 ? `<span style="font-size: 10px; color: white; font-weight: 600;">${Utils.formatCurrency(m.total)}</span>` : ''}
                                 </div>
                             </div>
-                            <div style="width: 30px; font-size: 10px; color: #666; text-align: right;">${m.count}</div>
+                            <div style="width: 32px; font-size: 11px; color: #6b7280; text-align: right;">${m.count}</div>
                         </div>
                     `;
         }).join('')}
@@ -257,22 +257,23 @@ const Dashboard = {
 
     renderTopStores(topStores) {
         if (topStores.length === 0) {
-            return '<div style="padding: 20px; text-align: center; color: #666; font-size: 12px;">No store data for this period</div>';
+            return '<div style="padding: 20px; text-align: center; color: #6b7280; font-size: 13px;">No store data for this period</div>';
         }
 
-        const colors = ['#3182ce', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
+        const colors = ['#059669', '#0d9488', '#0891b2', '#10b981', '#14b8a6'];
+        const bgColors = ['#ecfdf5', '#f0fdfa', '#ecfeff', '#ecfdf5', '#f0fdfa'];
 
         return `
-            <div style="padding: 0;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
                 ${topStores.map((store, idx) => `
-                    <div style="padding: 10px 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div style="width: 20px; height: 20px; background: ${colors[idx]}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: 600;">${idx + 1}</div>
-                            <span style="font-size: 12px; color: #333;">${store.name}</span>
+                    <div style="padding: 12px 16px; background: ${bgColors[idx]}; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 24px; height: 24px; background: ${colors[idx]}; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700;">${idx + 1}</div>
+                            <span style="font-size: 13px; font-weight: 500; color: #064e3b;">${store.name}</span>
                         </div>
                         <div style="text-align: right;">
-                            <div style="font-size: 12px; font-weight: 600; color: ${colors[idx]};">${Utils.formatCurrency(store.total)}</div>
-                            <div style="font-size: 10px; color: #888;">${store.count} orders</div>
+                            <div style="font-size: 13px; font-weight: 600; color: ${colors[idx]};">${Utils.formatCurrency(store.total)}</div>
+                            <div style="font-size: 11px; color: #6b7280;">${store.count} orders</div>
                         </div>
                     </div>
                 `).join('')}
@@ -394,7 +395,7 @@ const Dashboard = {
         if (weeklyData.length === 0) return '<p style="color: #666; font-size: 12px;">No data available</p>';
 
         const maxTotal = Math.max(...weeklyData.map(w => w.total)) || 1;
-        const colors = ['#3182ce', '#ff7f0e', '#2ca02c', '#d62728'];
+        const colors = ['#059669', '#ff7f0e', '#2ca02c', '#d62728'];
 
         return `
             <div style="display: flex; justify-content: space-around; align-items: flex-end; height: 120px; padding-bottom: 30px; position: relative; border-bottom: 1px solid #ddd;">
@@ -424,7 +425,7 @@ const Dashboard = {
         }
 
         const maxTotal = topStores[0]?.total || 1;
-        const colors = ['#3182ce', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
+        const colors = ['#059669', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
 
         return `
             <div style="padding: 0;">

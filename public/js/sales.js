@@ -14,8 +14,8 @@ const Sales = {
     async render() {
         const contentArea = document.getElementById('contentArea');
         contentArea.innerHTML = `
-            <div style="display: flex; align-items: center; justify-content: center; padding: 60px 20px;">
-                <div style="width: 48px; height: 48px; border: 4px solid #e0e0e0; border-top-color: #2ca02c; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+            <div style="display: flex; align-items: center; justify-content: center; padding: 100px;">
+                <div class="loading-spinner"></div>
             </div>
         `;
 
@@ -43,134 +43,130 @@ const Sales = {
             }
 
             contentArea.innerHTML = `
-                <!-- Page Title Header -->
-                <div style="background: #2563eb; color: white; padding: 20px; margin: -20px -20px 20px -20px; border-bottom: 4px solid #1d4ed8;">
-                    <h1 style="margin: 0; font-size: 24px; font-weight: 700;">📄 Create Tax Invoice</h1>
-                    <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Generate GST-compliant invoices • ${this.products.length} Products • ${this.stores.length} Stores</p>
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="header-title-wrapper">
+                        <h1>Create Tax Invoice</h1>
+                        <p>Generate GST-compliant invoices • ${this.products.length} Products • ${this.stores.length} Stores</p>
+                    </div>
                 </div>
 
-                <!-- Main Form Container -->
-                <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <div style="max-width: 1200px; margin: 0 auto;">
-                            
-                            <!-- Invoice Header -->
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #eee;">
+                <!-- Main Form Card -->
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Invoice Header -->
+                        <div class="form-row" style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border-light);">
+                            <div class="form-group" style="flex: 1;">
+                                <label class="form-label">Invoice Date *</label>
+                                <input type="date" id="invoiceDate" value="${new Date().toISOString().split('T')[0]}" class="form-input" required>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label class="form-label">Invoice No *</label>
+                                <input type="text" id="invoiceNo" value="${nextInvoiceData.nextInvoiceNo}" class="form-input" readonly style="background-color: var(--bg-body); font-weight: 600;">
+                            </div>
+                        </div>
+
+                        <!-- Store Selection -->
+                        <div class="form-group">
+                            <label class="form-label">Select Store *</label>
+                            <select class="form-select" id="storeSelect" required>
+                                <option value="">-- Select Store --</option>
+                                ${this.stores.map(s => `
+                                    <option value="${s.id}" 
+                                        data-name="${s.storeName}"
+                                        data-storeid="${s.storeId || ''}"
+                                        data-address1="${s.addressLine1 || s.address || ''}"
+                                        data-address2="${s.addressLine2 || ''}"
+                                        data-pincode="${s.pinCode || ''}"
+                                        data-gstin="${s.gstNumber || ''}"
+                                        data-area="${s.area || ''}"
+                                        data-captain="${s.salesCaptain || ''}"
+                                        data-orderphone="${s.orderPhone || s.phone1 || ''}"
+                                        data-accountsphone="${s.accountsPhone || s.phone2 || ''}"
+                                        data-email="${s.email || ''}"
+                                        data-category="${s.storeCategory || ''}"
+                                        data-code="33">
+                                        ${s.storeId || '#' + s.id} - ${s.storeName} - ${s.area}
+                                    </option>
+                                `).join('')}
+                            </select>
+                        </div>
+
+                        <!-- Store Details Display -->
+                        <div id="storeDetails" style="display: none; padding: 16px; background: var(--bg-body); border-radius: var(--radius); margin-bottom: 24px; border: 1px solid var(--border-light);">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 8px;">
+                                <p style="margin: 0; font-size: 13px;"><strong>Store ID:</strong> <span id="storeIdDisplay"></span></p>
+                                <p style="margin: 0; font-size: 13px;"><strong>Category:</strong> <span id="storeCategoryDisplay"></span></p>
+                            </div>
+                            <p style="margin: 4px 0 0 0; font-size: 13px;"><strong>Address:</strong> <span id="storeAddress"></span></p>
+                            <p style="margin: 4px 0 0 0; font-size: 13px;"><strong>PIN Code:</strong> <span id="storePinCode"></span></p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px;">
+                                <p style="margin: 0; font-size: 13px;"><strong>Order Phone:</strong> <span id="storeOrderPhone"></span></p>
+                                <p style="margin: 0; font-size: 13px;"><strong>Accounts Phone:</strong> <span id="storeAccountsPhone"></span></p>
+                            </div>
+                            <p style="margin: 4px 0 0 0; font-size: 13px;"><strong>Email:</strong> <span id="storeEmail"></span></p>
+                            <p style="margin: 4px 0 0 0; font-size: 13px;"><strong>GSTIN:</strong> <span id="storeGstin"></span></p>
+                            <p style="margin: 4px 0 0 0; font-size: 13px;"><strong>Sales Captain:</strong> <span id="storeCaptain"></span></p>
+                        </div>
+
+                        <!-- Product Selection Table -->
+                        <div style="margin-bottom: 24px;">
+                            <h3 style="margin-bottom: 12px; font-size: 16px; font-weight: 600; color: var(--primary);">📦 Select Products</h3>
+                            <div class="table-container">
+                                <table class="table" style="width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 40px;">☑️</th>
+                                            <th>S.No.</th>
+                                            <th>Product</th>
+                                            <th>Weight</th>
+                                            <th>HSN/SAC</th>
+                                            <th class="text-center">GST%</th>
+                                            <th class="text-right">MRP (₹)</th>
+                                            <th class="text-center" style="width: 80px;">Qty</th>
+                                            <th class="text-center" style="width: 80px;">Margin%</th>
+                                            <th class="text-right">Dist. Price</th>
+                                            <th class="text-right">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTableBody">
+                                        ${this.renderProductsForSelection()}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Invoice Summary -->
+                        <div style="background: #f8fafc; padding: 24px; border-radius: var(--radius); border: 1px solid var(--border-light); margin-bottom: 24px;">
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;">
                                 <div>
-                                    <label style="display: block; font-size: 11px; font-weight: 600; color: #555; margin-bottom: 4px; text-transform: uppercase;">Invoice Date *</label>
-                                    <input type="date" id="invoiceDate" value="${new Date().toISOString().split('T')[0]}" style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 3px; font-size: 12px;" required>
+                                    <p style="margin: 0; font-size: 13px; color: var(--text-light); text-transform: uppercase;">Total Items</p>
+                                    <p style="margin: 4px 0 0 0; font-size: 20px; font-weight: 700;" id="totalItems">0</p>
                                 </div>
                                 <div>
-                                    <label style="display: block; font-size: 11px; font-weight: 600; color: #555; margin-bottom: 4px; text-transform: uppercase;">Invoice No *</label>
-                                    <input type="text" id="invoiceNo" value="${nextInvoiceData.nextInvoiceNo}" readonly style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 3px; font-size: 12px; background: #f8f9fa; font-weight: 600;">
+                                    <p style="margin: 0; font-size: 13px; color: var(--text-light); text-transform: uppercase;">Total Quantity</p>
+                                    <p style="margin: 4px 0 0 0; font-size: 20px; font-weight: 700;" id="totalQuantity">0</p>
+                                </div>
+                                <div>
+                                    <p style="margin: 0; font-size: 13px; color: var(--text-light); text-transform: uppercase;">Subtotal</p>
+                                    <p style="margin: 4px 0 0 0; font-size: 20px; font-weight: 700;" id="subtotalDisplay">₹0.00</p>
+                                </div>
+                                <div>
+                                    <p style="margin: 0; font-size: 13px; color: var(--text-light); text-transform: uppercase;">Total GST</p>
+                                    <p style="margin: 4px 0 0 0; font-size: 20px; font-weight: 700;" id="gstDisplay">₹0.00</p>
                                 </div>
                             </div>
+                            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-dark); text-align: right;">
+                                <p style="margin: 0; font-size: 14px; color: var(--text-body);">Grand Total</p>
+                                <p style="margin: 4px 0 0 0; font-size: 32px; font-weight: 700; color: var(--primary);" id="grandTotalDisplay">₹0.00</p>
+                            </div>
+                        </div>
 
-                            <!-- Store Selection -->
-                            <div class="form-group">
-                                <label class="form-label">Select Store *</label>
-                                <select class="form-select" id="storeSelect" required>
-                                    <option value="">-- Select Store --</option>
-                                    ${this.stores.map(s => `
-                                        <option value="${s.id}" 
-                                            data-name="${s.storeName}"
-                                            data-storeid="${s.storeId || ''}"
-                                            data-address1="${s.addressLine1 || s.address || ''}"
-                                            data-address2="${s.addressLine2 || ''}"
-                                            data-pincode="${s.pinCode || ''}"
-                                            data-gstin="${s.gstNumber || ''}"
-                                            data-area="${s.area || ''}"
-                                            data-captain="${s.salesCaptain || ''}"
-                                            data-orderphone="${s.orderPhone || s.phone1 || ''}"
-                                            data-accountsphone="${s.accountsPhone || s.phone2 || ''}"
-                                            data-email="${s.email || ''}"
-                                            data-category="${s.storeCategory || ''}"
-                                            data-code="33">
-                                            ${s.storeId || '#' + s.id} - ${s.storeName} - ${s.area}
-                                        </option>
-                                    `).join('')}
-                                </select>
-                            </div>
-
-                            <!-- Store Details Display -->
-                            <div id="storeDetails" style="display: none; padding: var(--spacing-md); background: var(--gray-50); border-radius: var(--radius-md);">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm);">
-                                    <p style="margin: 0; font-size: var(--font-size-sm);"><strong>Store ID:</strong> <span id="storeIdDisplay"></span></p>
-                                    <p style="margin: 0; font-size: var(--font-size-sm);"><strong>Category:</strong> <span id="storeCategoryDisplay"></span></p>
-                                </div>
-                                <p style="margin: var(--spacing-xs) 0 0 0; font-size: var(--font-size-sm);"><strong>Address:</strong> <span id="storeAddress"></span></p>
-                                <p style="margin: var(--spacing-xs) 0 0 0; font-size: var(--font-size-sm);"><strong>PIN Code:</strong> <span id="storePinCode"></span></p>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm); margin-top: var(--spacing-xs);">
-                                    <p style="margin: 0; font-size: var(--font-size-sm);"><strong>Order Phone:</strong> <span id="storeOrderPhone"></span></p>
-                                    <p style="margin: 0; font-size: var(--font-size-sm);"><strong>Accounts Phone:</strong> <span id="storeAccountsPhone"></span></p>
-                                </div>
-                                <p style="margin: var(--spacing-xs) 0 0 0; font-size: var(--font-size-sm);"><strong>Email:</strong> <span id="storeEmail"></span></p>
-                                <p style="margin: var(--spacing-xs) 0 0 0; font-size: var(--font-size-sm);"><strong>GSTIN:</strong> <span id="storeGstin"></span></p>
-                                <p style="margin: var(--spacing-xs) 0 0 0; font-size: var(--font-size-sm);"><strong>Sales Captain:</strong> <span id="storeCaptain"></span></p>
-                            </div>
-
-                            <!-- Product Selection Table -->
-                            <div>
-                                <h3 style="margin-bottom: 12px; font-size: 16px; font-weight: 600; color: #1e40af;">📦 Select Products</h3>
-                                <div style="border: 2px solid #3b82f6; border-radius: 8px; overflow: hidden;">
-                                    <table class="table" style="margin: 0; width: 100%; border-collapse: collapse;">
-                                        <thead style="background: #1e40af;">
-                                            <tr>
-                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: left; width: 40px;">☑️</th>
-                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: left;">S.No.</th>
-                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: left;">Product</th>
-                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: left;">Weight</th>
-                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: left;">HSN/SAC</th>
-                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: center;">GST%</th>
-                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: right;">MRP (₹)</th>
-                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: center; width: 70px;">Qty</th>
-                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: center; width: 80px;">Margin%</th>
-                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: right;">Dist. Price</th>
-                                                <th style="padding: 12px 10px; color: white; font-weight: 600; font-size: 12px; text-align: right;">Amount</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="productsTableBody">
-                                            ${this.renderProductsForSelection()}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <!-- Invoice Summary -->
-                            <div style="background: var(--primary-50); padding: var(--spacing-lg); border-radius: var(--radius-md); border: 2px solid var(--primary-200);">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md);">
-                                    <div>
-                                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--gray-600);">Total Items</p>
-                                        <p style="margin: var(--spacing-xs) 0 0 0; font-size: var(--font-size-xl); font-weight: 700;" id="totalItems">0</p>
-                                    </div>
-                                    <div>
-                                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--gray-600);">Total Quantity</p>
-                                        <p style="margin: var(--spacing-xs) 0 0 0; font-size: var(--font-size-xl); font-weight: 700;" id="totalQuantity">0</p>
-                                    </div>
-                                    <div>
-                                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--gray-600);">Subtotal</p>
-                                        <p style="margin: var(--spacing-xs) 0 0 0; font-size: var(--font-size-xl); font-weight: 700;" id="subtotalDisplay">₹0.00</p>
-                                    </div>
-                                    <div>
-                                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--gray-600);">Total GST</p>
-                                        <p style="margin: var(--spacing-xs) 0 0 0; font-size: var(--font-size-xl); font-weight: 700;" id="gstDisplay">₹0.00</p>
-                                    </div>
-                                </div>
-                                <div style="margin-top: var(--spacing-md); padding-top: var(--spacing-md); border-top: 2px solid var(--primary-300);">
-                                    <p style="margin: 0; font-size: var(--font-size-sm); color: var(--gray-700);">Grand Total</p>
-                                    <p style="margin: var(--spacing-xs) 0 0 0; font-size: var(--font-size-3xl); font-weight: 700; color: var(--primary-700);" id="grandTotalDisplay">₹0.00</p>
-                                </div>
-                            </div>
-
-                            <!-- Action Buttons -->
-                            <div style="display: flex; gap: var(--spacing-md); justify-content: flex-end;">
-                                <button class="btn btn-secondary" id="resetFormBtn">🔄 Reset Form</button>
-                                <button class="btn btn-primary" id="savePrintBtn" style="font-size: var(--font-size-lg); padding: var(--spacing-md) var(--spacing-xl);">
-                                    🖨️ Save & Print
-                                </button>
-                                <button class="btn btn-success" id="saveInvoiceBtn" style="font-size: var(--font-size-lg); padding: var(--spacing-md) var(--spacing-xl);">
-                                    💾 Save Invoice
-                                </button>
-                            </div>
+                        <!-- Action Buttons -->
+                        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                            <button class="btn btn-secondary" id="resetFormBtn">🔄 Reset Form</button>
+                            <button class="btn btn-primary" id="savePrintBtn">🖨️ Save & Print</button>
+                            <button class="btn btn-success" id="saveInvoiceBtn">💾 Save Invoice</button>
                         </div>
                     </div>
                 </div>
@@ -178,7 +174,6 @@ const Sales = {
 
             this.attachInvoiceFormListeners();
 
-            // If editing an existing invoice, populate the form
             if (editInvoice) {
                 this.populateEditForm(editInvoice);
             }
@@ -399,19 +394,21 @@ const Sales = {
     },
 
     renderProductsForSelection() {
-        return this.products.map(p => `
+        if (!this.products.length) return '<tr><td colspan="11" style="text-align: center; padding: 20px; color: var(--text-muted);">No products available</td></tr>';
+
+        return this.products.map((p, index) => `
             <tr id="product-row-${p.id}">
-                <td><input type="checkbox" class="product-checkbox" data-product-id="${p.id}"></td>
-                <td>${p.serialNumber || p.id}</td>
-                <td>${p.productName}</td>
+                <td><input type="checkbox" class="product-checkbox" data-product-id="${p.id}" style="cursor: pointer;"></td>
+                <td>${index + 1}</td>
+                <td style="font-weight: 500;">${p.productName}</td>
                 <td>${p.weight || '-'}</td>
                 <td>${p.hsnCode || '-'}</td>
-                <td>${p.gstRate || 0}%</td>
-                <td>₹${parseFloat(p.mrp || 0).toFixed(2)}</td>
-                <td><input type="number" class="form-input" style="width: 70px; padding: 4px;" id="qty-${p.id}" value="1" min="1" disabled></td>
-                <td><input type="number" class="form-input" style="width: 70px; padding: 4px;" id="margin-${p.id}" value="${p.distributorMargin || 0}" step="0.01" min="0" max="100" disabled></td>
-                <td id="dist-price-${p.id}">₹0.00</td>
-                <td id="amount-${p.id}">₹0.00</td>
+                <td class="text-center">${p.gstRate || 0}%</td>
+                <td class="text-right">₹${parseFloat(p.mrp || 0).toFixed(2)}</td>
+                <td class="text-center"><input type="number" class="form-input text-center" style="padding: 4px; width: 60px;" id="qty-${p.id}" value="1" min="1" disabled></td>
+                <td class="text-center"><input type="number" class="form-input text-center" style="padding: 4px; width: 60px;" id="margin-${p.id}" value="${p.distributorMargin || 0}" step="0.01" min="0" max="100" disabled></td>
+                <td class="text-right" id="dist-price-${p.id}">₹0.00</td>
+                <td class="text-right font-bold" id="amount-${p.id}">₹0.00</td>
             </tr>
         `).join('');
     },

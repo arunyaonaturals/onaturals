@@ -126,16 +126,32 @@ router.post('/', (req, res) => {
             return;
         }
 
-        // Insert order items
-        const itemSql = `INSERT INTO purchase_order_items 
+        // Insert order items - use different SQL based on whether productId is valid
+        const itemSqlWithProduct = `INSERT INTO purchase_order_items 
                          (orderId, productId, productName, weight, hsnCode, quantity, rate, amount, gstRate, gstAmount, totalAmount)
                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
+        const itemSqlNoProduct = `INSERT INTO purchase_order_items 
+                         (orderId, productName, weight, hsnCode, quantity, rate, amount, gstRate, gstAmount, totalAmount)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
         const promises = items.map(item => {
-            // Sanitize item params for Turso
-            const itemParams = [
+            const hasValidProductId = item.productId && item.productId > 0;
+
+            const itemParams = hasValidProductId ? [
                 orderId,
-                item.productId || 0,
+                item.productId,
+                item.productName || '',
+                item.weight || '',
+                item.hsnCode || '',
+                item.quantity || 0,
+                item.rate || 0,
+                item.amount || 0,
+                item.gstRate || 0,
+                item.gstAmount || 0,
+                item.totalAmount || 0
+            ] : [
+                orderId,
                 item.productName || '',
                 item.weight || '',
                 item.hsnCode || '',
@@ -146,8 +162,11 @@ router.post('/', (req, res) => {
                 item.gstAmount || 0,
                 item.totalAmount || 0
             ];
+
+            const sql = hasValidProductId ? itemSqlWithProduct : itemSqlNoProduct;
+
             return new Promise((resolve, reject) => {
-                db.run(itemSql, itemParams, (err) => {
+                db.run(sql, itemParams, (err) => {
                     if (err) reject(err);
                     else resolve();
                 });

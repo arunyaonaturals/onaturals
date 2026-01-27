@@ -230,16 +230,25 @@ router.put('/:id/receive', (req, res) => {
                                         [diff, diff, stockEntry.id]
                                     );
                                 } else {
-                                    // Insert new
+                                    // Insert new - sanitize all values for Turso
+                                    const stockParams = [
+                                        orderId || 0,
+                                        item.id || 0,
+                                        currentItem.productName || 'Unknown Material',
+                                        currentItem.weight || '',
+                                        diff || 0,
+                                        diff || 0,
+                                        'units',
+                                        currentItem.rate || 0,
+                                        order.supplierId || 0,
+                                        order.supplierName || '',
+                                        receivedDate || order.orderDate || ''
+                                    ];
                                     db.run(
                                         `INSERT INTO raw_material_stock 
                                         (purchaseOrderId, purchaseItemId, materialName, weight, initialQty, remainingQty, unit, rate, vendorId, vendorName, purchaseDate)
                                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                                        [
-                                            orderId, item.id, currentItem.productName, currentItem.weight,
-                                            diff, diff, 'units', currentItem.rate,
-                                            order.supplierId, order.supplierName, receivedDate || order.orderDate
-                                        ]
+                                        stockParams
                                     );
                                 }
                             }

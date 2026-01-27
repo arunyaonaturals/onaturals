@@ -351,6 +351,7 @@ function initDb() {
             weight TEXT,
             hsnCode TEXT,
             quantity INTEGER,
+            unit TEXT DEFAULT 'KG',
             receivedQty INTEGER DEFAULT 0,
             rate REAL,
             amount REAL,

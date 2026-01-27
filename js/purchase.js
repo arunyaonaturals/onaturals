@@ -238,22 +238,28 @@ const Purchase = {
                      <h3 class="card-title">Add Products</h3>
                 </div>
                 <div class="card-body">
-                     <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: 16px; align-items: end;">
+                     <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto; gap: 12px; align-items: end;">
                         <div class="form-group" style="margin: 0;">
-                            <label class="form-label">Product Name *</label>
-                            <input type="text" id="productName" class="form-input" placeholder="Type product name">
-                        </div>
-                        <div class="form-group" style="margin: 0;">
-                            <label class="form-label">Weight/Unit</label>
-                            <input type="text" id="productWeight" class="form-input" placeholder="e.g. 10 kg">
+                            <label class="form-label">Raw Material Name *</label>
+                            <input type="text" id="productName" class="form-input" placeholder="e.g. Himalayan Salt">
                         </div>
                         <div class="form-group" style="margin: 0;">
                             <label class="form-label">Quantity *</label>
-                            <input type="number" id="productQty" class="form-input" value="1" min="1">
+                            <input type="number" id="productQty" class="form-input" value="1" min="0.1" step="0.1" placeholder="e.g. 1000">
                         </div>
                         <div class="form-group" style="margin: 0;">
-                            <label class="form-label">Rate (₹) *</label>
-                            <input type="number" id="productRate" class="form-input" step="0.01" placeholder="0.00">
+                            <label class="form-label">Unit *</label>
+                            <select id="productUnit" class="form-input">
+                                <option value="KG">KG</option>
+                                <option value="GM">Grams</option>
+                                <option value="LTR">Liters</option>
+                                <option value="ML">ML</option>
+                                <option value="PCS">Pieces</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Rate/Unit (₹) *</label>
+                            <input type="number" id="productRate" class="form-input" step="0.01" placeholder="per KG">
                         </div>
                         <div class="form-group" style="margin: 0;">
                             <label class="form-label">GST %</label>
@@ -261,6 +267,9 @@ const Purchase = {
                         </div>
                         <button class="btn btn-primary" onclick="Purchase.addProduct()" style="height: 42px;">➕ Add</button>
                     </div>
+                    <p style="margin-top: 8px; font-size: 12px; color: var(--text-muted);">
+                        💡 Enter raw materials by weight (e.g., 1000 KG of salt @ ₹100/KG)
+                    </p>
                 </div>
             </div>
 
@@ -310,13 +319,18 @@ const Purchase = {
 
     addProduct() {
         const productName = document.getElementById('productName').value.trim();
-        const weight = document.getElementById('productWeight').value.trim();
-        const qty = parseInt(document.getElementById('productQty').value) || 1;
+        const qty = parseFloat(document.getElementById('productQty').value) || 1;
+        const unit = document.getElementById('productUnit').value || 'KG';
         const rate = parseFloat(document.getElementById('productRate').value) || 0;
         const gstRate = parseFloat(document.getElementById('productGst').value) || 5;
 
         if (!productName) {
-            UI.showToast('Please enter a product name', 'error');
+            UI.showToast('Please enter a raw material name', 'error');
+            return;
+        }
+
+        if (qty <= 0) {
+            UI.showToast('Please enter a valid quantity', 'error');
             return;
         }
 
@@ -329,15 +343,16 @@ const Purchase = {
         const gstAmount = amount * (gstRate / 100);
         const totalAmount = amount + gstAmount;
 
-        // Use a unique key based on product name + weight
-        const productKey = `${productName}-${weight}`;
+        // Use a unique key based on product name + unit
+        const productKey = `${productName}-${unit}`;
 
         this.selectedProducts.set(productKey, {
             productId: null, // Manual entry, no product ID
             productName,
-            weight,
+            weight: `${qty} ${unit}`, // Store as "1000 KG" format for display
+            unit, // Store unit separately
             hsnCode: '',
-            quantity: qty,
+            quantity: qty, // This is now the weight quantity (e.g., 1000 KG)
             rate,
             amount,
             gstRate,
@@ -350,11 +365,10 @@ const Purchase = {
 
         // Reset form
         document.getElementById('productName').value = '';
-        document.getElementById('productWeight').value = '';
         document.getElementById('productQty').value = 1;
         document.getElementById('productRate').value = '';
 
-        UI.showToast('Product added to order!', 'success');
+        UI.showToast('Raw material added to order!', 'success');
     },
 
     removeProduct(productId) {
@@ -374,17 +388,17 @@ const Purchase = {
 
     renderItemsTable() {
         if (this.selectedProducts.size === 0) {
-            return `<div class="empty-state" style="padding: 2rem;"><p style="color: var(--text-muted);">No products added yet. Add products above.</p></div>`;
+            return `<div class="empty-state" style="padding: 2rem;"><p style="color: var(--text-muted);">No raw materials added yet. Add materials above.</p></div>`;
         }
 
         let rows = '';
         this.selectedProducts.forEach((item, key) => {
+            const unitLabel = item.unit || 'units';
             rows += `
                 <tr>
                     <td style="font-weight: 500;">${item.productName}</td>
-                    <td>${item.weight || '-'}</td>
-                    <td style="text-align: center;">${item.quantity}</td>
-                    <td style="text-align: right;">₹${item.rate.toFixed(2)}</td>
+                    <td style="text-align: center;">${item.quantity} ${unitLabel}</td>
+                    <td style="text-align: right;">₹${item.rate.toFixed(2)}/${unitLabel}</td>
                     <td style="text-align: right;">₹${item.amount.toFixed(2)}</td>
                     <td style="text-align: center;">${item.gstRate}%</td>
                     <td style="text-align: right;">₹${item.gstAmount.toFixed(2)}</td>
@@ -398,9 +412,8 @@ const Purchase = {
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Product</th>
-                        <th>Weight</th>
-                        <th style="text-align: center;">Qty</th>
+                        <th>Raw Material</th>
+                        <th style="text-align: center;">Quantity</th>
                         <th style="text-align: right;">Rate</th>
                         <th style="text-align: right;">Amount</th>
                         <th style="text-align: center;">GST %</th>

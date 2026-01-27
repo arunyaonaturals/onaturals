@@ -128,15 +128,16 @@ router.post('/', (req, res) => {
 
         // Insert order items - use different SQL based on whether productId is valid
         const itemSqlWithProduct = `INSERT INTO purchase_order_items 
-                         (orderId, productId, productName, weight, hsnCode, quantity, rate, amount, gstRate, gstAmount, totalAmount)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                         (orderId, productId, productName, weight, hsnCode, quantity, unit, rate, amount, gstRate, gstAmount, totalAmount)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
         const itemSqlNoProduct = `INSERT INTO purchase_order_items 
-                         (orderId, productName, weight, hsnCode, quantity, rate, amount, gstRate, gstAmount, totalAmount)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                         (orderId, productName, weight, hsnCode, quantity, unit, rate, amount, gstRate, gstAmount, totalAmount)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
         const promises = items.map(item => {
             const hasValidProductId = item.productId && item.productId > 0;
+            const unit = item.unit || 'KG'; // Default to KG if not specified
 
             const itemParams = hasValidProductId ? [
                 orderId,
@@ -145,6 +146,7 @@ router.post('/', (req, res) => {
                 item.weight || '',
                 item.hsnCode || '',
                 item.quantity || 0,
+                unit,
                 item.rate || 0,
                 item.amount || 0,
                 item.gstRate || 0,
@@ -156,6 +158,7 @@ router.post('/', (req, res) => {
                 item.weight || '',
                 item.hsnCode || '',
                 item.quantity || 0,
+                unit,
                 item.rate || 0,
                 item.amount || 0,
                 item.gstRate || 0,
@@ -229,13 +232,14 @@ router.put('/:id/receive', (req, res) => {
         // Loop through items
         let processed = 0;
 
-        items.forEach(async (item) => {
-            // Get previous received qty to calculate difference
-            db.get('SELECT receivedQty, productName, weight, rate, productId FROM purchase_order_items WHERE id = ?', [item.id], (err, currentItem) => {
+        items.forEach((item) => {
+            // Get previous received qty to calculate difference - include unit
+            db.get('SELECT receivedQty, productName, weight, rate, productId, unit, quantity FROM purchase_order_items WHERE id = ?', [item.id], (err, currentItem) => {
                 if (!err && currentItem) {
                     const prevQty = currentItem.receivedQty || 0;
                     const newQty = item.receivedQty || 0;
                     const diff = newQty - prevQty;
+                    const unit = currentItem.unit || 'KG';
 
                     if (diff > 0) {
                         // Add to raw material stock
@@ -257,7 +261,7 @@ router.put('/:id/receive', (req, res) => {
                                         currentItem.weight || '',
                                         diff || 0,
                                         diff || 0,
-                                        'units',
+                                        unit, // Use the unit from purchase_order_items
                                         currentItem.rate || 0,
                                         order.supplierId || 0,
                                         order.supplierName || '',

@@ -290,10 +290,10 @@ const Inventory = {
                     <thead>
                         <tr>
                             <th>Material Name</th>
-                            <th>Weight</th>
+                            <th>Unit</th>
                             <th>Vendor</th>
-                            <th style="text-align: right;">Rate (₹)</th>
-                            <th style="text-align: right;">Initial</th>
+                            <th style="text-align: right;">Rate</th>
+                            <th style="text-align: right;">Initial Qty</th>
                             <th style="text-align: right;">Remaining</th>
                             <th style="text-align: center;">Status</th>
                         </tr>
@@ -301,6 +301,7 @@ const Inventory = {
                     <tbody>
                         ${this.rawMaterials.map((m) => {
             const percent = m.initialQty > 0 ? (m.remainingQty / m.initialQty * 100) : 0;
+            const unit = m.unit || 'KG';
             let statusClass = 'success';
             let statusLabel = 'OK';
 
@@ -310,11 +311,11 @@ const Inventory = {
             return `
                                 <tr>
                                     <td style="font-weight: 500;">${m.materialName}</td>
-                                    <td style="color: var(--text-muted);">${m.weight || '-'}</td>
+                                    <td><span class="badge badge-info">${unit}</span></td>
                                     <td style="color: var(--text-muted);">${m.vendorName || '-'}</td>
-                                    <td style="text-align: right;">₹${parseFloat(m.rate || 0).toFixed(2)}</td>
-                                    <td style="text-align: right; color: var(--text-muted);">${m.initialQty}</td>
-                                    <td style="text-align: right; font-weight: 600;">${m.remainingQty}</td>
+                                    <td style="text-align: right;">₹${parseFloat(m.rate || 0).toFixed(2)}/${unit}</td>
+                                    <td style="text-align: right; color: var(--text-muted);">${m.initialQty} ${unit}</td>
+                                    <td style="text-align: right; font-weight: 600; font-size: 16px;">${m.remainingQty} ${unit}</td>
                                     <td style="text-align: center;">
                                         <span class="badge badge-${statusClass}">${statusLabel}</span>
                                     </td>
@@ -365,7 +366,7 @@ const Inventory = {
                     <label class="form-label">Finished Product *</label>
                     <select id="prodProductId" class="form-select" required>
                         <option value="">Select finished product to make</option>
-                        ${this.products.map(p => `<option value="${p.id}" data-name="${p.productName}">${p.productName} (${p.weight || 'N/A'})</option>`).join('')}
+                        ${this.products.map(p => `<option value="${p.id}" data-name="${p.productName}" data-weight="${p.weight || ''}">${p.productName} (${p.weight || 'N/A'})</option>`).join('')}
                     </select>
                 </div>
                 
@@ -394,7 +395,10 @@ const Inventory = {
                         <label class="form-label">Raw Material</label>
                         <select id="addMaterialSelect" class="form-select">
                             <option value="">Select material</option>
-                            ${availableMaterials.map(m => `<option value="${m.id}" data-name="${m.materialName}" data-remaining="${m.remainingQty}">${m.materialName} (${m.remainingQty} left)</option>`).join('')}
+                            ${availableMaterials.map(m => {
+            const unit = m.unit || 'KG';
+            return `<option value="${m.id}" data-name="${m.materialName}" data-remaining="${m.remainingQty}" data-unit="${unit}">${m.materialName} (${m.remainingQty} ${unit} left)</option>`;
+        }).join('')}
                         </select>
                     </div>
                     <div class="form-group" style="margin: 0; flex: 1;">
@@ -606,7 +610,53 @@ const Inventory = {
             }
         });
 
+        // Helper to parse weight string to base unit (KG or LTR) value
+        const parseWeightValue = (weightStr) => {
+            if (!weightStr) return 0;
+            const match = weightStr.trim().match(/^([\d\.]+)\s*([a-zA-Z]+)$/i);
+            if (!match) return 0;
+
+            let val = parseFloat(match[1]);
+            const unit = match[2].toUpperCase();
+
+            // Normalize to KG or LTR
+            if (['GM', 'G', 'GMS', 'GRAM', 'GRAMS', 'ML', 'MILLILITER', 'MILLILITERS'].includes(unit)) {
+                val /= 1000;
+            }
+
+            return val; // Returns value in KG or LTR
+        };
+
         // Add Material to Production Batch
+        document.getElementById('addMaterialSelect')?.addEventListener('change', (e) => {
+            const matOption = e.target.selectedOptions[0];
+            if (!matOption || !matOption.value) return;
+
+            const prodSelect = document.getElementById('prodProductId');
+            const prodOption = prodSelect.selectedOptions[0];
+            const prodQty = parseFloat(document.getElementById('prodQuantity').value) || 0;
+
+            if (prodOption && prodOption.value && prodQty > 0) {
+                const prodWeightStr = prodOption.dataset.weight;
+                const matUnit = matOption.dataset.unit || 'KG';
+
+                // Calculate required
+                let weightPerUnit = parseWeightValue(prodWeightStr); // in KG/LTR
+
+                if (weightPerUnit > 0) {
+                    let totalNeeded = weightPerUnit * prodQty; // in KG/LTR
+
+                    // Convert to material unit if needed
+                    if (matUnit === 'GM' || matUnit === 'ML') {
+                        totalNeeded *= 1000;
+                    }
+
+                    document.getElementById('addMaterialQty').value = totalNeeded;
+                    UI.showToast(`Auto-calculated: ${prodQty} x ${prodWeightStr} = ${totalNeeded} ${matUnit}`, 'info');
+                }
+            }
+        });
+
         document.getElementById('addMaterialBtn')?.addEventListener('click', () => {
             const select = document.getElementById('addMaterialSelect');
             const qtyInput = document.getElementById('addMaterialQty');

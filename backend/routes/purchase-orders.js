@@ -92,16 +92,28 @@ router.post('/', (req, res) => {
         paymentStatus, paymentAmount, paymentDate
     } = req.body;
 
+    // Sanitize values for Turso compatibility (no undefined/null allowed)
+    const sanitizedParams = [
+        orderNo || '',
+        orderDate || '',
+        supplierId || 0,
+        supplierName || '',
+        expectedDeliveryDate || '',
+        subtotal || 0,
+        gstTotal || 0,
+        grandTotal || 0,
+        notes || '',
+        paymentStatus || 'unpaid',
+        paymentAmount || 0,
+        paymentDate || ''
+    ];
+
     const orderSql = `INSERT INTO purchase_orders 
                       (orderNo, orderDate, supplierId, supplierName, expectedDeliveryDate,
                        subtotal, gstTotal, grandTotal, notes, status, paymentStatus, paymentAmount, paymentDate)
                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)`;
 
-    db.run(orderSql, [
-        orderNo, orderDate, supplierId, supplierName, expectedDeliveryDate,
-        subtotal, gstTotal, grandTotal, notes,
-        paymentStatus || 'unpaid', paymentAmount || 0, paymentDate || null
-    ], function (err) {
+    db.run(orderSql, sanitizedParams, function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -120,20 +132,22 @@ router.post('/', (req, res) => {
                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
         const promises = items.map(item => {
+            // Sanitize item params for Turso
+            const itemParams = [
+                orderId,
+                item.productId || 0,
+                item.productName || '',
+                item.weight || '',
+                item.hsnCode || '',
+                item.quantity || 0,
+                item.rate || 0,
+                item.amount || 0,
+                item.gstRate || 0,
+                item.gstAmount || 0,
+                item.totalAmount || 0
+            ];
             return new Promise((resolve, reject) => {
-                db.run(itemSql, [
-                    orderId,
-                    item.productId || null,
-                    item.productName,
-                    item.weight || '',
-                    item.hsnCode || '',
-                    item.quantity,
-                    item.rate,
-                    item.amount,
-                    item.gstRate,
-                    item.gstAmount,
-                    item.totalAmount
-                ], (err) => {
+                db.run(itemSql, itemParams, (err) => {
                     if (err) reject(err);
                     else resolve();
                 });

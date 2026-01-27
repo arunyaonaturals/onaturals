@@ -125,6 +125,7 @@ const Purchase = {
                                 <th>PO Number</th>
                                 <th>Date</th>
                                 <th>Vendor</th>
+                                <th>Items</th>
                                 <th style="text-align: right;">Total</th>
                                 <th style="text-align: center;">Status</th>
                                 <th style="text-align: center;">Payment</th>
@@ -142,6 +143,7 @@ const Purchase = {
                                     <td class="text-primary" style="font-weight: 600;">${o.orderNo}</td>
                                     <td style="color: var(--text-muted);">${o.orderDate || '-'}</td>
                                     <td style="font-weight: 500;">${o.supplierName || '-'}</td>
+                                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-muted);" title="${o.itemNames || ''}">${o.itemNames || '-'}</td>
                                     <td style="text-align: right; font-weight: 600;">${Utils.formatCurrency(parseFloat(o.grandTotal || 0))}</td>
                                     <td style="text-align: center;">
                                         <span class="badge badge-${statusClass}">

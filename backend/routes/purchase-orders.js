@@ -41,9 +41,12 @@ router.get('/next-po-no', (req, res) => {
 
 // Get all purchase orders
 router.get('/', (req, res) => {
-    const sql = `SELECT po.*, s.supplierName 
+    const sql = `SELECT po.*, s.supplierName,
+                 GROUP_CONCAT(poi.productName, ', ') as itemNames
                  FROM purchase_orders po 
-                 LEFT JOIN suppliers s ON po.supplierId = s.id 
+                 LEFT JOIN suppliers s ON po.supplierId = s.id
+                 LEFT JOIN purchase_order_items poi ON po.id = poi.orderId
+                 GROUP BY po.id
                  ORDER BY po.orderDate DESC, po.id DESC`;
     db.all(sql, [], (err, rows) => {
         if (err) {

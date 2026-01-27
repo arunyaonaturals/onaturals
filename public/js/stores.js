@@ -136,7 +136,7 @@ const Stores = {
 
         const categoryColors = {
             'CLASS A': '#48bb78',
-            'CLASS B': '#4299e1',
+            'CLASS B': '#10b981',
             'CLASS C': '#f59e0b',
             'CLASS D': '#ef4444'
         };
@@ -406,7 +406,7 @@ const Stores = {
         // Add tags
         this.selectedAreas.forEach(area => {
             const tag = document.createElement('span');
-            tag.style.cssText = 'background: #4299e1; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem; display: flex; align-items: center; gap: 0.25rem;';
+            tag.style.cssText = 'background: #10b981; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem; display: flex; align-items: center; gap: 0.25rem;';
             tag.innerHTML = `${area} <span style="cursor: pointer; font-weight: bold;" data-remove-area="${area}">×</span>`;
             container.appendChild(tag);
         });
@@ -632,7 +632,7 @@ const Stores = {
                     <div class="store-card-title">
                         <span class="store-number">${store.storeId || '#' + store.id}</span>
                         <h3>${store.storeName || 'Unnamed Store'}</h3>
-                        ${store.storeCategory ? `<span style="background: ${store.storeCategory === 'CLASS A' ? '#48bb78' : store.storeCategory === 'CLASS B' ? '#4299e1' : store.storeCategory === 'CLASS C' ? '#f59e0b' : '#ef4444'}; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600;">${store.storeCategory}</span>` : ''}
+                        ${store.storeCategory ? `<span style="background: ${store.storeCategory === 'CLASS A' ? '#48bb78' : store.storeCategory === 'CLASS B' ? '#10b981' : store.storeCategory === 'CLASS C' ? '#f59e0b' : '#ef4444'}; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600;">${store.storeCategory}</span>` : ''}
                     </div>
                     <div class="store-card-actions">
                         <button class="btn-icon" data-action="edit" data-id="${store.id}" title="Edit">✏️</button>
@@ -699,7 +699,7 @@ const Stores = {
                     if (!v) return '-';
                     const colors = {
                         'CLASS A': '#48bb78',
-                        'CLASS B': '#4299e1',
+                        'CLASS B': '#10b981',
                         'CLASS C': '#f59e0b',
                         'CLASS D': '#ef4444'
                     };

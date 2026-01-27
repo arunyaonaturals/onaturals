@@ -215,80 +215,103 @@ router.put('/:id/status', (req, res) => {
 });
 
 // Receive items
-router.put('/:id/receive', (req, res) => {
+router.put('/:id/receive', async (req, res) => {
     const { items, receivedDate, invoiceNo } = req.body;
     const orderId = req.params.id;
 
-    // First get order details for vendor info
-    db.get('SELECT supplierId, supplierName, orderDate FROM purchase_orders WHERE id = ?', [orderId], (err, order) => {
-        if (err || !order) {
+    const getAsync = (sql, params) => new Promise((resolve, reject) => {
+        db.get(sql, params, (err, row) => err ? reject(err) : resolve(row));
+    });
+
+    const allAsync = (sql, params) => new Promise((resolve, reject) => {
+        db.all(sql, params, (err, rows) => err ? reject(err) : resolve(rows));
+    });
+
+    const runAsync = (sql, params) => new Promise((resolve, reject) => {
+        db.run(sql, params, function (err) { err ? reject(err) : resolve(this); });
+    });
+
+    try {
+        // First get order details for vendor info
+        const order = await getAsync('SELECT supplierId, supplierName, orderDate FROM purchase_orders WHERE id = ?', [orderId]);
+        if (!order) {
             res.status(404).json({ error: 'Order not found' });
             return;
         }
 
-        // Prepare statements
+        // Process items sequentially to ensure consistency
         const updateItemSql = `UPDATE purchase_order_items SET receivedQty = ? WHERE id = ?`;
 
-        // Loop through items
-        let processed = 0;
+        for (const item of items) {
+            const currentItem = await getAsync('SELECT receivedQty, productName, weight, rate, productId, unit, quantity FROM purchase_order_items WHERE id = ?', [item.id]);
 
-        items.forEach((item) => {
-            // Get previous received qty to calculate difference - include unit
-            db.get('SELECT receivedQty, productName, weight, rate, productId, unit, quantity FROM purchase_order_items WHERE id = ?', [item.id], (err, currentItem) => {
-                if (!err && currentItem) {
-                    const prevQty = currentItem.receivedQty || 0;
-                    const newQty = item.receivedQty || 0;
-                    const diff = newQty - prevQty;
-                    const unit = currentItem.unit || 'KG';
+            if (currentItem) {
+                const prevQty = currentItem.receivedQty || 0;
+                const newQty = item.receivedQty || 0;
+                const diff = newQty - prevQty;
+                const unit = currentItem.unit || 'KG';
 
-                    if (diff > 0) {
-                        // Add to raw material stock
-                        // Check if entry exists for this line item
-                        db.get('SELECT id, remainingQty FROM raw_material_stock WHERE purchaseItemId = ?', [item.id], (err, stockEntry) => {
-                            if (!err) {
-                                if (stockEntry) {
-                                    // Update existing
-                                    db.run(
-                                        'UPDATE raw_material_stock SET initialQty = initialQty + ?, remainingQty = remainingQty + ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?',
-                                        [diff, diff, stockEntry.id]
-                                    );
-                                } else {
-                                    // Insert new - sanitize all values for Turso
-                                    const stockParams = [
-                                        orderId || 0,
-                                        item.id || 0,
-                                        currentItem.productName || 'Unknown Material',
-                                        currentItem.weight || '',
-                                        diff || 0,
-                                        diff || 0,
-                                        unit, // Use the unit from purchase_order_items
-                                        currentItem.rate || 0,
-                                        order.supplierId || 0,
-                                        order.supplierName || '',
-                                        receivedDate || order.orderDate || ''
-                                    ];
-                                    db.run(
-                                        `INSERT INTO raw_material_stock 
-                                        (purchaseOrderId, purchaseItemId, materialName, weight, initialQty, remainingQty, unit, rate, vendorId, vendorName, purchaseDate)
-                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                                        stockParams
-                                    );
-                                }
-                            }
-                        });
+                if (diff > 0) {
+                    // Add to raw material stock
+                    const stockEntry = await getAsync('SELECT id, remainingQty FROM raw_material_stock WHERE purchaseItemId = ?', [item.id]);
+
+                    if (stockEntry) {
+                        // Update existing
+                        await runAsync(
+                            'UPDATE raw_material_stock SET initialQty = initialQty + ?, remainingQty = remainingQty + ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?',
+                            [diff, diff, stockEntry.id]
+                        );
+                    } else {
+                        // Insert new
+                        const stockParams = [
+                            orderId || 0,
+                            item.id || 0,
+                            currentItem.productName || 'Unknown Material',
+                            currentItem.weight || '',
+                            diff || 0,
+                            diff || 0,
+                            unit,
+                            currentItem.rate || 0,
+                            order.supplierId || 0,
+                            order.supplierName || '',
+                            receivedDate || order.orderDate || ''
+                        ];
+
+                        await runAsync(
+                            `INSERT INTO raw_material_stock 
+                            (purchaseOrderId, purchaseItemId, materialName, weight, initialQty, remainingQty, unit, rate, vendorId, vendorName, purchaseDate)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                            stockParams
+                        );
                     }
-
-                    // Update PO item
-                    db.run(updateItemSql, [newQty, item.id]);
                 }
 
-                processed++;
-                if (processed === items.length) {
-                    updateOrderStatus(orderId, receivedDate, invoiceNo, res);
-                }
-            });
-        });
-    });
+                // Update PO item
+                await runAsync(updateItemSql, [newQty, item.id]);
+            }
+        }
+
+        // Update Order Status
+        const orderItems = await allAsync(`SELECT quantity, receivedQty FROM purchase_order_items WHERE orderId = ?`, [orderId]);
+
+        const allReceived = orderItems.every(item => item.receivedQty >= item.quantity);
+        const partialReceived = orderItems.some(item => item.receivedQty > 0);
+
+        let status = 'pending';
+        if (allReceived) status = 'received';
+        else if (partialReceived) status = 'partial';
+
+        await runAsync(
+            `UPDATE purchase_orders SET status = ?, receivedDate = ?, invoiceNo = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`,
+            [status, receivedDate, invoiceNo, orderId]
+        );
+
+        res.json({ message: 'Items received and added to stock', status });
+
+    } catch (err) {
+        console.error('Receive error:', err);
+        res.status(500).json({ error: 'Failed to receive items: ' + err.message });
+    }
 });
 
 function updateOrderStatus(orderId, receivedDate, invoiceNo, res) {

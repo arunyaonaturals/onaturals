@@ -327,9 +327,9 @@ export class InvoiceController {
 
         for (const item of processedItems) {
           await run(`
-            INSERT INTO invoice_items (invoice_id, product_id, quantity, quantity_shipped, unit_price, cost_price, margin_percentage, gst_rate, total) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `, [invoiceId, item.product_id, item.quantity, item.quantity_shipped, item.unit_price, item.cost_price, item.margin_percentage, item.gst_rate, item.total]);
+            INSERT INTO invoice_items (invoice_id, product_id, quantity, quantity_shipped, unit_price, cost_price, margin_percentage, gst_rate, total, total_price) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `, [invoiceId, item.product_id, item.quantity, item.quantity_shipped, item.unit_price, item.cost_price, item.margin_percentage, item.gst_rate, item.total, item.total]);
 
           // Deduct stock
           await run('UPDATE products SET stock_quantity = stock_quantity - ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', 

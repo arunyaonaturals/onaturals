@@ -1,4 +1,4 @@
-import { initDatabase, query, run, saveDatabase } from '../config/database';
+import { initDatabase, query, run } from '../config/database';
 
 /**
  * Seed script to import stores from the draft data spreadsheet
@@ -23,7 +23,7 @@ const stores: StoreData[] = [
   { name: 'HEALTHY CHOICE', city: 'TRICHY', gst_number: '', address: 'CANTONMENT, TRICHY' },
   { name: 'FARM FRESH ORGANICS', city: 'TRICHY', gst_number: '', address: 'TVS TOLLGATE, TRICHY' },
   { name: 'NATURES BASKET', city: 'TRICHY', gst_number: '', address: 'WORAIYUR, TRICHY' },
-  
+
   // Row 11-20
   { name: 'HERBAL HOUSE', city: 'MADURAI', gst_number: '', address: 'ANNA NAGAR, MADURAI' },
   { name: 'ORGANIC PALACE', city: 'MADURAI', gst_number: '', address: 'K.K.NAGAR, MADURAI' },
@@ -35,7 +35,7 @@ const stores: StoreData[] = [
   { name: 'ORGANIC MART', city: 'MADURAI', gst_number: '', address: 'VILLAPURAM, MADURAI' },
   { name: 'HEALTH HUT', city: 'MADURAI', gst_number: '', address: 'TALLAKULAM, MADURAI' },
   { name: 'VILLAGE FRESH', city: 'MADURAI', gst_number: '', address: 'SELLUR, MADURAI' },
-  
+
   // Row 21-30
   { name: 'ORGANIC EXPRESS', city: 'CHENNAI', gst_number: '', address: 'T.NAGAR, CHENNAI' },
   { name: 'NATURE DELIGHT', city: 'CHENNAI', gst_number: '', address: 'ADYAR, CHENNAI' },
@@ -47,7 +47,7 @@ const stores: StoreData[] = [
   { name: 'NATURAL FOODS', city: 'CHENNAI', gst_number: '', address: 'VADAPALANI, CHENNAI' },
   { name: 'WELLNESS STORE', city: 'CHENNAI', gst_number: '', address: 'ASHOK NAGAR, CHENNAI' },
   { name: 'AYUR ORGANICS', city: 'CHENNAI', gst_number: '', address: 'KODAMBAKKAM, CHENNAI' },
-  
+
   // Row 31-40
   { name: 'TRADITIONAL FOODS', city: 'COIMBATORE', gst_number: '', address: 'RS PURAM, COIMBATORE' },
   { name: 'NATIVE SPECIAL', city: 'COIMBATORE', gst_number: '', address: 'GANDHIPURAM, COIMBATORE' },
@@ -59,7 +59,7 @@ const stores: StoreData[] = [
   { name: 'GREEN LIFE', city: 'SALEM', gst_number: '', address: 'HASTHAMPATTI, SALEM' },
   { name: 'FRESH N ORGANIC', city: 'ERODE', gst_number: '', address: 'PERUNDURAI ROAD, ERODE' },
   { name: 'DESI FOODS', city: 'ERODE', gst_number: '', address: 'GANDHIJI ROAD, ERODE' },
-  
+
   // Row 41-50
   { name: 'ORGANIC HUB', city: 'TIRUNELVELI', gst_number: '', address: 'PALAYAMKOTTAI, TIRUNELVELI' },
   { name: 'NATURE STORE', city: 'TIRUNELVELI', gst_number: '', address: 'JUNCTION, TIRUNELVELI' },
@@ -71,7 +71,7 @@ const stores: StoreData[] = [
   { name: 'NATIVE ORGANICS', city: 'KARUR', gst_number: '', address: 'JAWAHAR BAZAR, KARUR' },
   { name: 'HERBAL ORGANICS', city: 'NAMAKKAL', gst_number: '', address: 'TRICHY ROAD, NAMAKKAL' },
   { name: 'WELLNESS ORGANICS', city: 'NAMAKKAL', gst_number: '', address: 'MOHANUR ROAD, NAMAKKAL' },
-  
+
   // Row 51-60
   { name: 'NATURAL CHOICE', city: 'VELLORE', gst_number: '', address: 'KATPADI, VELLORE' },
   { name: 'ORGANIC POINT', city: 'VELLORE', gst_number: '', address: 'SATHUVACHARI, VELLORE' },
@@ -83,7 +83,7 @@ const stores: StoreData[] = [
   { name: 'VILLAGE MART', city: 'DHARMAPURI', gst_number: '', address: 'PENNAGARAM ROAD, DHARMAPURI' },
   { name: 'NATURE FRESH ORGANICS', city: 'CUDDALORE', gst_number: '', address: 'MANJAKUPPAM, CUDDALORE' },
   { name: 'HEALTH ORGANICS', city: 'CUDDALORE', gst_number: '', address: 'NELLIKUPPAM ROAD, CUDDALORE' },
-  
+
   // Row 61-70
   { name: 'ORGANIC WORLD FOODS', city: 'KANCHIPURAM', gst_number: '', address: 'GANDHI ROAD, KANCHIPURAM' },
   { name: 'PURE EARTH', city: 'KANCHIPURAM', gst_number: '', address: 'PILLAIYAR KOIL STREET, KANCHIPURAM' },
@@ -95,7 +95,7 @@ const stores: StoreData[] = [
   { name: 'GREEN ZONE', city: 'TIRUVANNAMALAI', gst_number: '', address: 'CHENGAM ROAD, TIRUVANNAMALAI' },
   { name: 'ORGANIC GARDEN', city: 'VILLUPURAM', gst_number: '', address: 'MAIN ROAD, VILLUPURAM' },
   { name: 'NATURE HUB', city: 'VILLUPURAM', gst_number: '', address: 'TRICHY ROAD, VILLUPURAM' },
-  
+
   // Row 71-80
   { name: 'SWADESHI ORGANICS', city: 'NAGAPATTINAM', gst_number: '', address: 'EAST CAR STREET, NAGAPATTINAM' },
   { name: 'ECO MART', city: 'NAGAPATTINAM', gst_number: '', address: 'NORTH STREET, NAGAPATTINAM' },
@@ -107,7 +107,7 @@ const stores: StoreData[] = [
   { name: 'NATURE FOODS', city: 'VIRUDHUNAGAR', gst_number: '', address: 'SRIVILLIPUTHUR ROAD, VIRUDHUNAGAR' },
   { name: 'ORGANIC CORNER', city: 'THENI', gst_number: '', address: 'PERIYAKULAM ROAD, THENI' },
   { name: 'FRESH BASKET', city: 'THENI', gst_number: '', address: 'CUMBUM ROAD, THENI' },
-  
+
   // Row 81-90
   { name: 'NATURAL BASKET', city: 'THOOTHUKUDI', gst_number: '', address: 'VE ROAD, THOOTHUKUDI' },
   { name: 'ORGANIC HOME', city: 'THOOTHUKUDI', gst_number: '', address: 'PALAYAMKOTTAI ROAD, THOOTHUKUDI' },
@@ -131,7 +131,7 @@ export const seedStores = async () => {
 
   for (const store of stores) {
     // Check if store with same name already exists
-    const existing = query(
+    const existing = await query(
       'SELECT id FROM stores WHERE name = ?',
       [store.name]
     );
@@ -143,7 +143,7 @@ export const seedStores = async () => {
     }
 
     // Insert the store
-    run(
+    await run(
       `INSERT INTO stores (name, address, city, state, gst_number, is_active) 
        VALUES (?, ?, ?, ?, ?, 1)`,
       [
@@ -159,7 +159,6 @@ export const seedStores = async () => {
     insertedCount++;
   }
 
-  saveDatabase();
   console.log(`\nSeeding completed!`);
   console.log(`Inserted: ${insertedCount} stores`);
   console.log(`Skipped: ${skippedCount} stores (already exist)`);

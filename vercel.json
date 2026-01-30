@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "installCommand": "npm install && cd backend && npm install && cd ../frontend && npm install",
   "builds": [
     {
       "src": "frontend/package.json",
@@ -12,7 +13,7 @@
       "src": "api/index.ts",
       "use": "@vercel/node@3.0.11",
       "config": {
-        "includeFiles": ["backend/src/**/*"]
+        "includeFiles": ["backend/**/*"]
       }
     }
   ],

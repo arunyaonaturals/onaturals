@@ -70,7 +70,9 @@ export class ProductionController {
     try {
       // Get all pending/submitted/approved orders
       const orders = await query(`
-        SELECT o.*, s.name as store_name, u.name as created_by_name
+        SELECT o.id, o.order_number, o.store_id, o.status, o.total_amount, o.notes,
+               o.created_by, o.created_at, o.updated_at,
+               s.name as store_name, u.name as created_by_name
         FROM orders o
         INNER JOIN stores s ON o.store_id = s.id
         INNER JOIN users u ON o.created_by = u.id
@@ -78,19 +80,21 @@ export class ProductionController {
         ORDER BY o.created_at DESC
       `);
 
-      // Get items for each order with product stock info
-      const ordersWithItems = orders.map(async (order: any) => {
+      // Get items for each order with product stock info - AWAIT all promises
+      const ordersWithItems = await Promise.all(orders.map(async (order: any) => {
         const items = await query(`
-          SELECT oi.*, p.name as product_name, p.stock_quantity, p.weight, p.weight_unit
+          SELECT oi.id, oi.order_id, oi.product_id, oi.quantity,
+                 COALESCE(oi.store_stock, oi.stock_qty, 0) as store_stock,
+                 p.name as product_name, p.stock_quantity, p.weight, p.weight_unit
           FROM order_items oi
           INNER JOIN products p ON oi.product_id = p.id
           WHERE oi.order_id = ?
         `, [order.id]);
         
-        return { ...order, items };
-      });
+        return { ...order, items: items || [] };
+      }));
 
-      res.json({ success: true, data: ordersWithItems });
+      res.json({ success: true, data: ordersWithItems || [] });
     } catch (error) {
       console.error('Get order demand error:', error);
       res.status(500).json({ success: false, message: 'Error fetching order demand' });
@@ -102,13 +106,14 @@ export class ProductionController {
     try {
       // Get all pending/submitted orders that haven't been fully invoiced
       const pendingOrderItems = await query(`
-        SELECT oi.product_id, p.name as product_name, p.weight, p.weight_unit, p.stock_quantity,
-               SUM(oi.quantity) as total_required
+        SELECT oi.product_id, p.name as product_name, p.weight, p.weight_unit, 
+               COALESCE(p.stock_quantity, 0) as stock_quantity,
+               COALESCE(SUM(oi.quantity), 0) as total_required
         FROM order_items oi
         INNER JOIN orders o ON oi.order_id = o.id
         INNER JOIN products p ON oi.product_id = p.id
         WHERE o.status IN ('submitted', 'approved')
-        GROUP BY oi.product_id
+        GROUP BY oi.product_id, p.name, p.weight, p.weight_unit, p.stock_quantity
       `);
 
       // Calculate production needs - show ALL products from orders

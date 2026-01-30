@@ -8,16 +8,17 @@ export class PaymentController {
     try {
       const { invoice_id } = req.params;
       
+      // Use LEFT JOIN to handle cases where collected_by might be NULL
       const payments = await query(`
-        SELECT ip.*, u.name as collected_by_name
+        SELECT ip.*, COALESCE(u.name, 'Unknown') as collected_by_name
         FROM invoice_payments ip
-        INNER JOIN users u ON ip.collected_by = u.id
+        LEFT JOIN users u ON ip.collected_by = u.id
         WHERE ip.invoice_id = ?
         ORDER BY ip.payment_date DESC, ip.created_at DESC
       `, [invoice_id]);
 
       const invoice = await queryOne(`
-        SELECT id, invoice_number, total_amount, total_paid, payment_status
+        SELECT id, invoice_number, total_amount, COALESCE(total_paid, 0) as total_paid, payment_status
         FROM invoices WHERE id = ?
       `, [invoice_id]);
 
@@ -26,7 +27,7 @@ export class PaymentController {
       res.json({ 
         success: true, 
         data: { 
-          payments, 
+          payments: payments || [], 
           invoice,
           balance: Math.max(0, balance)
         } 
@@ -44,11 +45,11 @@ export class PaymentController {
       
       let sql = `
         SELECT ip.*, i.invoice_number, i.total_amount, s.name as store_name, 
-               u.name as collected_by_name
+               COALESCE(u.name, 'Unknown') as collected_by_name
         FROM invoice_payments ip
         INNER JOIN invoices i ON ip.invoice_id = i.id
         INNER JOIN stores s ON i.store_id = s.id
-        INNER JOIN users u ON ip.collected_by = u.id
+        LEFT JOIN users u ON ip.collected_by = u.id
         WHERE 1=1
       `;
       const params: any[] = [];
@@ -61,7 +62,7 @@ export class PaymentController {
       sql += ' ORDER BY ip.payment_date DESC, ip.created_at DESC';
 
       const payments = await query(sql, params);
-      res.json({ success: true, data: payments });
+      res.json({ success: true, data: payments || [] });
     } catch (error) {
       console.error('Get all payments error:', error);
       res.status(500).json({ success: false, message: 'Error fetching payments' });
@@ -94,7 +95,7 @@ export class PaymentController {
       // Calculate totals
       const totals = await query(`
         SELECT 
-          SUM(ip.amount) as total_collected,
+          COALESCE(SUM(ip.amount), 0) as total_collected,
           COUNT(*) as payment_count
         FROM invoice_payments ip
         WHERE ip.collected_by = ?
@@ -104,7 +105,7 @@ export class PaymentController {
 
       res.json({ 
         success: true, 
-        data: payments,
+        data: payments || [],
         summary: totals[0] || { total_collected: 0, payment_count: 0 }
       });
     } catch (error) {
@@ -117,7 +118,9 @@ export class PaymentController {
   getPendingPayments = async (req: AuthRequest, res: Response) => {
     try {
       const invoices = await query(`
-        SELECT i.*, s.name as store_name, s.city as store_city, s.phone as store_phone,
+        SELECT i.id, i.invoice_number, i.store_id, i.invoice_date, i.total_amount,
+               i.status, i.payment_status, COALESCE(i.total_paid, 0) as total_paid,
+               i.created_at, s.name as store_name, s.city as store_city, s.phone as store_phone,
                u.name as created_by_name, a.name as area_name,
                (i.total_amount - COALESCE(i.total_paid, 0)) as balance
         FROM invoices i
@@ -128,7 +131,7 @@ export class PaymentController {
         ORDER BY i.created_at DESC
       `);
 
-      res.json({ success: true, data: invoices });
+      res.json({ success: true, data: invoices || [] });
     } catch (error) {
       console.error('Get pending payments error:', error);
       res.status(500).json({ success: false, message: 'Error fetching pending payments' });

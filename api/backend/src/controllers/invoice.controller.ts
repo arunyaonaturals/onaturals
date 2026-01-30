@@ -7,7 +7,11 @@ export class InvoiceController {
   getAllInvoices = async (req: AuthRequest, res: Response) => {
     try {
       const { store_id, status, billing_status, payment_status, start_date, end_date } = req.query;
-      let sql = `SELECT i.*, s.name as store_name, s.gst_number as store_gst, u.name as created_by_name, a.name as area_name
+      let sql = `SELECT i.id, i.invoice_number, i.order_id, i.store_id, i.invoice_date, i.due_date,
+                 i.subtotal, i.discount, i.cgst, i.sgst, i.igst, i.total_gst, i.round_off, i.total_amount,
+                 i.status, i.payment_status, COALESCE(i.billing_status, 'pending') as billing_status,
+                 COALESCE(i.total_paid, 0) as total_paid, i.notes, i.created_by, i.created_at, i.updated_at,
+                 s.name as store_name, s.gst_number as store_gst, u.name as created_by_name, a.name as area_name
                  FROM invoices i INNER JOIN stores s ON i.store_id = s.id
                  INNER JOIN users u ON i.created_by = u.id LEFT JOIN areas a ON s.area_id = a.id WHERE 1=1`;
       const params: any[] = [];
@@ -20,14 +24,14 @@ export class InvoiceController {
           sql += ' AND i.status = ?'; params.push(status); 
         }
       }
-      if (billing_status) { sql += ' AND i.billing_status = ?'; params.push(billing_status); }
+      if (billing_status) { sql += ' AND COALESCE(i.billing_status, \'pending\') = ?'; params.push(billing_status); }
       if (payment_status) { sql += ' AND i.payment_status = ?'; params.push(payment_status); }
       if (start_date) { sql += ' AND date(i.created_at) >= ?'; params.push(start_date); }
       if (end_date) { sql += ' AND date(i.created_at) <= ?'; params.push(end_date); }
       sql += ' ORDER BY i.created_at DESC';
 
       const invoices = await query(sql, params);
-      res.json({ success: true, data: invoices });
+      res.json({ success: true, data: invoices || [] });
     } catch (error) {
       console.error('Get all invoices error:', error);
       res.status(500).json({ success: false, message: 'Error fetching invoices' });

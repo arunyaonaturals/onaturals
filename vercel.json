@@ -1,9 +1,12 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && npm install && npm run build",
+  "buildCommand": "cd frontend && npm install && CI=false npm run build",
   "outputDirectory": "frontend/build",
   "installCommand": "npm install && cd backend && npm install && cd ../frontend && npm install",
   "framework": null,
+  "env": {
+    "CI": "false"
+  },
   "rewrites": [
     {
       "source": "/api/:path*",

@@ -1,25 +1,26 @@
 {
   "version": 2,
-  "framework": "create-react-app",
-  "buildCommand": "cd frontend && npm install && npm run build",
-  "outputDirectory": "frontend/build",
-  "installCommand": "cd frontend && npm install",
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    },
+    {
+      "src": "api/index.ts",
+      "use": "@vercel/node@3.0.11"
+    }
+  ],
   "routes": [
     {
       "src": "/api/(.*)",
       "dest": "/api/index.ts"
     },
     {
-      "handle": "filesystem"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/frontend/build/index.html"
+      "dest": "/frontend/$1"
     }
-  ],
-  "functions": {
-    "api/index.ts": {
-      "runtime": "@vercel/node@3.0.11"
-    }
-  }
+  ]
 }

@@ -107,10 +107,6 @@ const Login: React.FC = () => {
               {loading ? <CircularProgress size={24} /> : 'Login'}
             </Button>
           </form>
-
-          <Typography variant="caption" color="text.secondary" align="center" sx={{ mt: 2, display: 'block' }}>
-            Default: sanjay / demo123
-          </Typography>
         </CardContent>
       </Card>
     </Box>

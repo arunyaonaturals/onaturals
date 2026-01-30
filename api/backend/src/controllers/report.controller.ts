@@ -268,33 +268,57 @@ export class ReportController {
       const monthStart = firstDayOfMonth.toISOString().split('T')[0];
 
       const salesStats = await queryOne(`
-        SELECT COUNT(*) as total_invoices, SUM(total_amount) as total_sales,
-          SUM(CASE WHEN payment_status = 'pending' THEN total_amount ELSE 0 END) as pending_payments
-        FROM invoices WHERE status != 'cancelled' AND DATE(created_at) >= ?
+        SELECT 
+          COALESCE(COUNT(*), 0) as total_invoices, 
+          COALESCE(SUM(total_amount), 0) as total_sales,
+          COALESCE(SUM(CASE WHEN payment_status = 'pending' THEN total_amount ELSE 0 END), 0) as pending_payments
+        FROM invoices WHERE status != 'cancelled' AND date(created_at) >= ?
       `, [monthStart]);
 
       const dispatchStats = await queryOne(`
-        SELECT COUNT(*) as pending_dispatches, SUM(CASE WHEN is_small_order = 1 THEN 1 ELSE 0 END) as small_orders
+        SELECT 
+          COALESCE(COUNT(*), 0) as pending_dispatches, 
+          COALESCE(SUM(CASE WHEN is_small_order = 1 THEN 1 ELSE 0 END), 0) as small_orders
         FROM dispatches WHERE status IN ('pending', 'ready')
       `);
 
       const vendorStats = await queryOne(`
-        SELECT COUNT(*) as pending_vendor_payments, SUM(total_amount) as total_vendor_dues
+        SELECT 
+          COALESCE(COUNT(*), 0) as pending_vendor_payments, 
+          COALESCE(SUM(total_amount), 0) as total_vendor_dues
         FROM raw_material_receipts WHERE payment_status = 'pending'
       `);
 
       const attendanceStats = await queryOne(`
-        SELECT SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_today,
-          SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_today
+        SELECT 
+          COALESCE(SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END), 0) as present_today,
+          COALESCE(SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END), 0) as absent_today
         FROM attendance WHERE date = ?
       `, [today]);
 
-      const packingStats = await queryOne(`SELECT COUNT(*) as pending_packing FROM packing_orders WHERE status IN ('pending', 'in_progress')`);
+      const packingStats = await queryOne(`
+        SELECT COALESCE(COUNT(*), 0) as pending_packing 
+        FROM packing_orders 
+        WHERE status IN ('pending', 'in_progress')
+      `);
 
-      res.json({ success: true, data: { sales: salesStats, dispatch: dispatchStats, vendor: vendorStats, attendance: attendanceStats, packing: packingStats } });
-    } catch (error) {
+      res.json({ 
+        success: true, 
+        data: { 
+          sales: salesStats || { total_invoices: 0, total_sales: 0, pending_payments: 0 },
+          dispatch: dispatchStats || { pending_dispatches: 0, small_orders: 0 },
+          vendor: vendorStats || { pending_vendor_payments: 0, total_vendor_dues: 0 },
+          attendance: attendanceStats || { present_today: 0, absent_today: 0 },
+          packing: packingStats || { pending_packing: 0 }
+        } 
+      });
+    } catch (error: any) {
       console.error('Get dashboard data error:', error);
-      res.status(500).json({ success: false, message: 'Error fetching dashboard data' });
+      res.status(500).json({ 
+        success: false, 
+        message: 'Error fetching dashboard data',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
   };
 

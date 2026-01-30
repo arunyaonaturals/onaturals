@@ -80,7 +80,7 @@ export class InvoiceController {
 
       if (!invoice) return res.status(404).json({ success: false, message: 'Invoice not found' });
 
-      const items = await query(`SELECT ii.*, p.name as product_name, p.hsn_code, p.weight, p.weight_unit, p.mrp, p.gst_rate as product_gst_rate
+      const items = await query(`SELECT ii.*, COALESCE(ii.total, ii.total_price, 0) as total, p.name as product_name, p.hsn_code, p.weight, p.weight_unit, p.mrp, p.gst_rate as product_gst_rate
         FROM invoice_items ii
         INNER JOIN products p ON ii.product_id = p.id WHERE ii.invoice_id = ?`, [id]);
 
@@ -90,7 +90,7 @@ export class InvoiceController {
       for (const item of items) {
         const hsnCode = item.hsn_code || 'N/A';
         const gstRate = item.gst_rate || item.product_gst_rate || 0;
-        const taxableValue = item.total;
+        const taxableValue = item.total || item.total_price || 0;
         const halfRate = gstRate / 2;
         
         if (!hsnBreakdown[hsnCode]) {
@@ -205,8 +205,8 @@ export class InvoiceController {
         const invoiceId = invoiceResult.lastInsertRowid;
 
         for (const item of processedItems) {
-          await run(`INSERT INTO invoice_items (invoice_id, product_id, quantity, quantity_shipped, unit_price, cost_price, margin_percentage, gst_rate, total) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, [invoiceId, item.product_id, item.quantity, item.quantity_shipped, item.unit_price, item.cost_price, item.margin_percentage, item.gst_rate, item.total]);
+          await run(`INSERT INTO invoice_items (invoice_id, product_id, quantity, quantity_shipped, unit_price, cost_price, margin_percentage, gst_rate, total, total_price) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [invoiceId, item.product_id, item.quantity, item.quantity_shipped, item.unit_price, item.cost_price, item.margin_percentage, item.gst_rate, item.total, item.total]);
         }
 
         return { invoiceId, invoiceNumber, totalAmount };
@@ -486,7 +486,7 @@ export class InvoiceController {
 
       if (!invoice) return res.status(404).json({ success: false, message: 'Invoice not found' });
 
-      const items = await query(`SELECT ii.*, p.name as product_name, p.hsn_code, p.weight, p.weight_unit, p.mrp, p.gst_rate as product_gst_rate
+      const items = await query(`SELECT ii.*, COALESCE(ii.total, ii.total_price, 0) as total, p.name as product_name, p.hsn_code, p.weight, p.weight_unit, p.mrp, p.gst_rate as product_gst_rate
         FROM invoice_items ii
         INNER JOIN products p ON ii.product_id = p.id WHERE ii.invoice_id = ?`, [id]);
 
@@ -496,7 +496,7 @@ export class InvoiceController {
       for (const item of items) {
         const hsnCode = item.hsn_code || 'N/A';
         const gstRate = item.gst_rate || item.product_gst_rate || 0;
-        const taxableValue = item.total;
+        const taxableValue = item.total || item.total_price || 0;
         const halfRate = gstRate / 2;
         
         if (!hsnBreakdown[hsnCode]) {

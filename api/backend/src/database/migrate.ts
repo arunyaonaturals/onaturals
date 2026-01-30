@@ -173,6 +173,13 @@ export const runMigrations = async () => {
     )
   `);
 
+  // Add missing columns to order_items
+  try { await run('ALTER TABLE order_items ADD COLUMN stock_qty INTEGER DEFAULT 0'); } catch (_) {}
+  try { await run('ALTER TABLE order_items ADD COLUMN notes TEXT'); } catch (_) {}
+
+  // Add invoice_id to orders if missing
+  try { await run('ALTER TABLE orders ADD COLUMN invoice_id INTEGER'); } catch (_) {}
+
   // Invoices table
   await exec(`
     CREATE TABLE IF NOT EXISTS invoices (
@@ -221,6 +228,12 @@ export const runMigrations = async () => {
     )
   `);
 
+  // Add missing columns to invoice_items
+  try { await run('ALTER TABLE invoice_items ADD COLUMN quantity_shipped INTEGER'); } catch (_) {}
+  try { await run('ALTER TABLE invoice_items ADD COLUMN cost_price REAL DEFAULT 0'); } catch (_) {}
+  try { await run('ALTER TABLE invoice_items ADD COLUMN margin_percentage REAL DEFAULT 0'); } catch (_) {}
+  try { await run('ALTER TABLE invoice_items ADD COLUMN total REAL DEFAULT 0'); } catch (_) {}
+
   // Invoice Payments table
   await exec(`
     CREATE TABLE IF NOT EXISTS invoice_payments (
@@ -237,6 +250,13 @@ export const runMigrations = async () => {
       FOREIGN KEY (collected_by) REFERENCES users(id)
     )
   `);
+
+  // Add missing columns to invoices if they don't exist
+  try { await run('ALTER TABLE invoices ADD COLUMN billing_status TEXT DEFAULT \'pending\''); } catch (_) {}
+  try { await run('ALTER TABLE invoices ADD COLUMN total_paid REAL DEFAULT 0'); } catch (_) {}
+  try { await run('ALTER TABLE invoices ADD COLUMN payment_date DATE'); } catch (_) {}
+  try { await run('ALTER TABLE invoices ADD COLUMN payment_amount REAL'); } catch (_) {}
+  try { await run('ALTER TABLE invoices ADD COLUMN payment_method TEXT'); } catch (_) {}
 
   // Dispatches table (packing_order_id without FK - packing_orders is created later)
   await exec(`
@@ -260,6 +280,10 @@ export const runMigrations = async () => {
   try { await run('ALTER TABLE dispatches ADD COLUMN packing_order_id INTEGER'); } catch (_) { }
   try { await run('ALTER TABLE dispatches ADD COLUMN priority INTEGER DEFAULT 1'); } catch (_) { }
   try { await run('ALTER TABLE dispatches ADD COLUMN is_small_order INTEGER DEFAULT 0'); } catch (_) { }
+
+  // Add missing columns to stores
+  try { await run('ALTER TABLE stores ADD COLUMN volume_classification TEXT DEFAULT \'medium\''); } catch (_) { }
+  try { await run('ALTER TABLE stores ADD COLUMN last_classification_date DATE'); } catch (_) { }
 
   // Dispatch Items table
   await exec(`

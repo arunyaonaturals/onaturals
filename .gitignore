@@ -42,7 +42,6 @@ coverage/
 
 # Vercel
 .vercel
-api/backend
 
 # Uploads
 uploads/

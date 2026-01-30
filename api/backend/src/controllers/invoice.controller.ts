@@ -154,14 +154,14 @@ export class InvoiceController {
 
           let marginPercentage = item.margin_percentage;
           if (marginPercentage === undefined) {
-            const margin = await queryOne('SELECT margin_percentage FROM product_store_margins WHERE store_id = ? AND product_id = ?', [store_id, item.product_id]);
+            const margin = await queryOne('SELECT margin_percentage FROM store_product_margins WHERE store_id = ? AND product_id = ?', [store_id, item.product_id]);
             marginPercentage = margin?.margin_percentage || 0;
           } else {
-            const existing = await queryOne('SELECT id FROM product_store_margins WHERE store_id = ? AND product_id = ?', [store_id, item.product_id]);
+            const existing = await queryOne('SELECT id FROM store_product_margins WHERE store_id = ? AND product_id = ?', [store_id, item.product_id]);
             if (existing) {
-              await run('UPDATE product_store_margins SET margin_percentage = ? WHERE store_id = ? AND product_id = ?', [marginPercentage, store_id, item.product_id]);
+              await run('UPDATE store_product_margins SET margin_percentage = ? WHERE store_id = ? AND product_id = ?', [marginPercentage, store_id, item.product_id]);
             } else {
-              await run('INSERT INTO product_store_margins (store_id, product_id, margin_percentage) VALUES (?, ?, ?)', [store_id, item.product_id, marginPercentage]);
+              await run('INSERT INTO store_product_margins (store_id, product_id, margin_percentage) VALUES (?, ?, ?)', [store_id, item.product_id, marginPercentage]);
             }
           }
 
@@ -269,14 +269,14 @@ export class InvoiceController {
 
           let marginPercentage = item.margin_percentage;
           if (marginPercentage === undefined) {
-            const margin = await queryOne('SELECT margin_percentage FROM product_store_margins WHERE store_id = ? AND product_id = ?', [store_id, item.product_id]);
+            const margin = await queryOne('SELECT margin_percentage FROM store_product_margins WHERE store_id = ? AND product_id = ?', [store_id, item.product_id]);
             marginPercentage = margin?.margin_percentage || 0;
           } else {
-            const existing = await queryOne('SELECT id FROM product_store_margins WHERE store_id = ? AND product_id = ?', [store_id, item.product_id]);
+            const existing = await queryOne('SELECT id FROM store_product_margins WHERE store_id = ? AND product_id = ?', [store_id, item.product_id]);
             if (existing) {
-              await run('UPDATE product_store_margins SET margin_percentage = ? WHERE store_id = ? AND product_id = ?', [marginPercentage, store_id, item.product_id]);
+              await run('UPDATE store_product_margins SET margin_percentage = ? WHERE store_id = ? AND product_id = ?', [marginPercentage, store_id, item.product_id]);
             } else {
-              await run('INSERT INTO product_store_margins (store_id, product_id, margin_percentage) VALUES (?, ?, ?)', [store_id, item.product_id, marginPercentage]);
+              await run('INSERT INTO store_product_margins (store_id, product_id, margin_percentage) VALUES (?, ?, ?)', [store_id, item.product_id, marginPercentage]);
             }
           }
 

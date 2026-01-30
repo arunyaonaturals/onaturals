@@ -163,7 +163,7 @@ export class StoreController {
       const { id } = req.params;
       const margins = await query(`
         SELECT psm.*, p.name as product_name, p.hsn_code, p.cost
-        FROM product_store_margins psm INNER JOIN products p ON psm.product_id = p.id
+        FROM store_product_margins psm INNER JOIN products p ON psm.product_id = p.id
         WHERE psm.store_id = ? ORDER BY p.name
       `, [id]);
 
@@ -183,13 +183,13 @@ export class StoreController {
         return res.status(400).json({ success: false, message: 'Product ID and margin percentage are required' });
       }
 
-      const existing = await queryOne('SELECT id FROM product_store_margins WHERE store_id = ? AND product_id = ?', [id, product_id]);
+      const existing = await queryOne('SELECT id FROM store_product_margins WHERE store_id = ? AND product_id = ?', [id, product_id]);
 
       if (existing) {
-        await run('UPDATE product_store_margins SET margin_percentage = ?, updated_at = CURRENT_TIMESTAMP WHERE store_id = ? AND product_id = ?',
+        await run('UPDATE store_product_margins SET margin_percentage = ?, updated_at = CURRENT_TIMESTAMP WHERE store_id = ? AND product_id = ?',
           [margin_percentage, id, product_id]);
       } else {
-        await run('INSERT INTO product_store_margins (store_id, product_id, margin_percentage) VALUES (?, ?, ?)',
+        await run('INSERT INTO store_product_margins (store_id, product_id, margin_percentage) VALUES (?, ?, ?)',
           [id, product_id, margin_percentage]);
       }
 

@@ -561,5 +561,7 @@ export const runMigrations = async () => {
   console.log('Migrations completed successfully!');
 };
 
-// Run migrations
-runMigrations().catch(console.error);
+// Only run if executed directly (not imported)
+if (require.main === module) {
+  runMigrations().catch(console.error);
+}

@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import express from 'express';
 import cors from 'cors';
-import { initDatabase } from '../backend/src/config/database';
+import { runMigrations } from '../backend/src/database/migrate';
 
 // Import routes
 import authRoutes from '../backend/src/routes/auth.routes';
@@ -30,15 +30,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Initialize database
-let dbInitialized = false;
-const ensureDb = async () => {
-  if (!dbInitialized) {
-    await initDatabase();
-    dbInitialized = true;
-  }
-};
-
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -65,8 +56,22 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Initialize database flag
+let dbInitialized = false;
+
 // Vercel serverless handler
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  await ensureDb();
+  // Run migrations once on first request
+  if (!dbInitialized) {
+    try {
+      await runMigrations();
+      dbInitialized = true;
+      console.log('Database initialized successfully');
+    } catch (error) {
+      console.error('Database initialization error:', error);
+      return res.status(500).json({ success: false, message: 'Database initialization failed' });
+    }
+  }
+  
   return app(req as any, res as any);
 }

@@ -12,8 +12,8 @@ export class PurchaseController {
 
       if (vendor_id) { sql += ' AND rmr.vendor_id = ?'; params.push(vendor_id); }
       if (payment_status) { sql += ' AND rmr.payment_status = ?'; params.push(payment_status); }
-      if (start_date) { sql += ' AND DATE(rmr.receipt_date) >= ?'; params.push(start_date); }
-      if (end_date) { sql += ' AND DATE(rmr.receipt_date) <= ?'; params.push(end_date); }
+      if (start_date) { sql += ' AND date(rmr.receipt_date) >= ?'; params.push(start_date); }
+      if (end_date) { sql += ' AND date(rmr.receipt_date) <= ?'; params.push(end_date); }
       sql += ' ORDER BY rmr.receipt_date DESC';
 
       const receipts = await query(sql, params);
@@ -36,8 +36,8 @@ export class PurchaseController {
       const today = new Date().toISOString().split('T')[0];
       const receipts = await query(`
         SELECT rmr.*, v.name as vendor_name, v.payment_days,
-        DATE(rmr.receipt_date, '+' || v.payment_days || ' days') as due_date,
-        CASE WHEN DATE(rmr.receipt_date, '+' || v.payment_days || ' days') < ? THEN 1 ELSE 0 END as is_overdue
+        date(rmr.receipt_date, '+' || v.payment_days || ' days') as due_date,
+        CASE WHEN date(rmr.receipt_date, '+' || v.payment_days || ' days') < ? THEN 1 ELSE 0 END as is_overdue
         FROM raw_material_receipts rmr INNER JOIN vendors v ON rmr.vendor_id = v.id
         WHERE rmr.payment_status = 'pending' ORDER BY due_date ASC
       `, [today]);
@@ -54,12 +54,12 @@ export class PurchaseController {
       const today = new Date().toISOString().split('T')[0];
       const receipts = await query(`
         SELECT rmr.*, v.name as vendor_name, v.payment_days, v.phone as vendor_phone,
-        DATE(rmr.receipt_date, '+' || v.payment_days || ' days') as due_date,
-        JULIANDAY(?) - JULIANDAY(DATE(rmr.receipt_date, '+' || v.payment_days || ' days')) as days_overdue
+        date(rmr.receipt_date, '+' || v.payment_days || ' days') as due_date,
+        JULIANDAY(?) - JULIANDAY(date(rmr.receipt_date, '+' || v.payment_days || ' days')) as days_overdue
         FROM raw_material_receipts rmr 
         INNER JOIN vendors v ON rmr.vendor_id = v.id
         WHERE rmr.payment_status = 'pending' 
-        AND DATE(rmr.receipt_date, '+' || v.payment_days || ' days') < ?
+        AND date(rmr.receipt_date, '+' || v.payment_days || ' days') < ?
         ORDER BY days_overdue DESC
       `, [today, today]);
       res.json({ success: true, data: receipts });
@@ -79,13 +79,13 @@ export class PurchaseController {
       
       const receipts = await query(`
         SELECT rmr.*, v.name as vendor_name, v.payment_days, v.phone as vendor_phone,
-        DATE(rmr.receipt_date, '+' || v.payment_days || ' days') as due_date,
-        JULIANDAY(DATE(rmr.receipt_date, '+' || v.payment_days || ' days')) - JULIANDAY(?) as days_until_due
+        date(rmr.receipt_date, '+' || v.payment_days || ' days') as due_date,
+        JULIANDAY(date(rmr.receipt_date, '+' || v.payment_days || ' days')) - JULIANDAY(?) as days_until_due
         FROM raw_material_receipts rmr 
         INNER JOIN vendors v ON rmr.vendor_id = v.id
         WHERE rmr.payment_status = 'pending' 
-        AND DATE(rmr.receipt_date, '+' || v.payment_days || ' days') >= ?
-        AND DATE(rmr.receipt_date, '+' || v.payment_days || ' days') <= ?
+        AND date(rmr.receipt_date, '+' || v.payment_days || ' days') >= ?
+        AND date(rmr.receipt_date, '+' || v.payment_days || ' days') <= ?
         ORDER BY due_date ASC
       `, [today, today, nextWeekStr]);
       res.json({ success: true, data: receipts });
@@ -109,7 +109,7 @@ export class PurchaseController {
         FROM raw_material_receipts rmr 
         INNER JOIN vendors v ON rmr.vendor_id = v.id
         WHERE rmr.payment_status = 'pending' 
-        AND DATE(rmr.receipt_date, '+' || v.payment_days || ' days') < ?
+        AND date(rmr.receipt_date, '+' || v.payment_days || ' days') < ?
       `, [today]);
 
       // Due this week count and total
@@ -118,8 +118,8 @@ export class PurchaseController {
         FROM raw_material_receipts rmr 
         INNER JOIN vendors v ON rmr.vendor_id = v.id
         WHERE rmr.payment_status = 'pending' 
-        AND DATE(rmr.receipt_date, '+' || v.payment_days || ' days') >= ?
-        AND DATE(rmr.receipt_date, '+' || v.payment_days || ' days') <= ?
+        AND date(rmr.receipt_date, '+' || v.payment_days || ' days') >= ?
+        AND date(rmr.receipt_date, '+' || v.payment_days || ' days') <= ?
       `, [today, nextWeekStr]);
 
       res.json({ 

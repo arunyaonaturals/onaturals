@@ -14,8 +14,8 @@ export class DispatchController {
       if (status) { sql += ' AND d.status = ?'; params.push(status); }
       if (priority) { sql += ' AND d.priority = ?'; params.push(priority); }
       if (is_small_order !== undefined) { sql += ' AND d.is_small_order = ?'; params.push(is_small_order === 'true' ? 1 : 0); }
-      if (start_date) { sql += ' AND DATE(d.created_at) >= ?'; params.push(start_date); }
-      if (end_date) { sql += ' AND DATE(d.created_at) <= ?'; params.push(end_date); }
+      if (start_date) { sql += ' AND date(d.created_at) >= ?'; params.push(start_date); }
+      if (end_date) { sql += ' AND date(d.created_at) <= ?'; params.push(end_date); }
       sql += ' ORDER BY d.priority DESC, d.created_at ASC';
 
       const dispatches = await query(sql, params);

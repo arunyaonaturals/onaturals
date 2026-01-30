@@ -22,8 +22,8 @@ export class OrderController {
       if (store_id) { sql += ' AND o.store_id = ?'; params.push(store_id); }
       if (status) { sql += ' AND o.status = ?'; params.push(status); }
       if (created_by) { sql += ' AND o.created_by = ?'; params.push(created_by); }
-      if (start_date) { sql += ' AND DATE(o.created_at) >= ?'; params.push(start_date); }
-      if (end_date) { sql += ' AND DATE(o.created_at) <= ?'; params.push(end_date); }
+      if (start_date) { sql += ' AND date(o.created_at) >= ?'; params.push(start_date); }
+      if (end_date) { sql += ' AND date(o.created_at) <= ?'; params.push(end_date); }
       sql += ' ORDER BY o.created_at DESC';
 
       const orders = await query(sql, params);

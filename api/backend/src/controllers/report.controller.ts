@@ -12,8 +12,8 @@ export class ReportController {
         AVG(total_amount) as average_invoice_value FROM invoices WHERE status != 'cancelled'`;
       const params: any[] = [];
 
-      if (start_date) { sql += ' AND DATE(created_at) >= ?'; params.push(start_date); }
-      if (end_date) { sql += ' AND DATE(created_at) <= ?'; params.push(end_date); }
+      if (start_date) { sql += ' AND date(created_at) >= ?'; params.push(start_date); }
+      if (end_date) { sql += ' AND date(created_at) <= ?'; params.push(end_date); }
 
       const summary = await queryOne(sql, params);
       res.json({ success: true, data: summary });
@@ -29,8 +29,8 @@ export class ReportController {
       let dateFilter = '';
       const params: any[] = [];
 
-      if (start_date) { dateFilter += ' AND DATE(i.created_at) >= ?'; params.push(start_date); }
-      if (end_date) { dateFilter += ' AND DATE(i.created_at) <= ?'; params.push(end_date); }
+      if (start_date) { dateFilter += ' AND date(i.created_at) >= ?'; params.push(start_date); }
+      if (end_date) { dateFilter += ' AND date(i.created_at) <= ?'; params.push(end_date); }
 
       const sales = await query(`
         SELECT a.id as area_id, a.name as area_name, u.name as sales_captain_name,
@@ -55,8 +55,8 @@ export class ReportController {
       let dateFilter = '';
       const params: any[] = [];
 
-      if (start_date) { dateFilter += ' AND DATE(i.created_at) >= ?'; params.push(start_date); }
-      if (end_date) { dateFilter += ' AND DATE(i.created_at) <= ?'; params.push(end_date); }
+      if (start_date) { dateFilter += ' AND date(i.created_at) >= ?'; params.push(start_date); }
+      if (end_date) { dateFilter += ' AND date(i.created_at) <= ?'; params.push(end_date); }
 
       const sales = await query(`
         SELECT u.id as captain_id, u.name as captain_name, u.email as captain_email,
@@ -81,8 +81,8 @@ export class ReportController {
       let filters = '';
       const params: any[] = [];
 
-      if (start_date) { filters += ' AND DATE(i.created_at) >= ?'; params.push(start_date); }
-      if (end_date) { filters += ' AND DATE(i.created_at) <= ?'; params.push(end_date); }
+      if (start_date) { filters += ' AND date(i.created_at) >= ?'; params.push(start_date); }
+      if (end_date) { filters += ' AND date(i.created_at) <= ?'; params.push(end_date); }
       if (area_id) { filters += ' AND s.area_id = ?'; params.push(area_id); }
 
       const sales = await query(`
@@ -107,8 +107,8 @@ export class ReportController {
       let dateFilter = '';
       const params: any[] = [];
 
-      if (start_date) { dateFilter += ' AND DATE(i.created_at) >= ?'; params.push(start_date); }
-      if (end_date) { dateFilter += ' AND DATE(i.created_at) <= ?'; params.push(end_date); }
+      if (start_date) { dateFilter += ' AND date(i.created_at) >= ?'; params.push(start_date); }
+      if (end_date) { dateFilter += ' AND date(i.created_at) <= ?'; params.push(end_date); }
 
       const sales = await query(`
         SELECT p.id as product_id, p.name as product_name, p.hsn_code,
@@ -149,8 +149,8 @@ export class ReportController {
       let dateFilter = '';
       const params: any[] = [];
 
-      if (start_date) { dateFilter += ' AND DATE(i.payment_date) >= ?'; params.push(start_date); }
-      if (end_date) { dateFilter += ' AND DATE(i.payment_date) <= ?'; params.push(end_date); }
+      if (start_date) { dateFilter += ' AND date(i.payment_date) >= ?'; params.push(start_date); }
+      if (end_date) { dateFilter += ' AND date(i.payment_date) <= ?'; params.push(end_date); }
 
       const payments = await query(`
         SELECT i.id as invoice_id, i.invoice_number, i.total_amount, i.payment_amount, i.payment_date, i.payment_method,
@@ -172,7 +172,7 @@ export class ReportController {
       const dues = await query(`
         SELECT v.id as vendor_id, v.name as vendor_name, v.phone as vendor_phone, v.payment_days,
           SUM(rmr.total_amount) as total_due, COUNT(rmr.id) as pending_receipts,
-          MIN(DATE(rmr.receipt_date, '+' || v.payment_days || ' days')) as earliest_due_date
+          MIN(date(rmr.receipt_date, '+' || v.payment_days || ' days')) as earliest_due_date
         FROM vendors v INNER JOIN raw_material_receipts rmr ON rmr.vendor_id = v.id
         WHERE rmr.payment_status = 'pending'
         GROUP BY v.id, v.name, v.phone, v.payment_days ORDER BY earliest_due_date ASC
@@ -369,7 +369,7 @@ export class ReportController {
         FROM stores s
         LEFT JOIN invoices i ON i.store_id = s.id 
           AND i.status != 'cancelled'
-          AND DATE(i.created_at) >= DATE('now', '-${periodDays} days')
+          AND date(i.created_at) >= date('now', '-${periodDays} days')
         WHERE s.is_active = 1
         GROUP BY s.id
       `);
@@ -412,10 +412,10 @@ export class ReportController {
         SELECT s.*, a.name as area_name, u.name as sales_captain_name,
           (SELECT COALESCE(SUM(i.total_amount), 0) FROM invoices i 
            WHERE i.store_id = s.id AND i.status != 'cancelled' 
-           AND DATE(i.created_at) >= DATE('now', '-30 days')) as last_30_days_sales,
+           AND date(i.created_at) >= date('now', '-30 days')) as last_30_days_sales,
           (SELECT COUNT(*) FROM invoices i 
            WHERE i.store_id = s.id AND i.status != 'cancelled' 
-           AND DATE(i.created_at) >= DATE('now', '-30 days')) as last_30_days_orders
+           AND date(i.created_at) >= date('now', '-30 days')) as last_30_days_orders
         FROM stores s
         LEFT JOIN areas a ON s.area_id = a.id
         LEFT JOIN users u ON a.sales_captain_id = u.id
@@ -453,13 +453,13 @@ export class ReportController {
       let dateFilter = '';
       switch (period) {
         case 'week':
-          dateFilter = "DATE(i.created_at) >= DATE('now', '-7 days')";
+          dateFilter = "date(i.created_at) >= date('now', '-7 days')";
           break;
         case 'quarter':
-          dateFilter = "DATE(i.created_at) >= DATE('now', '-90 days')";
+          dateFilter = "date(i.created_at) >= date('now', '-90 days')";
           break;
         default: // month
-          dateFilter = "DATE(i.created_at) >= DATE('now', '-30 days')";
+          dateFilter = "date(i.created_at) >= date('now', '-30 days')";
       }
 
       let sql = `
@@ -584,8 +584,8 @@ export class ReportController {
       let dateFilter = '';
       const params: any[] = [userId];
 
-      if (start_date) { dateFilter += ' AND DATE(ip.payment_date) >= ?'; params.push(start_date); }
-      if (end_date) { dateFilter += ' AND DATE(ip.payment_date) <= ?'; params.push(end_date); }
+      if (start_date) { dateFilter += ' AND date(ip.payment_date) >= ?'; params.push(start_date); }
+      if (end_date) { dateFilter += ' AND date(ip.payment_date) <= ?'; params.push(end_date); }
 
       const collections = await query(`
         SELECT 
@@ -606,12 +606,12 @@ export class ReportController {
       // Summary by date
       const dailySummary = await query(`
         SELECT 
-          DATE(ip.payment_date) as date,
+          date(ip.payment_date) as date,
           COUNT(*) as collection_count,
           SUM(ip.amount) as total_collected
         FROM invoice_payments ip
         WHERE ip.collected_by = ? ${dateFilter}
-        GROUP BY DATE(ip.payment_date)
+        GROUP BY date(ip.payment_date)
         ORDER BY date DESC
         LIMIT 30
       `, params);

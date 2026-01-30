@@ -22,8 +22,8 @@ export class InvoiceController {
       }
       if (billing_status) { sql += ' AND i.billing_status = ?'; params.push(billing_status); }
       if (payment_status) { sql += ' AND i.payment_status = ?'; params.push(payment_status); }
-      if (start_date) { sql += ' AND DATE(i.created_at) >= ?'; params.push(start_date); }
-      if (end_date) { sql += ' AND DATE(i.created_at) <= ?'; params.push(end_date); }
+      if (start_date) { sql += ' AND date(i.created_at) >= ?'; params.push(start_date); }
+      if (end_date) { sql += ' AND date(i.created_at) <= ?'; params.push(end_date); }
       sql += ' ORDER BY i.created_at DESC';
 
       const invoices = await query(sql, params);

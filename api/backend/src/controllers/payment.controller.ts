@@ -53,8 +53,8 @@ export class PaymentController {
       `;
       const params: any[] = [];
 
-      if (start_date) { sql += ' AND DATE(ip.payment_date) >= ?'; params.push(start_date); }
-      if (end_date) { sql += ' AND DATE(ip.payment_date) <= ?'; params.push(end_date); }
+      if (start_date) { sql += ' AND date(ip.payment_date) >= ?'; params.push(start_date); }
+      if (end_date) { sql += ' AND date(ip.payment_date) <= ?'; params.push(end_date); }
       if (collected_by) { sql += ' AND ip.collected_by = ?'; params.push(collected_by); }
       if (payment_method) { sql += ' AND ip.payment_method = ?'; params.push(payment_method); }
       
@@ -84,8 +84,8 @@ export class PaymentController {
       `;
       const params: any[] = [req.user.id];
 
-      if (start_date) { sql += ' AND DATE(ip.payment_date) >= ?'; params.push(start_date); }
-      if (end_date) { sql += ' AND DATE(ip.payment_date) <= ?'; params.push(end_date); }
+      if (start_date) { sql += ' AND date(ip.payment_date) >= ?'; params.push(start_date); }
+      if (end_date) { sql += ' AND date(ip.payment_date) <= ?'; params.push(end_date); }
       
       sql += ' ORDER BY ip.payment_date DESC, ip.created_at DESC';
 
@@ -98,8 +98,8 @@ export class PaymentController {
           COUNT(*) as payment_count
         FROM invoice_payments ip
         WHERE ip.collected_by = ?
-        ${start_date ? ' AND DATE(ip.payment_date) >= ?' : ''}
-        ${end_date ? ' AND DATE(ip.payment_date) <= ?' : ''}
+        ${start_date ? ' AND date(ip.payment_date) >= ?' : ''}
+        ${end_date ? ' AND date(ip.payment_date) <= ?' : ''}
       `, params);
 
       res.json({ 

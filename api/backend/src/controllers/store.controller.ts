@@ -10,13 +10,25 @@ export class StoreController {
 
       let baseSql = `FROM stores s LEFT JOIN areas a ON s.area_id = a.id
                      LEFT JOIN users u ON a.sales_captain_id = u.id WHERE 1=1`;
+      let countSql = `FROM stores s WHERE 1=1`;
       const params: any[] = [];
+      const countParams: any[] = [];
 
-      if (area_id) { baseSql += ' AND s.area_id = ?'; params.push(area_id); }
-      if (is_active !== undefined) { baseSql += ' AND s.is_active = ?'; params.push(is_active === 'true' ? 1 : 0); }
+      if (area_id) { 
+        baseSql += ' AND s.area_id = ?'; 
+        countSql += ' AND s.area_id = ?';
+        params.push(area_id); 
+        countParams.push(area_id);
+      }
+      if (is_active !== undefined) { 
+        baseSql += ' AND s.is_active = ?'; 
+        countSql += ' AND s.is_active = ?';
+        params.push(is_active === 'true' ? 1 : 0); 
+        countParams.push(is_active === 'true' ? 1 : 0);
+      }
 
-      // Get total count for pagination
-      const countResult = await queryOne(`SELECT COUNT(*) as count ${baseSql}`, params);
+      // Get total count for pagination (faster without joins)
+      const countResult = await queryOne(`SELECT COUNT(*) as count ${countSql}`, countParams);
       const total = countResult?.count || 0;
 
       // Get paginated data

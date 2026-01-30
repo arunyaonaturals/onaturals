@@ -485,23 +485,21 @@ const Invoices: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <Box sx={{ width: '100%', overflowX: 'auto' }}>
-            <DataGrid 
-              rows={invoices} 
-              columns={columns} 
-              loading={loading} 
-              pageSizeOptions={[10, 25, 50]} 
-              initialState={{ pagination: { paginationModel: { pageSize: 10 } } }} 
-              autoHeight 
-              disableRowSelectionOnClick 
-              sx={{
-                '& .MuiDataGrid-cell': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
-                '& .MuiDataGrid-columnHeaderTitle': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
-              }}
-            />
-          </Box>
-        </Card>
+      <Card sx={{ height: 650, width: '100%' }}>
+        <DataGrid
+          rows={invoices}
+          columns={columns}
+          loading={loading}
+          pageSizeOptions={[10, 25, 50]}
+          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+          disableRowSelectionOnClick
+          sx={{
+            border: 'none',
+            '& .MuiDataGrid-cell': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
+            '& .MuiDataGrid-columnHeaderTitle': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
+          }}
+        />
+      </Card>
       </TabPanel>
 
       {/* View Order Dialog */}

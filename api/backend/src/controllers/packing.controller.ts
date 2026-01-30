@@ -13,8 +13,8 @@ export class PackingController {
 
       if (status) { sql += ' AND po.status = ?'; params.push(status); }
       if (priority) { sql += ' AND po.priority = ?'; params.push(priority); }
-      if (start_date) { sql += ' AND DATE(po.created_at) >= ?'; params.push(start_date); }
-      if (end_date) { sql += ' AND DATE(po.created_at) <= ?'; params.push(end_date); }
+      if (start_date) { sql += ' AND date(po.created_at) >= ?'; params.push(start_date); }
+      if (end_date) { sql += ' AND date(po.created_at) <= ?'; params.push(end_date); }
       sql += ' ORDER BY po.priority DESC, po.created_at ASC';
 
       const orders = await query(sql, params);

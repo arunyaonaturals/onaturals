@@ -35,7 +35,8 @@ const Stores: React.FC = () => {
   });
   const [totalRows, setTotalRows] = useState(0);
 
-  useEffect(() => { fetchStores(); fetchAreas(); }, [paginationModel]);
+  useEffect(() => { fetchStores(); }, [paginationModel]);
+  useEffect(() => { fetchAreas(); }, []);
 
   const fetchStores = async () => {
     try {
@@ -161,25 +162,23 @@ const Stores: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card>
-        <Box sx={{ width: '100%', overflowX: 'auto' }}>
-          <DataGrid
-            rows={stores}
-            columns={columns}
-            loading={loading}
-            rowCount={totalRows}
-            paginationMode="server"
-            paginationModel={paginationModel}
-            onPaginationModelChange={setPaginationModel}
-            pageSizeOptions={[10, 25, 50]}
-            autoHeight
-            disableRowSelectionOnClick
-            sx={{
-              '& .MuiDataGrid-cell': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
-              '& .MuiDataGrid-columnHeaderTitle': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
-            }}
-          />
-        </Box>
+      <Card sx={{ height: 650, width: '100%' }}>
+        <DataGrid
+          rows={stores}
+          columns={columns}
+          loading={loading}
+          rowCount={totalRows}
+          paginationMode="server"
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          pageSizeOptions={[10, 25, 50]}
+          disableRowSelectionOnClick
+          sx={{
+            border: 'none',
+            '& .MuiDataGrid-cell': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
+            '& .MuiDataGrid-columnHeaderTitle': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
+          }}
+        />
       </Card>
 
       {/* View Store Dialog (Mobile) */}

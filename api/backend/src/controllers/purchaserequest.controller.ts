@@ -19,8 +19,8 @@ export class PurchaseRequestController {
 
       if (vendor_id) { sql += ' AND pr.vendor_id = ?'; params.push(vendor_id); }
       if (status) { sql += ' AND pr.status = ?'; params.push(status); }
-      if (start_date) { sql += ' AND DATE(pr.request_date) >= ?'; params.push(start_date); }
-      if (end_date) { sql += ' AND DATE(pr.request_date) <= ?'; params.push(end_date); }
+      if (start_date) { sql += ' AND date(pr.request_date) >= ?'; params.push(start_date); }
+      if (end_date) { sql += ' AND date(pr.request_date) <= ?'; params.push(end_date); }
       sql += ' ORDER BY pr.created_at DESC';
 
       const requests = await query(sql, params);

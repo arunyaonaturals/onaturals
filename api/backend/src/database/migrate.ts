@@ -123,6 +123,7 @@ export const runMigrations = async () => {
   await exec(`CREATE INDEX IF NOT EXISTS idx_stores_area_id ON stores(area_id)`);
   await exec(`CREATE INDEX IF NOT EXISTS idx_areas_sales_captain_id ON areas(sales_captain_id)`);
   await exec(`CREATE INDEX IF NOT EXISTS idx_stores_is_active ON stores(is_active)`);
+  await exec(`CREATE INDEX IF NOT EXISTS idx_stores_name ON stores(name)`);
 
   // Store Product Margins
   await exec(`

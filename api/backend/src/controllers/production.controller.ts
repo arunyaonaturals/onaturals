@@ -20,8 +20,8 @@ export class ProductionController {
 
       if (status) { sql += ' AND po.status = ?'; params.push(status); }
       if (product_id) { sql += ' AND po.product_id = ?'; params.push(product_id); }
-      if (start_date) { sql += ' AND DATE(po.created_at) >= ?'; params.push(start_date); }
-      if (end_date) { sql += ' AND DATE(po.created_at) <= ?'; params.push(end_date); }
+      if (start_date) { sql += ' AND date(po.created_at) >= ?'; params.push(start_date); }
+      if (end_date) { sql += ' AND date(po.created_at) <= ?'; params.push(end_date); }
       sql += ' ORDER BY po.created_at DESC';
 
       const orders = await query(sql, params);
@@ -529,7 +529,7 @@ export class ProductionController {
     // Get count of batches created today for this product
     const countResult = await queryOne(`
       SELECT COUNT(*) as count FROM product_batches 
-      WHERE product_id = ? AND DATE(created_at) = DATE('now')
+      WHERE product_id = ? AND date(created_at) = date('now')
     `, [productId]);
     
     const sequence = (countResult?.count || 0) + 1;

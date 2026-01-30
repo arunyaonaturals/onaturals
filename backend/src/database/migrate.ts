@@ -250,6 +250,11 @@ export const runMigrations = async () => {
     )
   `);
 
+  // Add columns to dispatches if missing (for new CREATE and for existing DBs)
+  try { await run('ALTER TABLE dispatches ADD COLUMN packing_order_id INTEGER'); } catch (_) {}
+  try { await run('ALTER TABLE dispatches ADD COLUMN priority INTEGER DEFAULT 1'); } catch (_) {}
+  try { await run('ALTER TABLE dispatches ADD COLUMN is_small_order INTEGER DEFAULT 0'); } catch (_) {}
+
   // Dispatch Items table
   await exec(`
     CREATE TABLE IF NOT EXISTS dispatch_items (

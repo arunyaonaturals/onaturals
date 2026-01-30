@@ -232,7 +232,7 @@ export const runMigrations = async () => {
     )
   `);
 
-  // Dispatches table
+  // Dispatches table (packing_order_id without FK - packing_orders is created later)
   await exec(`
     CREATE TABLE IF NOT EXISTS dispatches (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -249,6 +249,11 @@ export const runMigrations = async () => {
       FOREIGN KEY (created_by) REFERENCES users(id)
     )
   `);
+
+  // Add columns to dispatches if missing (for new CREATE and for existing Turso DBs)
+  try { await run('ALTER TABLE dispatches ADD COLUMN packing_order_id INTEGER'); } catch (_) {}
+  try { await run('ALTER TABLE dispatches ADD COLUMN priority INTEGER DEFAULT 1'); } catch (_) {}
+  try { await run('ALTER TABLE dispatches ADD COLUMN is_small_order INTEGER DEFAULT 0'); } catch (_) {}
 
   // Dispatch Items table
   await exec(`

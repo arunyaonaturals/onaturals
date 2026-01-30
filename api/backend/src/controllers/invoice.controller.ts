@@ -203,8 +203,9 @@ export class InvoiceController {
         const roundOff = Math.round(totalBeforeRoundOff) - totalBeforeRoundOff;
         const totalAmount = totalBeforeRoundOff + roundOff;
 
-        const invoiceResult = await run(`INSERT INTO invoices (invoice_number, store_id, created_by, subtotal, cgst, sgst, igst, round_off, total_amount, notes) 
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [invoiceNumber, store_id, req.user!.id, subtotal, totalCgst, totalSgst, totalIgst, roundOff, totalAmount, notes || null]);
+        const today = new Date().toISOString().split('T')[0];
+        const invoiceResult = await run(`INSERT INTO invoices (invoice_number, store_id, invoice_date, created_by, subtotal, cgst, sgst, igst, round_off, total_amount, notes) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [invoiceNumber, store_id, today, req.user!.id, subtotal, totalCgst, totalSgst, totalIgst, roundOff, totalAmount, notes || null]);
 
         const invoiceId = invoiceResult.lastInsertRowid;
 
@@ -316,10 +317,11 @@ export class InvoiceController {
         const roundOff = Math.round(totalBeforeRoundOff) - totalBeforeRoundOff;
         const totalAmount = totalBeforeRoundOff + roundOff;
 
+        const today = new Date().toISOString().split('T')[0];
         const invoiceResult = await run(`
-          INSERT INTO invoices (invoice_number, store_id, created_by, subtotal, cgst, sgst, igst, round_off, total_amount, notes, order_id) 
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [invoiceNumber, store_id, req.user!.id, subtotal, totalCgst, totalSgst, totalIgst, roundOff, totalAmount, notes || null, order_id]);
+          INSERT INTO invoices (invoice_number, store_id, invoice_date, created_by, subtotal, cgst, sgst, igst, round_off, total_amount, notes, order_id) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [invoiceNumber, store_id, today, req.user!.id, subtotal, totalCgst, totalSgst, totalIgst, roundOff, totalAmount, notes || null, order_id]);
 
         const invoiceId = invoiceResult.lastInsertRowid;
 

@@ -1,6 +1,6 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { initDatabase } from '../backend/src/config/database';
 
 // Import routes
@@ -24,23 +24,20 @@ import attendanceRoutes from '../backend/src/routes/attendance.routes';
 import salaryRoutes from '../backend/src/routes/salary.routes';
 import staffRoutes from '../backend/src/routes/staff.routes';
 
-dotenv.config();
-
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Initialize database on startup
+// Initialize database
 let dbInitialized = false;
-app.use(async (req, res, next) => {
+const ensureDb = async () => {
   if (!dbInitialized) {
     await initDatabase();
     dbInitialized = true;
   }
-  next();
-});
+};
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -68,10 +65,8 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Error handling
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Error:', err);
-  res.status(500).json({ success: false, message: 'Internal server error' });
-});
-
-export default app;
+// Vercel serverless handler
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  await ensureDb();
+  return app(req as any, res as any);
+}

@@ -10,6 +10,7 @@ export interface UserPayload {
 
 export interface AuthRequest extends Request {
   user?: UserPayload;
+  file?: { filename: string; [key: string]: unknown };
 }
 
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {

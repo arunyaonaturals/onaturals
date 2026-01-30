@@ -5,18 +5,38 @@ import { AuthRequest } from '../middleware/auth.middleware';
 export class StoreController {
   getAllStores = async (req: AuthRequest, res: Response) => {
     try {
-      const { area_id, is_active } = req.query;
-      let sql = `SELECT s.*, a.name as area_name, u.name as sales_captain_name
-                 FROM stores s LEFT JOIN areas a ON s.area_id = a.id
-                 LEFT JOIN users u ON a.sales_captain_id = u.id WHERE 1=1`;
+      const { area_id, is_active, page = '1', limit = '10' } = req.query;
+      const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
+
+      let baseSql = `FROM stores s LEFT JOIN areas a ON s.area_id = a.id
+                     LEFT JOIN users u ON a.sales_captain_id = u.id WHERE 1=1`;
       const params: any[] = [];
 
-      if (area_id) { sql += ' AND s.area_id = ?'; params.push(area_id); }
-      if (is_active !== undefined) { sql += ' AND s.is_active = ?'; params.push(is_active === 'true' ? 1 : 0); }
-      sql += ' ORDER BY s.name';
+      if (area_id) { baseSql += ' AND s.area_id = ?'; params.push(area_id); }
+      if (is_active !== undefined) { baseSql += ' AND s.is_active = ?'; params.push(is_active === 'true' ? 1 : 0); }
 
-      const stores = await query(sql, params);
-      res.json({ success: true, data: stores });
+      // Get total count for pagination
+      const countResult = await queryOne(`SELECT COUNT(*) as count ${baseSql}`, params);
+      const total = countResult?.count || 0;
+
+      // Get paginated data
+      const sql = `SELECT s.*, a.name as area_name, u.name as sales_captain_name 
+                   ${baseSql} 
+                   ORDER BY s.name 
+                   LIMIT ? OFFSET ?`;
+
+      const stores = await query(sql, [...params, parseInt(limit as string), offset]);
+
+      res.json({
+        success: true,
+        data: stores,
+        pagination: {
+          total,
+          page: parseInt(page as string),
+          limit: parseInt(limit as string),
+          pages: Math.ceil(total / parseInt(limit as string))
+        }
+      });
     } catch (error) {
       console.error('Get all stores error:', error);
       res.status(500).json({ success: false, message: 'Error fetching stores' });

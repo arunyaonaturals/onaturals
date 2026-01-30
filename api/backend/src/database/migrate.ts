@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 
 export const runMigrations = async () => {
   console.log('Running database migrations...');
-  
+
   await initDatabase();
 
   // Users table (username-based login)
@@ -118,6 +118,11 @@ export const runMigrations = async () => {
       FOREIGN KEY (area_id) REFERENCES areas(id)
     )
   `);
+
+  // Indexes for performance
+  await exec(`CREATE INDEX IF NOT EXISTS idx_stores_area_id ON stores(area_id)`);
+  await exec(`CREATE INDEX IF NOT EXISTS idx_areas_sales_captain_id ON areas(sales_captain_id)`);
+  await exec(`CREATE INDEX IF NOT EXISTS idx_stores_is_active ON stores(is_active)`);
 
   // Store Product Margins
   await exec(`
@@ -251,9 +256,9 @@ export const runMigrations = async () => {
   `);
 
   // Add columns to dispatches if missing (for new CREATE and for existing Turso DBs)
-  try { await run('ALTER TABLE dispatches ADD COLUMN packing_order_id INTEGER'); } catch (_) {}
-  try { await run('ALTER TABLE dispatches ADD COLUMN priority INTEGER DEFAULT 1'); } catch (_) {}
-  try { await run('ALTER TABLE dispatches ADD COLUMN is_small_order INTEGER DEFAULT 0'); } catch (_) {}
+  try { await run('ALTER TABLE dispatches ADD COLUMN packing_order_id INTEGER'); } catch (_) { }
+  try { await run('ALTER TABLE dispatches ADD COLUMN priority INTEGER DEFAULT 1'); } catch (_) { }
+  try { await run('ALTER TABLE dispatches ADD COLUMN is_small_order INTEGER DEFAULT 0'); } catch (_) { }
 
   // Dispatch Items table
   await exec(`

@@ -147,8 +147,10 @@ This clears Turso and fills it from your local SQLite. Run only when you intend 
 | Build fails | Vercel **Deployments** → failed build → **Build Logs**. Fix TypeScript or missing deps. |
 | "Failed to load dashboard data" | First load can take 10–15s (migrations). Wait or retry; ensure `TURSO_*` and `JWT_SECRET` are set in Vercel. Check **Functions** logs. |
 | Products / Stores very slow | Same cold start. App calls `/api/warmup` on load; open `/api/warmup` once after deploy to warm the instance. |
+| **404 on /stores or other pages** | SPA fallback: `vercel.json` must rewrite non-API, non-file paths to `/index.html`. Use the `rewrites` entry for `/((?!api/)(?!.*\..*).*)` → `/index.html`. |
+| **504 on stores or API** | Gateway timeout = serverless took too long (cold start + DB). Wait and retry, or open `/api/warmup` first. On Vercel Pro you can set `maxDuration: 60` in the API build config. |
 | 401 on login | `JWT_SECRET` set in Vercel; same secret used for signing. |
-| Blank page / wrong route | Vercel **routes** in `vercel.json` – `/api/*` → API, `/*` → frontend. |
+| Blank page / wrong route | Vercel **routes** in `vercel.json` – `/api/*` → API; **rewrites** send SPA routes to `/index.html`. |
 
 ---
 

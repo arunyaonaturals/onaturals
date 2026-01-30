@@ -14,7 +14,7 @@ const Stores: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
-  
+
   const [stores, setStores] = useState<any[]>([]);
   const [areas, setAreas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,17 +29,29 @@ const Stores: React.FC = () => {
     name: '', address: '', city: '', state: '', pincode: '', phone: '', email: '', gst_number: '', contact_person: '', area_id: '',
   });
 
-  useEffect(() => { fetchStores(); fetchAreas(); }, []);
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 10,
+  });
+  const [totalRows, setTotalRows] = useState(0);
+
+  useEffect(() => { fetchStores(); fetchAreas(); }, [paginationModel]);
 
   const fetchStores = async () => {
     try {
-      const response = await storesAPI.getAll({ is_active: 'true' });
+      setLoading(true);
+      const response = await storesAPI.getAll({
+        is_active: 'true',
+        page: paginationModel.page + 1,
+        limit: paginationModel.pageSize
+      });
       setStores(response.data.data);
+      setTotalRows(response.data.pagination?.total || response.data.data.length);
     } catch (error) { toast.error('Failed to load stores'); } finally { setLoading(false); }
   };
 
   const fetchAreas = async () => {
-    try { const response = await areasAPI.getAll(); setAreas(response.data.data); } catch (error) {}
+    try { const response = await areasAPI.getAll(); setAreas(response.data.data); } catch (error) { }
   };
 
   const handleSearch = async () => {
@@ -48,6 +60,7 @@ const Stores: React.FC = () => {
       setLoading(true);
       const response = await storesAPI.search(searchQuery);
       setStores(response.data.data);
+      setTotalRows(response.data.data.length);
     } catch (error) { toast.error('Search failed'); } finally { setLoading(false); }
   };
 
@@ -93,11 +106,11 @@ const Stores: React.FC = () => {
     { field: 'city', headerName: 'City', width: isMobile ? 80 : 120 },
     ...(!isTablet ? [{ field: 'gst_number', headerName: 'GST', width: 150 }] : []),
     ...(!isMobile ? [{ field: 'phone', headerName: 'Phone', width: 130 }] : []),
-    { 
-      field: 'is_active', 
-      headerName: 'Status', 
-      width: isMobile ? 70 : 100, 
-      renderCell: (params) => <Chip label={params.value ? 'Active' : 'Inactive'} color={params.value ? 'success' : 'default'} size="small" sx={{ fontSize: { xs: '0.65rem', sm: '0.8125rem' } }} /> 
+    {
+      field: 'is_active',
+      headerName: 'Status',
+      width: isMobile ? 70 : 100,
+      renderCell: (params) => <Chip label={params.value ? 'Active' : 'Inactive'} color={params.value ? 'success' : 'default'} size="small" sx={{ fontSize: { xs: '0.65rem', sm: '0.8125rem' } }} />
     },
     {
       field: 'actions', headerName: 'Actions', width: isMobile ? 60 : 120, sortable: false,
@@ -128,35 +141,38 @@ const Stores: React.FC = () => {
           </Button>
         )}
       </Box>
-      
+
       <Card sx={{ mb: 2 }}>
         <CardContent sx={{ py: 1.5, px: { xs: 1.5, sm: 2 } }}>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={6}>
-              <TextField 
-                fullWidth 
+              <TextField
+                fullWidth
                 size={isMobile ? "small" : "medium"}
-                placeholder="Search stores..." 
-                value={searchQuery} 
-                onChange={(e) => setSearchQuery(e.target.value)} 
+                placeholder="Search stores..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                InputProps={{ endAdornment: <IconButton onClick={handleSearch} size={isMobile ? "small" : "medium"}><SearchIcon /></IconButton> }} 
+                InputProps={{ endAdornment: <IconButton onClick={handleSearch} size={isMobile ? "small" : "medium"}><SearchIcon /></IconButton> }}
               />
             </Grid>
           </Grid>
         </CardContent>
       </Card>
-      
+
       <Card>
         <Box sx={{ width: '100%', overflowX: 'auto' }}>
-          <DataGrid 
-            rows={stores} 
-            columns={columns} 
-            loading={loading} 
-            pageSizeOptions={[10, 25]} 
-            initialState={{ pagination: { paginationModel: { pageSize: 10 } } }} 
-            autoHeight 
-            disableRowSelectionOnClick 
+          <DataGrid
+            rows={stores}
+            columns={columns}
+            loading={loading}
+            rowCount={totalRows}
+            paginationMode="server"
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
+            pageSizeOptions={[10, 25, 50]}
+            autoHeight
+            disableRowSelectionOnClick
             sx={{
               '& .MuiDataGrid-cell': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
               '& .MuiDataGrid-columnHeaderTitle': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },

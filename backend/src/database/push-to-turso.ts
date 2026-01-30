@@ -115,36 +115,39 @@ async function pushDataToTurso() {
         const placeholders = columns.map(() => '?').join(', ');
         const notNullCols = columns.filter(c => c.notnull === 1).map(c => c.name);
 
+        const getVal = (r: Record<string, unknown>, colName: string): unknown => {
+          const raw = r[colName];
+          if (raw !== null && raw !== undefined) return raw;
+          if (table === 'invoices' && colName === 'invoice_date') {
+            const created = r['created_at'];
+            if (created) return typeof created === 'string' ? created.split('T')[0].split(' ')[0] : new Date().toISOString().split('T')[0];
+            return new Date().toISOString().split('T')[0];
+          }
+          if (table === 'dispatches' && colName === 'dispatch_number') {
+            return `DISP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          }
+          if (table === 'invoice_items' && colName === 'total_price') {
+            const qty = Number(r['quantity']) || 0;
+            const price = Number(r['unit_price']) || 0;
+            const discount = Number(r['discount']) || 0;
+            return qty * price - discount;
+          }
+          const colInfo = columns.find(c => c.name === colName);
+          if (colInfo?.dflt_value != null) return colInfo.dflt_value;
+          return null;
+        };
+
         let inserted = 0;
         let skipped = 0;
         for (const row of localRows.rows) {
-          // Check for NULL in required columns
+          const r = row as Record<string, unknown>;
+          // Skip row if any required column has no value (after defaults)
           let hasNullRequired = false;
           for (const col of notNullCols) {
-            if (row[col] === null || row[col] === undefined) {
-              // Provide defaults for specific columns
-              if (table === 'invoices' && col === 'invoice_date') {
-                row[col] = row['created_at'] || new Date().toISOString().split('T')[0];
-              } else if (table === 'dispatches' && col === 'dispatch_number') {
-                row[col] = `DISP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-              } else if (table === 'invoice_items' && col === 'total_price') {
-                const qty: number = Number(row['quantity']) || 0;
-                const price: number = Number(row['unit_price']) || 0;
-                const discount: number = Number(row['discount']) || 0;
-                row[col] = (qty * price - discount) as number;
-              } else if (table === 'dispatch_items' && col === 'invoice_item_id') {
-                // Skip if invoice_item_id is NULL - can't generate this
-                hasNullRequired = true;
-                break;
-              } else {
-                const colInfo = columns.find(c => c.name === col);
-                if (colInfo?.dflt_value !== null && colInfo?.dflt_value !== undefined) {
-                  row[col] = colInfo.dflt_value;
-                } else {
-                  hasNullRequired = true;
-                  break;
-                }
-              }
+            const resolved = getVal(r, col);
+            if (resolved === null || resolved === undefined) {
+              hasNullRequired = true;
+              break;
             }
           }
 
@@ -154,10 +157,12 @@ async function pushDataToTurso() {
           }
 
           const values = columns.map(c => {
-            const val = row[c.name];
-            // Handle date strings
-            if (c.type?.toUpperCase().includes('DATE') && val) {
-              return typeof val === 'string' ? val.split(' ')[0] : val;
+            const val = getVal(r, c.name);
+            // Handle date strings: ensure YYYY-MM-DD
+            if (c.type?.toUpperCase().includes('DATE') && val != null) {
+              if (typeof val === 'string') return val.split('T')[0].split(' ')[0];
+              if (typeof val === 'number') return new Date(val).toISOString().split('T')[0];
+              return val;
             }
             return val;
           });

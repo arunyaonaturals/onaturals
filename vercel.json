@@ -24,8 +24,17 @@
       "dest": "/api/index.ts"
     },
     {
+      "handle": "filesystem"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/frontend/$1"
+      "dest": "/index.html"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/((?!api/)(?!.*\\..*).*)",
+      "destination": "/index.html"
     }
   ]
 }

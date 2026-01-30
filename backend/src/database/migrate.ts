@@ -532,6 +532,28 @@ export const runMigrations = async () => {
     )
   `);
 
+  // Classification thresholds table (for store volume classification)
+  await exec(`
+    CREATE TABLE IF NOT EXISTS classification_thresholds (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      high_volume_min REAL DEFAULT 100000,
+      medium_volume_min REAL DEFAULT 50000,
+      period_days INTEGER DEFAULT 30,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Insert default classification thresholds if not exists
+  const existingThresholds = await queryOne('SELECT id FROM classification_thresholds LIMIT 1');
+  if (!existingThresholds) {
+    await run('INSERT INTO classification_thresholds (high_volume_min, medium_volume_min, period_days) VALUES (?, ?, ?)', [
+      100000,
+      50000,
+      30
+    ]);
+    console.log('Default classification thresholds created');
+  }
+
   // Insert default admin user if not exists
   const existingAdmin = await queryOne('SELECT id FROM users WHERE username = ?', ['sanjay']);
   if (!existingAdmin) {

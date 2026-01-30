@@ -76,7 +76,7 @@ export class ProductionController {
         FROM orders o
         INNER JOIN stores s ON o.store_id = s.id
         INNER JOIN users u ON o.created_by = u.id
-        WHERE o.status IN ('submitted', 'approved')
+        WHERE o.status IN ('draft', 'submitted', 'approved')
         ORDER BY o.created_at DESC
       `);
 
@@ -112,7 +112,7 @@ export class ProductionController {
         FROM order_items oi
         INNER JOIN orders o ON oi.order_id = o.id
         INNER JOIN products p ON oi.product_id = p.id
-        WHERE o.status IN ('submitted', 'approved')
+        WHERE o.status IN ('draft', 'submitted', 'approved')
         GROUP BY oi.product_id, p.name, p.weight, p.weight_unit, p.stock_quantity
       `);
 

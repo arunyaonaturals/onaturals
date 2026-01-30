@@ -114,15 +114,18 @@ export class DispatchController {
         const totalQuantity = items.reduce((sum: number, item: any) => sum + item.quantity, 0);
         const isSmallOrder = totalProducts <= 3 || totalQuantity <= 5;
 
-        const dispatchResult = await run('INSERT INTO dispatches (invoice_id, packing_order_id, priority, is_small_order, notes) VALUES (?, ?, ?, ?, ?)',
-          [invoice_id, packing_order_id || null, priority || 1, isSmallOrder ? 1 : 0, notes || null]);
+        const dispatchNumber = `DISP-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+        const dispatchDate = new Date().toISOString().split('T')[0];
+        
+        const dispatchResult = await run('INSERT INTO dispatches (dispatch_number, invoice_id, dispatch_date, packing_order_id, priority, is_small_order, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [dispatchNumber, invoice_id, dispatchDate, packing_order_id || null, priority || 1, isSmallOrder ? 1 : 0, notes || null]);
         const dispatchId = dispatchResult.lastInsertRowid;
 
         const batchAllocations: any[] = [];
 
         for (const item of items) {
-          const dispatchItemResult = await run('INSERT INTO dispatch_items (dispatch_id, product_id, quantity) VALUES (?, ?, ?)', 
-            [dispatchId, item.product_id, item.quantity]);
+          const dispatchItemResult = await run('INSERT INTO dispatch_items (dispatch_id, invoice_item_id, product_id, quantity) VALUES (?, ?, ?, ?)', 
+            [dispatchId, item.invoice_item_id || 0, item.product_id, item.quantity]);
           const dispatchItemId = dispatchItemResult.lastInsertRowid;
 
           // FIFO batch allocation

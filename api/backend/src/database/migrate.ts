@@ -514,6 +514,36 @@ export const runMigrations = async () => {
     )
   `);
 
+  // Add created_by to packing_orders if missing
+  try { await run('ALTER TABLE packing_orders ADD COLUMN created_by INTEGER'); } catch (_) {}
+
+  // Packing Order Items table
+  await exec(`
+    CREATE TABLE IF NOT EXISTS packing_order_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      packing_order_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      quantity INTEGER NOT NULL,
+      packed_quantity INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (packing_order_id) REFERENCES packing_orders(id) ON DELETE CASCADE,
+      FOREIGN KEY (product_id) REFERENCES products(id)
+    )
+  `);
+
+  // Combined Dispatches table (for combining small orders)
+  await exec(`
+    CREATE TABLE IF NOT EXISTS combined_dispatches (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      dispatch_ids TEXT NOT NULL,
+      priority INTEGER DEFAULT 1,
+      status TEXT DEFAULT 'pending',
+      notes TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   // Attendance table
   await exec(`
     CREATE TABLE IF NOT EXISTS attendance (

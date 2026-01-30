@@ -342,20 +342,25 @@ export class InvoiceController {
         // Auto-create dispatch
         const isSmallOrder = totalAmount < 5000 ? 1 : 0; // Small order threshold
         const priority = totalAmount >= 50000 ? 3 : (totalAmount >= 20000 ? 2 : 1); // Priority based on amount
+        const dispatchNumber = `DISP-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+        const dispatchDate = new Date().toISOString().split('T')[0];
         
         const dispatchResult = await run(`
-          INSERT INTO dispatches (invoice_id, status, priority, is_small_order, notes) 
-          VALUES (?, 'pending', ?, ?, ?)
-        `, [invoiceId, priority, isSmallOrder, `Auto-created from order ${order.order_number}`]);
+          INSERT INTO dispatches (dispatch_number, invoice_id, dispatch_date, status, priority, is_small_order, notes) 
+          VALUES (?, ?, ?, 'pending', ?, ?, ?)
+        `, [dispatchNumber, invoiceId, dispatchDate, priority, isSmallOrder, `Auto-created from order ${order.order_number}`]);
 
         const dispatchId = dispatchResult.lastInsertRowid;
 
-        // Add dispatch items
-        for (const item of processedItems) {
+        // Get invoice items for dispatch
+        const invoiceItemsForDispatch = await query('SELECT id, product_id, quantity FROM invoice_items WHERE invoice_id = ?', [invoiceId]);
+
+        // Add dispatch items with invoice_item_id
+        for (const invItem of invoiceItemsForDispatch) {
           await run(`
-            INSERT INTO dispatch_items (dispatch_id, product_id, quantity) 
-            VALUES (?, ?, ?)
-          `, [dispatchId, item.product_id, item.quantity]);
+            INSERT INTO dispatch_items (dispatch_id, invoice_item_id, product_id, quantity) 
+            VALUES (?, ?, ?, ?)
+          `, [dispatchId, invItem.id, invItem.product_id, invItem.quantity]);
         }
 
         return { invoiceId, invoiceNumber, totalAmount, dispatchId };

@@ -13,7 +13,8 @@
       "src": "api/index.ts",
       "use": "@vercel/node@3.0.11",
       "config": {
-        "includeFiles": ["backend/**/*"]
+        "includeFiles": ["backend/**/*"],
+        "maxLambdaSize": "50mb"
       }
     }
   ],
@@ -26,5 +27,10 @@
       "src": "/(.*)",
       "dest": "/frontend/$1"
     }
-  ]
+  ],
+  "functions": {
+    "api/index.ts": {
+      "runtime": "@vercel/node@3.0.11"
+    }
+  }
 }

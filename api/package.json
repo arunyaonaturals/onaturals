@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Vercel serverless API for Arunya ERP",
   "main": "index.ts",
+  "scripts": {
+    "build": "echo 'Dependencies installed'"
+  },
   "dependencies": {
     "@libsql/client": "^0.5.0",
     "@vercel/node": "^3.0.11",

@@ -8,13 +8,14 @@ export class OrderController {
     try {
       const { store_id, status, created_by, start_date, end_date } = req.query;
       let sql = `
-        SELECT o.*, s.name as store_name, s.city as store_city, u.name as created_by_name, 
-               a.name as area_name, i.invoice_number
+        SELECT o.id, o.order_number, o.store_id, o.status, o.total_amount, o.notes,
+               o.created_by, o.created_at, o.updated_at,
+               s.name as store_name, s.city as store_city, u.name as created_by_name, 
+               a.name as area_name
         FROM orders o 
         INNER JOIN stores s ON o.store_id = s.id
         INNER JOIN users u ON o.created_by = u.id 
         LEFT JOIN areas a ON s.area_id = a.id 
-        LEFT JOIN invoices i ON o.invoice_id = i.id
         WHERE 1=1
       `;
       const params: any[] = [];
@@ -27,7 +28,7 @@ export class OrderController {
       sql += ' ORDER BY o.created_at DESC';
 
       const orders = await query(sql, params);
-      res.json({ success: true, data: orders });
+      res.json({ success: true, data: orders || [] });
     } catch (error) {
       console.error('Get all orders error:', error);
       res.status(500).json({ success: false, message: 'Error fetching orders' });
@@ -40,16 +41,17 @@ export class OrderController {
       if (!req.user) return res.status(401).json({ success: false, message: 'Not authenticated' });
 
       const orders = await query(`
-        SELECT o.*, s.name as store_name, s.city as store_city, a.name as area_name, i.invoice_number
+        SELECT o.id, o.order_number, o.store_id, o.status, o.total_amount, o.notes,
+               o.created_by, o.created_at, o.updated_at,
+               s.name as store_name, s.city as store_city, a.name as area_name
         FROM orders o
         INNER JOIN stores s ON o.store_id = s.id 
         LEFT JOIN areas a ON s.area_id = a.id
-        LEFT JOIN invoices i ON o.invoice_id = i.id
         WHERE o.created_by = ? 
         ORDER BY o.created_at DESC
       `, [req.user.id]);
 
-      res.json({ success: true, data: orders });
+      res.json({ success: true, data: orders || [] });
     } catch (error) {
       console.error('Get my orders error:', error);
       res.status(500).json({ success: false, message: 'Error fetching orders' });
@@ -60,7 +62,9 @@ export class OrderController {
   getSubmittedOrders = async (req: AuthRequest, res: Response) => {
     try {
       const orders = await query(`
-        SELECT o.*, s.name as store_name, s.city as store_city, s.address as store_address,
+        SELECT o.id, o.order_number, o.store_id, o.status, o.total_amount, o.notes,
+               o.created_by, o.created_at, o.updated_at,
+               s.name as store_name, s.city as store_city, s.address as store_address,
                s.gst_number as store_gst, u.name as created_by_name, a.name as area_name
         FROM orders o
         INNER JOIN stores s ON o.store_id = s.id
@@ -70,7 +74,7 @@ export class OrderController {
         ORDER BY o.created_at ASC
       `);
 
-      res.json({ success: true, data: orders });
+      res.json({ success: true, data: orders || [] });
     } catch (error) {
       console.error('Get submitted orders error:', error);
       res.status(500).json({ success: false, message: 'Error fetching submitted orders' });
@@ -82,7 +86,9 @@ export class OrderController {
     try {
       const { id } = req.params;
       const order = await queryOne(`
-        SELECT o.*, s.name as store_name, s.address as store_address, s.gst_number as store_gst,
+        SELECT o.id, o.order_number, o.store_id, o.status, o.total_amount, o.notes,
+               o.created_by, o.created_at, o.updated_at,
+               s.name as store_name, s.address as store_address, s.gst_number as store_gst,
                s.phone as store_phone, s.city as store_city, s.state as store_state,
                u.name as created_by_name, a.name as area_name
         FROM orders o 
@@ -95,7 +101,10 @@ export class OrderController {
       if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
       const items = await query(`
-        SELECT oi.*, p.name as product_name, p.hsn_code, p.weight, p.weight_unit, p.mrp, p.gst_rate, p.stock_quantity
+        SELECT oi.id, oi.order_id, oi.product_id, oi.quantity, 
+               COALESCE(oi.store_stock, oi.stock_qty, 0) as store_stock,
+               COALESCE(oi.unit_price, 0) as unit_price, COALESCE(oi.total_price, 0) as total_price,
+               p.name as product_name, p.hsn_code, p.weight, p.weight_unit, p.mrp, p.gst_rate, p.stock_quantity
         FROM order_items oi
         INNER JOIN products p ON oi.product_id = p.id 
         WHERE oi.order_id = ?

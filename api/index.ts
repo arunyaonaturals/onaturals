@@ -53,23 +53,71 @@ app.use('/api/staff', staffRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    dbInitialized,
+    env: {
+      hasTursoUrl: !!process.env.TURSO_DATABASE_URL,
+      hasTursoToken: !!process.env.TURSO_AUTH_TOKEN,
+      hasJwtSecret: !!process.env.JWT_SECRET
+    }
+  });
 });
 
-// Initialize database flag
+// Debug endpoint to test database
+app.get('/api/debug/db', async (req, res) => {
+  try {
+    const { queryOne } = await import('../backend/src/config/database');
+    const userCount = await queryOne('SELECT COUNT(*) as count FROM users');
+    res.json({ 
+      success: true, 
+      userCount: userCount?.count || 0,
+      message: 'Database connection working'
+    });
+  } catch (error: any) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
+// Initialize database flag (persists across invocations in same container)
 let dbInitialized = false;
+let dbInitPromise: Promise<void> | null = null;
 
 // Vercel serverless handler
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Run migrations once on first request
-  if (!dbInitialized) {
+  // Run migrations once (with promise to prevent concurrent runs)
+  if (!dbInitialized && !dbInitPromise) {
+    dbInitPromise = (async () => {
+      try {
+        console.log('Initializing database and running migrations...');
+        await runMigrations();
+        dbInitialized = true;
+        console.log('Database initialized successfully');
+      } catch (error: any) {
+        console.error('Database initialization error:', error);
+        console.error('Error details:', error?.message, error?.stack);
+        // Don't throw - let it retry on next request
+        dbInitPromise = null;
+        throw error;
+      }
+    })();
+  }
+
+  // Wait for initialization if in progress
+  if (dbInitPromise) {
     try {
-      await runMigrations();
-      dbInitialized = true;
-      console.log('Database initialized successfully');
+      await dbInitPromise;
     } catch (error) {
-      console.error('Database initialization error:', error);
-      return res.status(500).json({ success: false, message: 'Database initialization failed' });
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Database initialization failed. Please check server logs.',
+        error: process.env.NODE_ENV === 'development' ? String(error) : undefined
+      });
     }
   }
   

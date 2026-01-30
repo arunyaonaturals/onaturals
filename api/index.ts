@@ -51,7 +51,7 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/salaries', salaryRoutes);
 app.use('/api/staff', staffRoutes);
 
-// Health check
+// Health check (fast – does not wait for DB init)
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
@@ -63,6 +63,11 @@ app.get('/api/health', (req, res) => {
       hasJwtSecret: !!process.env.JWT_SECRET
     }
   });
+});
+
+// Warmup: run migrations so first real request is fast. Call after deploy: GET /api/warmup
+app.get('/api/warmup', (req, res) => {
+  res.json({ ok: true, dbInitialized, message: 'Ready' });
 });
 
 // Debug endpoint to test database
@@ -90,6 +95,14 @@ let dbInitPromise: Promise<void> | null = null;
 
 // Vercel serverless handler
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const pathname = req.url ? new URL(req.url, 'http://localhost').pathname : '';
+  const isHealth = pathname === '/api/health';
+
+  // Health check returns immediately so it doesn't trigger slow migration on every ping
+  if (isHealth) {
+    return app(req as any, res as any);
+  }
+
   // Run migrations once (with promise to prevent concurrent runs)
   if (!dbInitialized && !dbInitPromise) {
     dbInitPromise = (async () => {
@@ -101,14 +114,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       } catch (error: any) {
         console.error('Database initialization error:', error);
         console.error('Error details:', error?.message, error?.stack);
-        // Don't throw - let it retry on next request
         dbInitPromise = null;
         throw error;
       }
     })();
   }
 
-  // Wait for initialization if in progress
+  // Wait for initialization (all routes except health)
   if (dbInitPromise) {
     try {
       await dbInitPromise;
@@ -120,6 +132,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
   }
-  
+
   return app(req as any, res as any);
 }

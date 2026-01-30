@@ -102,8 +102,12 @@ Apply to **Production** (and Preview if you want).
 
 ### After first deploy
 
-- **Migrations** run automatically on the first API request (see `api/index.ts`).
+- **Migrations** run on the first API request that needs the DB (dashboard, products, etc.). That first request can take **10–15 seconds** (cold start + Turso).
+- The app calls **`/api/warmup`** on load so the serverless instance is ready sooner; dashboard also retries once if the first load fails.
 - Your Turso DB will have empty tables; to copy data from local SQLite, use the push script (see section 6).
+
+**Optional:** After deploy, open once in a browser to warm the API:
+`https://your-project.vercel.app/api/warmup`
 
 ---
 
@@ -111,7 +115,8 @@ Apply to **Production** (and Preview if you want).
 
 - **App (frontend):** `https://your-project.vercel.app`
 - **API:** `https://your-project.vercel.app/api`
-- **Health check:** `https://your-project.vercel.app/api/health`
+- **Health (fast):** `https://your-project.vercel.app/api/health`
+- **Warmup (runs migrations):** `https://your-project.vercel.app/api/warmup`
 
 The frontend is configured to call `/api`, so it works on the same domain. No extra `REACT_APP_API_URL` is needed for production unless you use a custom API URL.
 
@@ -140,7 +145,8 @@ This clears Turso and fills it from your local SQLite. Run only when you intend 
 | Issue | What to check |
 |-------|----------------|
 | Build fails | Vercel **Deployments** → failed build → **Build Logs**. Fix TypeScript or missing deps. |
-| "Failed to load dashboard data" | API and Turso env vars set in Vercel; check **Functions** logs for errors. |
+| "Failed to load dashboard data" | First load can take 10–15s (migrations). Wait or retry; ensure `TURSO_*` and `JWT_SECRET` are set in Vercel. Check **Functions** logs. |
+| Products / Stores very slow | Same cold start. App calls `/api/warmup` on load; open `/api/warmup` once after deploy to warm the instance. |
 | 401 on login | `JWT_SECRET` set in Vercel; same secret used for signing. |
 | Blank page / wrong route | Vercel **routes** in `vercel.json` – `/api/*` → API, `/*` → frontend. |
 

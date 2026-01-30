@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
 import { useAuth } from './context/AuthContext';
+import api from './services/api';
 import Layout from './components/common/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -57,6 +58,11 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const App: React.FC = () => {
   const { isAuthenticated, loading } = useAuth();
+
+  // Warm up serverless API on first load so dashboard/products/stores load faster
+  useEffect(() => {
+    api.get('/warmup').catch(() => {});
+  }, []);
 
   if (loading) {
     return (

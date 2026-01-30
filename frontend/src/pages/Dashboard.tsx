@@ -126,11 +126,16 @@ const Dashboard: React.FC = () => {
     fetchLowStockAlerts();
   }, []);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (retry = false) => {
     try {
       const response = await reportsAPI.getDashboard();
       setData(response.data.data);
     } catch (error) {
+      if (!retry) {
+        // First load can be slow (migrations); retry once after 3s
+        setTimeout(() => fetchDashboardData(true), 3000);
+        return;
+      }
       toast.error('Failed to load dashboard data');
     } finally {
       setLoading(false);
@@ -161,8 +166,11 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+      <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" minHeight="400px" gap={2}>
         <CircularProgress />
+        <Typography variant="body2" color="text.secondary">
+          First load may take 10–15 seconds…
+        </Typography>
       </Box>
     );
   }

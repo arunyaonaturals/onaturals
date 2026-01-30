@@ -1,20 +1,56 @@
 import { Response } from 'express';
-import { query, queryOne, run } from '../config/database';
+import { query, queryOne, run, batch } from '../config/database';
 import { AuthRequest } from '../middleware/auth.middleware';
 
 export class ProductController {
   getAllProducts = async (req: AuthRequest, res: Response) => {
     try {
-      const { category_id, is_active } = req.query;
-      let sql = `SELECT p.*, c.name as category_name FROM products p LEFT JOIN product_categories c ON p.category_id = c.id WHERE 1=1`;
+      const { category_id, is_active, page = '1', limit = '100' } = req.query;
+      const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
+
+      let baseSql = `FROM products p LEFT JOIN product_categories c ON p.category_id = c.id WHERE 1=1`;
+      let countSql = `FROM products p WHERE 1=1`;
       const params: any[] = [];
+      const countParams: any[] = [];
 
-      if (category_id) { sql += ' AND p.category_id = ?'; params.push(category_id); }
-      if (is_active !== undefined) { sql += ' AND p.is_active = ?'; params.push(is_active === 'true' ? 1 : 0); }
-      sql += ' ORDER BY p.name';
+      if (category_id) { 
+        baseSql += ' AND p.category_id = ?'; 
+        countSql += ' AND p.category_id = ?';
+        params.push(category_id); 
+        countParams.push(category_id);
+      }
+      if (is_active !== undefined) { 
+        baseSql += ' AND p.is_active = ?'; 
+        countSql += ' AND p.is_active = ?';
+        params.push(is_active === 'true' ? 1 : 0); 
+        countParams.push(is_active === 'true' ? 1 : 0);
+      }
 
-      const products = await query(sql, params);
-      res.json({ success: true, data: products });
+      // Get paginated data and total count in a single round-trip
+      const queries = [
+        { sql: `SELECT COUNT(*) as count ${countSql}`, args: countParams },
+        { 
+          sql: `SELECT p.*, c.name as category_name 
+                ${baseSql} 
+                ORDER BY p.name 
+                LIMIT ? OFFSET ?`, 
+          args: [...params, parseInt(limit as string), offset] 
+        }
+      ];
+
+      const [countRows, products] = await batch(queries);
+      const total = countRows[0]?.count || 0;
+
+      res.json({ 
+        success: true, 
+        data: products,
+        pagination: {
+          total,
+          page: parseInt(page as string),
+          limit: parseInt(limit as string),
+          pages: Math.ceil(total / parseInt(limit as string))
+        }
+      });
     } catch (error) {
       console.error('Get all products error:', error);
       res.status(500).json({ success: false, message: 'Error fetching products' });

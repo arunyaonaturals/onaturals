@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { query, queryOne, run } from '../config/database';
+import { query, queryOne, run, batch } from '../config/database';
 import { AuthRequest } from '../middleware/auth.middleware';
 
 export class ReportController {
@@ -267,40 +267,51 @@ export class ReportController {
       firstDayOfMonth.setDate(1);
       const monthStart = firstDayOfMonth.toISOString().split('T')[0];
 
-      const salesStats = await queryOne(`
-        SELECT 
-          COALESCE(COUNT(*), 0) as total_invoices, 
-          COALESCE(SUM(total_amount), 0) as total_sales,
-          COALESCE(SUM(CASE WHEN payment_status = 'pending' THEN total_amount ELSE 0 END), 0) as pending_payments
-        FROM invoices WHERE status != 'cancelled' AND date(created_at) >= ?
-      `, [monthStart]);
+      const queries = [
+        {
+          sql: `SELECT 
+            COALESCE(COUNT(*), 0) as total_invoices, 
+            COALESCE(SUM(total_amount), 0) as total_sales,
+            COALESCE(SUM(CASE WHEN payment_status = 'pending' THEN total_amount ELSE 0 END), 0) as pending_payments
+          FROM invoices WHERE status != 'cancelled' AND date(created_at) >= ?`,
+          args: [monthStart]
+        },
+        {
+          sql: `SELECT 
+            COALESCE(COUNT(*), 0) as pending_dispatches, 
+            COALESCE(SUM(CASE WHEN is_small_order = 1 THEN 1 ELSE 0 END), 0) as small_orders
+          FROM dispatches WHERE status IN ('pending', 'ready')`,
+          args: []
+        },
+        {
+          sql: `SELECT 
+            COALESCE(COUNT(*), 0) as pending_vendor_payments, 
+            COALESCE(SUM(total_amount), 0) as total_vendor_dues
+          FROM raw_material_receipts WHERE payment_status = 'pending'`,
+          args: []
+        },
+        {
+          sql: `SELECT 
+            COALESCE(SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END), 0) as present_today,
+            COALESCE(SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END), 0) as absent_today
+          FROM attendance WHERE date = ?`,
+          args: [today]
+        },
+        {
+          sql: `SELECT COALESCE(COUNT(*), 0) as pending_packing 
+          FROM packing_orders 
+          WHERE status IN ('pending', 'in_progress')`,
+          args: []
+        }
+      ];
 
-      const dispatchStats = await queryOne(`
-        SELECT 
-          COALESCE(COUNT(*), 0) as pending_dispatches, 
-          COALESCE(SUM(CASE WHEN is_small_order = 1 THEN 1 ELSE 0 END), 0) as small_orders
-        FROM dispatches WHERE status IN ('pending', 'ready')
-      `);
-
-      const vendorStats = await queryOne(`
-        SELECT 
-          COALESCE(COUNT(*), 0) as pending_vendor_payments, 
-          COALESCE(SUM(total_amount), 0) as total_vendor_dues
-        FROM raw_material_receipts WHERE payment_status = 'pending'
-      `);
-
-      const attendanceStats = await queryOne(`
-        SELECT 
-          COALESCE(SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END), 0) as present_today,
-          COALESCE(SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END), 0) as absent_today
-        FROM attendance WHERE date = ?
-      `, [today]);
-
-      const packingStats = await queryOne(`
-        SELECT COALESCE(COUNT(*), 0) as pending_packing 
-        FROM packing_orders 
-        WHERE status IN ('pending', 'in_progress')
-      `);
+      const results = await batch(queries);
+      
+      const salesStats = results[0][0];
+      const dispatchStats = results[1][0];
+      const vendorStats = results[2][0];
+      const attendanceStats = results[3][0];
+      const packingStats = results[4][0];
 
       res.json({ 
         success: true, 

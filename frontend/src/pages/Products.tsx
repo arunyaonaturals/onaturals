@@ -85,15 +85,30 @@ const Products: React.FC = () => {
     gst_rate: '',
   });
 
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 15,
+  });
+  const [totalRows, setTotalRows] = useState(0);
+
   useEffect(() => {
     fetchProducts();
+  }, [paginationModel]);
+
+  useEffect(() => {
     fetchRawMaterials();
   }, []);
 
   const fetchProducts = async () => {
     try {
-      const response = await productsAPI.getAll({ is_active: 'true' });
+      setLoading(true);
+      const response = await productsAPI.getAll({ 
+        is_active: 'true',
+        page: paginationModel.page + 1,
+        limit: paginationModel.pageSize
+      });
       setProducts(response.data.data);
+      setTotalRows(response.data.pagination?.total || response.data.data.length);
     } catch (error) {
       toast.error('Failed to load products');
     } finally {
@@ -363,24 +378,23 @@ const Products: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card>
-        <Box sx={{ width: '100%', overflowX: 'auto' }}>
-          <DataGrid
-            rows={products}
-            columns={columns}
-            loading={loading}
-            pageSizeOptions={[15, 25, 50, 100]}
-            initialState={{
-              pagination: { paginationModel: { pageSize: isMobile ? 15 : 100 } },
-            }}
-            autoHeight
-            disableRowSelectionOnClick
-            sx={{
-              '& .MuiDataGrid-cell': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
-              '& .MuiDataGrid-columnHeaderTitle': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
-            }}
-          />
-        </Box>
+      <Card sx={{ height: 650, width: '100%' }}>
+        <DataGrid
+          rows={products}
+          columns={columns}
+          loading={loading}
+          rowCount={totalRows}
+          paginationMode="server"
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          pageSizeOptions={[15, 25, 50, 100]}
+          disableRowSelectionOnClick
+          sx={{
+            border: 'none',
+            '& .MuiDataGrid-cell': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
+            '& .MuiDataGrid-columnHeaderTitle': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
+          }}
+        />
       </Card>
 
       {/* View Product Dialog (Mobile) */}

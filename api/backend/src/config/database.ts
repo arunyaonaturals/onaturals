@@ -68,6 +68,13 @@ export const exec = async (sql: string): Promise<void> => {
   }
 };
 
+// Execute multiple statements in a single round-trip
+export const batch = async (queries: { sql: string, args: any[] }[]): Promise<any[]> => {
+  const database = getDb();
+  const results = await database.batch(queries);
+  return results.map(r => r.rows as any[]);
+};
+
 // Transaction helper
 export const transaction = async <T>(fn: () => Promise<T>): Promise<T> => {
   const database = getDb();

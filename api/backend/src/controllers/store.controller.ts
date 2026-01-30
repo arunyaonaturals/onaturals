@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { query, queryOne, run } from '../config/database';
+import { query, queryOne, run, batch } from '../config/database';
 import { AuthRequest } from '../middleware/auth.middleware';
 
 export class StoreController {
@@ -27,17 +27,20 @@ export class StoreController {
         countParams.push(is_active === 'true' ? 1 : 0);
       }
 
-      // Get total count for pagination (faster without joins)
-      const countResult = await queryOne(`SELECT COUNT(*) as count ${countSql}`, countParams);
-      const total = countResult?.count || 0;
+      // Get paginated data and total count in a single round-trip
+      const queries = [
+        { sql: `SELECT COUNT(*) as count ${countSql}`, args: countParams },
+        { 
+          sql: `SELECT s.*, a.name as area_name, u.name as sales_captain_name 
+                ${baseSql} 
+                ORDER BY s.name 
+                LIMIT ? OFFSET ?`, 
+          args: [...params, parseInt(limit as string), offset] 
+        }
+      ];
 
-      // Get paginated data
-      const sql = `SELECT s.*, a.name as area_name, u.name as sales_captain_name 
-                   ${baseSql} 
-                   ORDER BY s.name 
-                   LIMIT ? OFFSET ?`;
-
-      const stores = await query(sql, [...params, parseInt(limit as string), offset]);
+      const [countRows, stores] = await batch(queries);
+      const total = countRows[0]?.count || 0;
 
       res.json({
         success: true,

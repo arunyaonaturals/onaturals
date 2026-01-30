@@ -45,6 +45,7 @@ const Stores: React.FC = () => {
         page: paginationModel.page + 1,
         limit: paginationModel.pageSize
       });
+      // The backend returns { success: true, data: [...], pagination: { total: ... } }
       setStores(response.data.data);
       setTotalRows(response.data.pagination?.total || response.data.data.length);
     } catch (error) { toast.error('Failed to load stores'); } finally { setLoading(false); }

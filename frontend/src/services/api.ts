@@ -78,7 +78,22 @@ export const areasAPI = {
 
 // Stores API
 export const storesAPI = {
-  getAll: (params?: any) => api.get('/stores', { params }),
+  getAll: (params?: any) => {
+    // #region agent log
+    console.log('[DEBUG] storesAPI.getAll: Making request with params', params);
+    // #endregion
+    return api.get('/stores', { params }).then(res => {
+      // #region agent log
+      console.log('[DEBUG] storesAPI.getAll: Response received', res.status, res.data?.data?.length, 'stores');
+      // #endregion
+      return res;
+    }).catch(err => {
+      // #region agent log
+      console.error('[DEBUG] storesAPI.getAll: Request failed', err.message, err.response?.status);
+      // #endregion
+      throw err;
+    });
+  },
   getMyStores: () => api.get('/stores/my-stores'),
   getById: (id: number) => api.get(`/stores/${id}`),
   search: (query: string) => api.get('/stores/search', { params: { q: query } }),

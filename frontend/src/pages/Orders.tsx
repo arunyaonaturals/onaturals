@@ -66,7 +66,7 @@ const Orders: React.FC = () => {
 
   const fetchStores = async () => {
     try {
-      const response = await storesAPI.getAll({ is_active: 'true' });
+      const response = await storesAPI.getAll({ is_active: 'true', limit: 1000 });
       setStores(response.data.data);
     } catch (error) {
       toast.error('Failed to load stores');

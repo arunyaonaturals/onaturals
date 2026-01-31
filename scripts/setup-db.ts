@@ -259,7 +259,7 @@ async function setupDatabase() {
   try {
     await client.execute({
       sql: `INSERT INTO "User" (email, password, name, role, isActive) VALUES (?, ?, ?, ?, ?)`,
-      args: ['sanjay@arunya.com', hashedPassword, 'Sanjay', 'admin', 1]
+      args: ['sanjay', hashedPassword, 'Sanjay', 'admin', 1]
     })
     console.log('  Created admin user')
   } catch (e) {
@@ -296,7 +296,7 @@ async function setupDatabase() {
   
   console.log('\n✅ Database setup complete!')
   console.log('\nAdmin credentials:')
-  console.log('  Email: sanjay@arunya.com')
+  console.log('  Username: sanjay')
   console.log('  Password: demo123')
 }
 

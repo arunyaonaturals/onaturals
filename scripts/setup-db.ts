@@ -14,25 +14,27 @@ async function setupDatabase() {
   console.log('🚀 Setting up database...')
   console.log('Database URL:', process.env.TURSO_DATABASE_URL)
   
-  // Drop existing tables
-  console.log('Dropping existing tables...')
+  // Drop existing tables (in reverse order of dependencies)
+  console.log('\nDropping existing tables...')
   const tables = [
-    'User', 'Product', 'Category', 'Store', 'Area', 'Order', 'OrderItem',
-    'Invoice', 'InvoiceItem', 'Payment', 'RawMaterial', 'Inventory',
-    'Production', '_prisma_migrations'
+    'OrderItem', 'Order', 'InvoiceItem', 'Invoice', 'Payment',
+    'Product', 'Category', 'Store', 'Area', 'User',
+    'RawMaterial', 'Inventory', 'Production', '_prisma_migrations'
   ]
   
   for (const table of tables) {
     try {
       await client.execute(`DROP TABLE IF EXISTS "${table}"`)
-      console.log(`  Dropped table: ${table}`)
+      console.log(`  Dropped: ${table}`)
     } catch (e) {
       // Ignore errors
     }
   }
   
-  // Create User table
-  console.log('Creating User table...')
+  // ==================== CREATE TABLES ====================
+  
+  // User table
+  console.log('\nCreating tables...')
   await client.execute(`
     CREATE TABLE IF NOT EXISTS "User" (
       "id" INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,24 +47,69 @@ async function setupDatabase() {
       "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
   `)
+  console.log('  Created: User')
+  
+  // Category table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS "Category" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "name" TEXT UNIQUE NOT NULL,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `)
+  console.log('  Created: Category')
+  
+  // Product table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS "Product" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "name" TEXT NOT NULL,
+      "sku" TEXT UNIQUE,
+      "categoryId" INTEGER,
+      "weight" REAL,
+      "weightUnit" TEXT DEFAULT 'g',
+      "mrp" REAL NOT NULL DEFAULT 0,
+      "gstPercent" REAL NOT NULL DEFAULT 18,
+      "hsnCode" TEXT,
+      "isActive" INTEGER NOT NULL DEFAULT 1,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY ("categoryId") REFERENCES "Category"("id")
+    )
+  `)
+  console.log('  Created: Product')
+  
+  // ==================== SEED DATA ====================
+  console.log('\nSeeding data...')
   
   // Create admin user
-  console.log('Creating admin user...')
   const hashedPassword = await bcrypt.hash('admin123', 10)
-  
   try {
     await client.execute({
       sql: `INSERT INTO "User" (email, password, name, role, isActive) VALUES (?, ?, ?, ?, ?)`,
       args: ['admin@arunya.com', hashedPassword, 'Admin', 'admin', 1]
     })
+    console.log('  Created admin user')
   } catch (e) {
-    console.log('Admin user may already exist, skipping...')
+    console.log('  Admin user may already exist')
   }
   
-  console.log('')
-  console.log('✅ Database setup complete!')
-  console.log('')
-  console.log('Admin credentials:')
+  // Create sample categories
+  const categories = ['Hair Care', 'Skin Care', 'Body Care', 'Face Care', 'Oils']
+  for (const cat of categories) {
+    try {
+      await client.execute({
+        sql: `INSERT INTO "Category" (name) VALUES (?)`,
+        args: [cat]
+      })
+    } catch (e) {
+      // Ignore duplicates
+    }
+  }
+  console.log('  Created sample categories')
+  
+  console.log('\n✅ Database setup complete!')
+  console.log('\nAdmin credentials:')
   console.log('  Email: admin@arunya.com')
   console.log('  Password: admin123')
 }

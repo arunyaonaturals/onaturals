@@ -525,9 +525,10 @@ const Orders: React.FC = () => {
               renderInput={(params) => <TextField {...params} label="Select Store / Outlet" required size={isMobile ? "small" : "medium"} />}
               sx={{ mb: 2 }}
               filterOptions={(options, state) => {
+                if (!state.inputValue) return options;
                 const inputValue = state.inputValue.toLowerCase();
                 return options.filter(option =>
-                  option.name.toLowerCase().includes(inputValue) ||
+                  option.name?.toLowerCase().includes(inputValue) ||
                   (option.city && option.city.toLowerCase().includes(inputValue))
                 );
               }}

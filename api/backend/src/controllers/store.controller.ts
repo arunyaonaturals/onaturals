@@ -68,11 +68,12 @@ export class StoreController {
     console.log('[BACKEND] getStoresForDropdown: ENTERED');
     try {
       console.log('[BACKEND] getStoresForDropdown: About to query...');
+      // Simple query - just get all stores without filtering
       const stores = await query(`
         SELECT id, name, city 
         FROM stores 
-        WHERE is_active = 1 OR is_active IS NULL
         ORDER BY name
+        LIMIT 500
       `);
       console.log('[BACKEND] getStoresForDropdown: Query returned', stores?.length, 'stores');
       res.json({ success: true, data: stores || [] });

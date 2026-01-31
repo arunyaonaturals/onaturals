@@ -1,163 +1,82 @@
-# Arunya Consumables ERP System
+# Arunya ERP
 
-A comprehensive Enterprise Resource Planning system for Arunya Consumables Private Limited.
-
-## Features
-
-### Sales Module
-- Store management with area grouping
-- Invoice generation with GST compliance
-- Margin management per product per store
-- Sales captain tracking and performance
-
-### Product Module
-- Product master with HSN codes
-- Category management
-- Stock tracking
-
-### Purchase Module
-- Vendor management with payment terms
-- Raw material receipt tracking
-- Packing order management
-- Dispatch management with priority
-
-### Staff Module
-- Attendance tracking
-- Leave management
-- Salary structure and payments
-- Payslip generation
+Enterprise Resource Planning system for Arunya Natural Products.
 
 ## Tech Stack
 
-- **Frontend**: React with TypeScript, Material-UI
-- **Backend**: Node.js, Express, TypeScript
-- **Database**: MySQL
-- **PDF Generation**: PDFKit
+- **Next.js 16** - Full-stack React framework
+- **Prisma** - Type-safe database ORM
+- **Turso** - SQLite-compatible cloud database
+- **Tailwind CSS** - Utility-first CSS framework
+- **NextAuth.js** - Authentication
 
-## Getting Started
+## Setup
 
-### Prerequisites
+### 1. Install dependencies
 
-- Node.js (v18 or higher)
-- MySQL (v8 or higher)
-- npm or yarn
-
-### Database Setup
-
-1. Create a MySQL database:
-```sql
-CREATE DATABASE arunya_erp;
-```
-
-2. Run the migration script:
-```bash
-cd backend
-npm run migrate
-```
-
-### Backend Setup
-
-1. Navigate to backend folder:
-```bash
-cd backend
-```
-
-2. Install dependencies:
 ```bash
 npm install
 ```
 
-3. Create `.env` file from example:
+### 2. Configure environment variables
+
+Copy `.env.example` to `.env` and fill in your values:
+
 ```bash
 cp .env.example .env
 ```
 
-4. Update `.env` with your database credentials
+Required variables:
+- `TURSO_DATABASE_URL` - Your Turso database URL
+- `TURSO_AUTH_TOKEN` - Your Turso auth token
+- `NEXTAUTH_SECRET` - Random string for session encryption
+- `NEXTAUTH_URL` - Your app URL (http://localhost:3000 for local)
 
-5. Start the server:
+### 3. Set up the database
+
+```bash
+npm run db:setup
+```
+
+This creates the database tables and an admin user:
+- Email: `admin@arunya.com`
+- Password: `admin123`
+
+### 4. Run development server
+
 ```bash
 npm run dev
 ```
 
-### Frontend Setup
+Open [http://localhost:3000](http://localhost:3000)
 
-1. Navigate to frontend folder:
-```bash
-cd frontend
-```
+## Deployment
 
-2. Install dependencies:
-```bash
-npm install
-```
+The app is configured for Vercel deployment:
 
-3. Start the development server:
-```bash
-npm start
-```
+1. Push to GitHub
+2. Connect repo to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy
 
-## Default Login
+## Modules
 
-- **Email**: admin@arunya.com
-- **Password**: admin123
+| Module | Status |
+|--------|--------|
+| Auth/Users | ✅ Complete |
+| Products | 🔄 In Progress |
+| Stores | ⏳ Pending |
+| Orders | ⏳ Pending |
+| Invoices | ⏳ Pending |
+| Payments | ⏳ Pending |
+| Inventory | ⏳ Pending |
+| Production | ⏳ Pending |
+| Dashboard | ⏳ Pending |
 
-## API Endpoints
+## Scripts
 
-### Authentication
-- `POST /api/auth/login` - User login
-- `POST /api/auth/register` - User registration
-- `GET /api/auth/me` - Get current user
-
-### Products
-- `GET /api/products` - List all products
-- `POST /api/products` - Create product
-- `PUT /api/products/:id` - Update product
-
-### Stores
-- `GET /api/stores` - List all stores
-- `POST /api/stores` - Create store
-- `GET /api/stores/:id/margins` - Get store margins
-
-### Invoices
-- `GET /api/invoices` - List all invoices
-- `POST /api/invoices` - Create invoice
-- `GET /api/invoices/:id/pdf` - Download invoice PDF
-
-### And more...
-
-## Project Structure
-
-```
-arunya-erp/
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   ├── context/
-│   │   └── utils/
-│   └── package.json
-├── backend/
-│   ├── src/
-│   │   ├── controllers/
-│   │   ├── routes/
-│   │   ├── middleware/
-│   │   ├── config/
-│   │   └── utils/
-│   └── package.json
-├── database/
-│   └── migrations/
-├── docker-compose.yml
-└── README.md
-```
-
-## Docker Deployment
-
-```bash
-docker-compose up -d
-```
-
-## License
-
-Private - Arunya Consumables Private Limited
-# onaturals
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run db:setup` - Initialize database
+- `npm run db:generate` - Generate Prisma client

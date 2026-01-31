@@ -29,7 +29,7 @@ const Orders: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
-  
+
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [stores, setStores] = useState<any[]>([]);
@@ -87,10 +87,10 @@ const Orders: React.FC = () => {
     const formItems: OrderFormItem[] = products.map((p) => {
       const weightStr = p.weight ? `${p.weight} ${(p.weight_unit || 'g').toUpperCase()}` : '';
       const productName = `${p.name}${weightStr ? ' ' + weightStr : ''}`;
-      
+
       // Check if this product exists in existing items (for edit mode)
       const existingItem = existingItems?.find(item => item.product_id === p.id);
-      
+
       return {
         product_id: p.id,
         product_name: productName,
@@ -116,11 +116,11 @@ const Orders: React.FC = () => {
     try {
       const response = await ordersAPI.getById(id);
       const orderData = response.data.data;
-      
+
       // Set store
       const store = stores.find(s => s.id === orderData.store_id);
       setSelectedStore(store || null);
-      
+
       // Initialize form with existing items
       initOrderForm(orderData.items);
       setNotes(orderData.notes || '');
@@ -159,10 +159,10 @@ const Orders: React.FC = () => {
       toast.error('Please select a store');
       return;
     }
-    
+
     // Filter items where order_qty > 0
     const itemsToOrder = orderFormItems.filter(i => i.order_qty > 0);
-    
+
     if (itemsToOrder.length === 0) {
       toast.error('Please enter order quantity for at least one product');
       return;
@@ -171,14 +171,14 @@ const Orders: React.FC = () => {
     try {
       const data = {
         store_id: selectedStore.id,
-        items: itemsToOrder.map(i => ({ 
-          product_id: i.product_id, 
+        items: itemsToOrder.map(i => ({
+          product_id: i.product_id,
           quantity: i.order_qty,
           stock_qty: i.stock_qty,
         })),
         notes,
       };
-      
+
       if (editMode && editingOrderId) {
         await ordersAPI.update(editingOrderId, data);
         toast.success('Order updated successfully');
@@ -186,7 +186,7 @@ const Orders: React.FC = () => {
         await ordersAPI.create(data);
         toast.success('Order created successfully');
       }
-      
+
       setDialogOpen(false);
       setEditMode(false);
       setEditingOrderId(null);
@@ -232,13 +232,13 @@ const Orders: React.FC = () => {
     try {
       const response = await ordersAPI.approve(id);
       toast.success('Order approved successfully');
-      
+
       if (response.data.data?.stock_warnings) {
         response.data.data.stock_warnings.forEach((warning: string) => {
           toast.warning(warning, { autoClose: 10000 });
         });
       }
-      
+
       fetchOrders();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to approve order');
@@ -250,15 +250,15 @@ const Orders: React.FC = () => {
     try {
       setInvoiceItems([]);
       setSelectedOrder(null);
-      
+
       const response = await ordersAPI.getById(order.id);
       const orderData = response.data.data;
       setSelectedOrder(orderData);
-      
+
       const marginsResponse = await storesAPI.getMargins(orderData.store_id);
       const margins: any = {};
       marginsResponse.data.data.forEach((m: any) => { margins[m.product_id] = m.margin_percentage; });
-      
+
       const initItems = orderData.items.map((item: any) => {
         const margin = margins[item.product_id] || 0;
         const mrp = item.mrp || 0;
@@ -436,8 +436,8 @@ const Orders: React.FC = () => {
 
   const [statusFilter, setStatusFilter] = useState('');
 
-  const filteredOrders = statusFilter 
-    ? orders.filter(o => o.status === statusFilter) 
+  const filteredOrders = statusFilter
+    ? orders.filter(o => o.status === statusFilter)
     : orders;
 
   // Count items with order_qty > 0
@@ -499,10 +499,10 @@ const Orders: React.FC = () => {
       </Card>
 
       {/* Create/Edit Order Dialog - Responsive */}
-      <Dialog 
-        open={dialogOpen} 
-        onClose={() => { setDialogOpen(false); setEditMode(false); setEditingOrderId(null); }} 
-        maxWidth="md" 
+      <Dialog
+        open={dialogOpen}
+        onClose={() => { setDialogOpen(false); setEditMode(false); setEditingOrderId(null); }}
+        maxWidth="md"
         fullWidth
         fullScreen={isMobile}
       >
@@ -524,6 +524,16 @@ const Orders: React.FC = () => {
               onChange={(_, value) => setSelectedStore(value)}
               renderInput={(params) => <TextField {...params} label="Select Store / Outlet" required size={isMobile ? "small" : "medium"} />}
               sx={{ mb: 2 }}
+              filterOptions={(options, state) => {
+                const inputValue = state.inputValue.toLowerCase();
+                return options.filter(option =>
+                  option.name.toLowerCase().includes(inputValue) ||
+                  (option.city && option.city.toLowerCase().includes(inputValue))
+                );
+              }}
+              ListboxProps={{
+                style: { maxHeight: 300 }
+              }}
             />
 
             {/* Products Table */}
@@ -540,9 +550,9 @@ const Orders: React.FC = () => {
                 </TableHead>
                 <TableBody>
                   {orderFormItems.map((item, index) => (
-                    <TableRow 
-                      key={item.product_id} 
-                      sx={{ 
+                    <TableRow
+                      key={item.product_id}
+                      sx={{
                         backgroundColor: item.order_qty > 0 ? 'action.selected' : 'inherit',
                         '&:hover': { backgroundColor: 'action.hover' }
                       }}

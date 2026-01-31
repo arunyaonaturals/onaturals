@@ -63,6 +63,22 @@ export class StoreController {
     }
   };
 
+  // Fast endpoint for dropdowns - no JOINs, minimal data
+  getStoresForDropdown = async (req: AuthRequest, res: Response) => {
+    try {
+      const stores = await query(`
+        SELECT id, name, city 
+        FROM stores 
+        WHERE is_active = 1 OR is_active IS NULL
+        ORDER BY name
+      `);
+      res.json({ success: true, data: stores || [] });
+    } catch (error: any) {
+      console.error('Get stores for dropdown error:', error);
+      res.status(500).json({ success: false, message: 'Error fetching stores' });
+    }
+  };
+
   getMyStores = async (req: AuthRequest, res: Response) => {
     try {
       if (!req.user) return res.status(401).json({ success: false, message: 'Not authenticated' });

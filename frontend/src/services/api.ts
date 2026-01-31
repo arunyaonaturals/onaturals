@@ -111,6 +111,23 @@ export const storesAPI = {
       throw err;
     });
   },
+  // Fast endpoint for dropdowns - no JOINs, minimal fields
+  getDropdown: () => {
+    // #region agent log
+    console.log('[DEBUG] storesAPI.getDropdown: Making request');
+    // #endregion
+    return api.get('/stores/dropdown').then(res => {
+      // #region agent log
+      console.log('[DEBUG] storesAPI.getDropdown: Response received', res.status, res.data?.data?.length, 'stores');
+      // #endregion
+      return res;
+    }).catch(err => {
+      // #region agent log
+      console.error('[DEBUG] storesAPI.getDropdown: Request failed', err.message, err.response?.status);
+      // #endregion
+      throw err;
+    });
+  },
   getMyStores: () => api.get('/stores/my-stores'),
   getById: (id: number) => api.get(`/stores/${id}`),
   search: (query: string) => api.get('/stores/search', { params: { q: query } }),

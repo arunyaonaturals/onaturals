@@ -10,6 +10,7 @@ router.use(authenticate);
 
 // Store CRUD
 router.get('/', storeController.getAllStores);
+router.get('/dropdown', storeController.getStoresForDropdown); // Fast endpoint for dropdowns
 router.get('/my-stores', isSalesCaptain, storeController.getMyStores);
 router.get('/search', storeController.searchStores);
 router.get('/:id', storeController.getStoreById);

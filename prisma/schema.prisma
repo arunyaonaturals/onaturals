@@ -20,8 +20,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  areas  Area[]  // Areas managed by this sales captain
-  orders Order[] // Orders created by this user
+  areas    Area[]    // Areas managed by this sales captain
+  orders   Order[]   // Orders created by this user
+  payments Payment[] // Payments collected by this user
 }
 
 // ==================== PRODUCTS ====================
@@ -33,20 +34,21 @@ model Category {
 }
 
 model Product {
-  id          Int         @id @default(autoincrement())
-  name        String
-  sku         String?     @unique
-  categoryId  Int?
-  category    Category?   @relation(fields: [categoryId], references: [id])
-  weight      Float?
-  weightUnit  String?     @default("g") // g, kg, ml, l
-  mrp         Float       @default(0)
-  gstPercent  Float       @default(18)
-  hsnCode     String?
-  isActive    Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  orderItems  OrderItem[]
+  id           Int           @id @default(autoincrement())
+  name         String
+  sku          String?       @unique
+  categoryId   Int?
+  category     Category?     @relation(fields: [categoryId], references: [id])
+  weight       Float?
+  weightUnit   String?       @default("g") // g, kg, ml, l
+  mrp          Float         @default(0)
+  gstPercent   Float         @default(18)
+  hsnCode      String?
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  orderItems   OrderItem[]
+  invoiceItems InvoiceItem[]
 }
 
 // ==================== STORES ====================
@@ -60,7 +62,7 @@ model Area {
 }
 
 model Store {
-  id            Int      @id @default(autoincrement())
+  id            Int       @id @default(autoincrement())
   name          String
   address       String?
   city          String?
@@ -71,11 +73,13 @@ model Store {
   gstNumber     String?
   contactPerson String?
   areaId        Int?
-  area          Area?    @relation(fields: [areaId], references: [id])
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  area          Area?     @relation(fields: [areaId], references: [id])
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   orders        Order[]
+  invoices      Invoice[]
+  payments      Payment[]
 }
 
 // ==================== ORDERS ====================
@@ -92,6 +96,7 @@ model Order {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   items       OrderItem[]
+  invoice     Invoice?
 }
 
 model OrderItem {
@@ -103,4 +108,90 @@ model OrderItem {
   quantity  Int     @default(0)
   price     Float   @default(0) // Price at time of order
   total     Float   @default(0)
+}
+
+// ==================== INVOICES ====================
+model Invoice {
+  id            Int           @id @default(autoincrement())
+  invoiceNumber String        @unique
+  orderId       Int           @unique
+  order         Order         @relation(fields: [orderId], references: [id])
+  storeId       Int
+  store         Store         @relation(fields: [storeId], references: [id])
+  subtotal      Float         @default(0)
+  gstAmount     Float         @default(0)
+  totalAmount   Float         @default(0)
+  paidAmount    Float         @default(0)
+  balanceAmount Float         @default(0)
+  status        String        @default("unpaid") // unpaid, partial, paid
+  dueDate       DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  items         InvoiceItem[]
+  payments      Payment[]
+}
+
+model InvoiceItem {
+  id         Int     @id @default(autoincrement())
+  invoiceId  Int
+  invoice    Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  productId  Int
+  product    Product @relation(fields: [productId], references: [id])
+  quantity   Int     @default(0)
+  price      Float   @default(0)
+  gstPercent Float   @default(18)
+  gstAmount  Float   @default(0)
+  total      Float   @default(0)
+}
+
+// ==================== PAYMENTS ====================
+model Payment {
+  id            Int      @id @default(autoincrement())
+  paymentNumber String   @unique
+  invoiceId     Int
+  invoice       Invoice  @relation(fields: [invoiceId], references: [id])
+  storeId       Int
+  store         Store    @relation(fields: [storeId], references: [id])
+  collectedById Int
+  collectedBy   User     @relation(fields: [collectedById], references: [id])
+  amount        Float    @default(0)
+  paymentMode   String   @default("cash") // cash, upi, bank_transfer, cheque
+  reference     String? // UPI ref, cheque number, etc.
+  notes         String?
+  collectedAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
+}
+
+// ==================== INVENTORY ====================
+model RawMaterial {
+  id           Int         @id @default(autoincrement())
+  name         String
+  unit         String      @default("kg") // kg, g, l, ml, pcs
+  currentStock Float       @default(0)
+  minStock     Float       @default(0)
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  movements    Inventory[]
+}
+
+model Inventory {
+  id            Int         @id @default(autoincrement())
+  rawMaterialId Int
+  rawMaterial   RawMaterial @relation(fields: [rawMaterialId], references: [id])
+  type          String // in, out, adjustment
+  quantity      Float       @default(0)
+  notes         String?
+  createdAt     DateTime    @default(now())
+}
+
+// ==================== PRODUCTION ====================
+model Production {
+  id          Int      @id @default(autoincrement())
+  productName String
+  quantity    Int      @default(0)
+  status      String   @default("suggested") // suggested, in_progress, completed
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

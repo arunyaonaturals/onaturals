@@ -89,11 +89,10 @@ export function Dashboard({ user }: DashboardProps) {
             ))}
         </div>
 
-        {/* Coming Soon Notice */}
-        <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <p className="text-yellow-800 text-sm">
-            <strong>Note:</strong> This ERP is being built incrementally. Currently only Users/Auth is functional. 
-            Other modules will be added one by one.
+        {/* Quick Stats */}
+        <div className="mt-8 bg-green-50 border border-green-200 rounded-lg p-4">
+          <p className="text-green-800 text-sm">
+            <strong>Arunya O&apos;Naturals ERP</strong> - All modules are now active! Manage your products, stores, orders, invoices, payments, inventory and production.
           </p>
         </div>
       </main>

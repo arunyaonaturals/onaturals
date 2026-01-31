@@ -17,9 +17,11 @@ async function setupDatabase() {
   // Drop existing tables (in reverse order of dependencies)
   console.log('\nDropping existing tables...')
   const tables = [
-    'OrderItem', 'Order', 'InvoiceItem', 'Invoice', 'Payment',
+    'Payment', 'InvoiceItem', 'Invoice',
+    'OrderItem', 'Order',
+    'Inventory', 'RawMaterial', 'Production',
     'Store', 'Area', 'Product', 'Category', 'User',
-    'RawMaterial', 'Inventory', 'Production', '_prisma_migrations'
+    '_prisma_migrations'
   ]
   
   for (const table of tables) {
@@ -145,6 +147,109 @@ async function setupDatabase() {
     )
   `)
   console.log('  Created: OrderItem')
+  
+  // Invoice table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS "Invoice" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "invoiceNumber" TEXT UNIQUE NOT NULL,
+      "orderId" INTEGER UNIQUE NOT NULL,
+      "storeId" INTEGER NOT NULL,
+      "subtotal" REAL NOT NULL DEFAULT 0,
+      "gstAmount" REAL NOT NULL DEFAULT 0,
+      "totalAmount" REAL NOT NULL DEFAULT 0,
+      "paidAmount" REAL NOT NULL DEFAULT 0,
+      "balanceAmount" REAL NOT NULL DEFAULT 0,
+      "status" TEXT NOT NULL DEFAULT 'unpaid',
+      "dueDate" DATETIME,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY ("orderId") REFERENCES "Order"("id"),
+      FOREIGN KEY ("storeId") REFERENCES "Store"("id")
+    )
+  `)
+  console.log('  Created: Invoice')
+  
+  // InvoiceItem table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS "InvoiceItem" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "invoiceId" INTEGER NOT NULL,
+      "productId" INTEGER NOT NULL,
+      "quantity" INTEGER NOT NULL DEFAULT 0,
+      "price" REAL NOT NULL DEFAULT 0,
+      "gstPercent" REAL NOT NULL DEFAULT 18,
+      "gstAmount" REAL NOT NULL DEFAULT 0,
+      "total" REAL NOT NULL DEFAULT 0,
+      FOREIGN KEY ("invoiceId") REFERENCES "Invoice"("id") ON DELETE CASCADE,
+      FOREIGN KEY ("productId") REFERENCES "Product"("id")
+    )
+  `)
+  console.log('  Created: InvoiceItem')
+  
+  // Payment table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS "Payment" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "paymentNumber" TEXT UNIQUE NOT NULL,
+      "invoiceId" INTEGER NOT NULL,
+      "storeId" INTEGER NOT NULL,
+      "collectedById" INTEGER NOT NULL,
+      "amount" REAL NOT NULL DEFAULT 0,
+      "paymentMode" TEXT NOT NULL DEFAULT 'cash',
+      "reference" TEXT,
+      "notes" TEXT,
+      "collectedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY ("invoiceId") REFERENCES "Invoice"("id"),
+      FOREIGN KEY ("storeId") REFERENCES "Store"("id"),
+      FOREIGN KEY ("collectedById") REFERENCES "User"("id")
+    )
+  `)
+  console.log('  Created: Payment')
+  
+  // RawMaterial table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS "RawMaterial" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "name" TEXT NOT NULL,
+      "unit" TEXT NOT NULL DEFAULT 'kg',
+      "currentStock" REAL NOT NULL DEFAULT 0,
+      "minStock" REAL NOT NULL DEFAULT 0,
+      "isActive" INTEGER NOT NULL DEFAULT 1,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `)
+  console.log('  Created: RawMaterial')
+  
+  // Inventory table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS "Inventory" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "rawMaterialId" INTEGER NOT NULL,
+      "type" TEXT NOT NULL,
+      "quantity" REAL NOT NULL DEFAULT 0,
+      "notes" TEXT,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY ("rawMaterialId") REFERENCES "RawMaterial"("id")
+    )
+  `)
+  console.log('  Created: Inventory')
+  
+  // Production table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS "Production" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "productName" TEXT NOT NULL,
+      "quantity" INTEGER NOT NULL DEFAULT 0,
+      "status" TEXT NOT NULL DEFAULT 'suggested',
+      "notes" TEXT,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `)
+  console.log('  Created: Production')
   
   // ==================== SEED DATA ====================
   console.log('\nSeeding data...')

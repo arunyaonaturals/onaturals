@@ -255,11 +255,11 @@ async function setupDatabase() {
   console.log('\nSeeding data...')
   
   // Create admin user
-  const hashedPassword = await bcrypt.hash('admin123', 10)
+  const hashedPassword = await bcrypt.hash('demo123', 10)
   try {
     await client.execute({
       sql: `INSERT INTO "User" (email, password, name, role, isActive) VALUES (?, ?, ?, ?, ?)`,
-      args: ['admin@arunya.com', hashedPassword, 'Admin', 'admin', 1]
+      args: ['sanjay@arunya.com', hashedPassword, 'Sanjay', 'admin', 1]
     })
     console.log('  Created admin user')
   } catch (e) {
@@ -296,8 +296,8 @@ async function setupDatabase() {
   
   console.log('\n✅ Database setup complete!')
   console.log('\nAdmin credentials:')
-  console.log('  Email: admin@arunya.com')
-  console.log('  Password: admin123')
+  console.log('  Email: sanjay@arunya.com')
+  console.log('  Password: demo123')
 }
 
 setupDatabase().catch(console.error)

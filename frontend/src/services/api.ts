@@ -14,18 +14,35 @@ api.interceptors.request.use(
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
+    // #region agent log
+    console.log('[DEBUG] axios interceptor: Request sent', config.method?.toUpperCase(), config.url);
+    // #endregion
     return config;
   },
   (error) => {
+    // #region agent log
+    console.error('[DEBUG] axios interceptor: Request error', error.message);
+    // #endregion
     return Promise.reject(error);
   }
 );
 
 // Response interceptor to handle errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // #region agent log
+    console.log('[DEBUG] axios interceptor: Response success', response.config.url, response.status);
+    // #endregion
+    return response;
+  },
   (error) => {
+    // #region agent log
+    console.error('[DEBUG] axios interceptor: Response error', error.config?.url, error.response?.status, error.message);
+    // #endregion
     if (error.response?.status === 401) {
+      // #region agent log
+      console.log('[DEBUG] axios interceptor: 401 detected, redirecting to login');
+      // #endregion
       localStorage.removeItem('token');
       window.location.href = '/login';
     }

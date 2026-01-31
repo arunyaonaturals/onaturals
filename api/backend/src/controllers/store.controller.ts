@@ -7,49 +7,50 @@ export class StoreController {
     try {
       const { area_id, is_active, page = '1', limit = '10' } = req.query;
       const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
+      const limitNum = parseInt(limit as string);
 
-      let baseSql = `FROM stores s LEFT JOIN areas a ON s.area_id = a.id
-                     LEFT JOIN users u ON a.sales_captain_id = u.id WHERE 1=1`;
-      let countSql = `FROM stores s WHERE 1=1`;
+      let sql = `SELECT s.id, s.name, s.address, s.city, s.state, s.pincode, s.phone, 
+                        s.email, s.gst_number, s.contact_person, s.area_id, s.is_active,
+                        s.created_at, s.updated_at,
+                        a.name as area_name, u.name as sales_captain_name 
+                 FROM stores s 
+                 LEFT JOIN areas a ON s.area_id = a.id
+                 LEFT JOIN users u ON a.sales_captain_id = u.id 
+                 WHERE 1=1`;
+      let countSql = `SELECT COUNT(*) as count FROM stores s WHERE 1=1`;
       const params: any[] = [];
       const countParams: any[] = [];
 
       if (area_id) { 
-        baseSql += ' AND s.area_id = ?'; 
+        sql += ' AND s.area_id = ?'; 
         countSql += ' AND s.area_id = ?';
         params.push(area_id); 
         countParams.push(area_id);
       }
       if (is_active !== undefined) { 
-        baseSql += ' AND s.is_active = ?'; 
+        sql += ' AND s.is_active = ?'; 
         countSql += ' AND s.is_active = ?';
         params.push(is_active === 'true' ? 1 : 0); 
         countParams.push(is_active === 'true' ? 1 : 0);
       }
 
-      // Get paginated data and total count in a single round-trip
-      const queries = [
-        { sql: `SELECT COUNT(*) as count ${countSql}`, args: countParams },
-        { 
-          sql: `SELECT s.*, a.name as area_name, u.name as sales_captain_name 
-                ${baseSql} 
-                ORDER BY s.name 
-                LIMIT ? OFFSET ?`, 
-          args: [...params, parseInt(limit as string), offset] 
-        }
-      ];
+      sql += ' ORDER BY s.name LIMIT ? OFFSET ?';
+      params.push(limitNum, offset);
 
-      const [countRows, stores] = await batch(queries);
-      const total = countRows[0]?.count || 0;
+      // Execute queries separately (more reliable than batch)
+      const countResult = await query(countSql, countParams);
+      const stores = await query(sql, params);
+      
+      const total = countResult[0]?.count || 0;
 
       res.json({
         success: true,
-        data: stores,
+        data: stores || [],
         pagination: {
           total,
           page: parseInt(page as string),
-          limit: parseInt(limit as string),
-          pages: Math.ceil(total / parseInt(limit as string))
+          limit: limitNum,
+          pages: Math.ceil(total / limitNum)
         }
       });
     } catch (error) {
@@ -63,9 +64,13 @@ export class StoreController {
       if (!req.user) return res.status(401).json({ success: false, message: 'Not authenticated' });
 
       const stores = await query(`
-        SELECT s.*, a.name as area_name FROM stores s 
-        INNER JOIN areas a ON s.area_id = a.id
-        WHERE a.sales_captain_id = ? AND s.is_active = 1 ORDER BY s.name
+        SELECT s.id, s.name, s.address, s.city, s.state, s.pincode, s.phone, 
+               s.email, s.gst_number, s.contact_person, s.area_id, s.is_active,
+               a.name as area_name 
+        FROM stores s 
+        LEFT JOIN areas a ON s.area_id = a.id
+        WHERE (a.sales_captain_id = ? OR s.area_id IS NULL) AND s.is_active = 1 
+        ORDER BY s.name
       `, [req.user.id]);
 
       res.json({ success: true, data: stores });

@@ -19,6 +19,8 @@ model User {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  areas Area[] // Areas managed by this sales captain
 }
 
 // ==================== PRODUCTS ====================
@@ -43,4 +45,32 @@ model Product {
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+}
+
+// ==================== STORES ====================
+model Area {
+  id              Int      @id @default(autoincrement())
+  name            String   @unique
+  salesCaptainId  Int?
+  salesCaptain    User?    @relation(fields: [salesCaptainId], references: [id])
+  stores          Store[]
+  createdAt       DateTime @default(now())
+}
+
+model Store {
+  id            Int      @id @default(autoincrement())
+  name          String
+  address       String?
+  city          String?
+  state         String?
+  pincode       String?
+  phone         String?
+  email         String?
+  gstNumber     String?
+  contactPerson String?
+  areaId        Int?
+  area          Area?    @relation(fields: [areaId], references: [id])
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

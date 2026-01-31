@@ -18,7 +18,7 @@ async function setupDatabase() {
   console.log('\nDropping existing tables...')
   const tables = [
     'OrderItem', 'Order', 'InvoiceItem', 'Invoice', 'Payment',
-    'Product', 'Category', 'Store', 'Area', 'User',
+    'Store', 'Area', 'Product', 'Category', 'User',
     'RawMaterial', 'Inventory', 'Production', '_prisma_migrations'
   ]
   
@@ -32,9 +32,9 @@ async function setupDatabase() {
   }
   
   // ==================== CREATE TABLES ====================
+  console.log('\nCreating tables...')
   
   // User table
-  console.log('\nCreating tables...')
   await client.execute(`
     CREATE TABLE IF NOT EXISTS "User" (
       "id" INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,6 +79,40 @@ async function setupDatabase() {
   `)
   console.log('  Created: Product')
   
+  // Area table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS "Area" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "name" TEXT UNIQUE NOT NULL,
+      "salesCaptainId" INTEGER,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY ("salesCaptainId") REFERENCES "User"("id")
+    )
+  `)
+  console.log('  Created: Area')
+  
+  // Store table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS "Store" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "name" TEXT NOT NULL,
+      "address" TEXT,
+      "city" TEXT,
+      "state" TEXT,
+      "pincode" TEXT,
+      "phone" TEXT,
+      "email" TEXT,
+      "gstNumber" TEXT,
+      "contactPerson" TEXT,
+      "areaId" INTEGER,
+      "isActive" INTEGER NOT NULL DEFAULT 1,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY ("areaId") REFERENCES "Area"("id")
+    )
+  `)
+  console.log('  Created: Store')
+  
   // ==================== SEED DATA ====================
   console.log('\nSeeding data...')
   
@@ -107,6 +141,20 @@ async function setupDatabase() {
     }
   }
   console.log('  Created sample categories')
+  
+  // Create sample areas
+  const areas = ['North Zone', 'South Zone', 'East Zone', 'West Zone', 'Central']
+  for (const area of areas) {
+    try {
+      await client.execute({
+        sql: `INSERT INTO "Area" (name) VALUES (?)`,
+        args: [area]
+      })
+    } catch (e) {
+      // Ignore duplicates
+    }
+  }
+  console.log('  Created sample areas')
   
   console.log('\n✅ Database setup complete!')
   console.log('\nAdmin credentials:')

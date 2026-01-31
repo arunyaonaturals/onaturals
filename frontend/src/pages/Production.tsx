@@ -362,100 +362,91 @@ const Production: React.FC = () => {
             No production suggestions at this time. All products have sufficient stock for pending orders.
           </Alert>
         ) : (
-          <Grid container spacing={2}>
-            {suggestions.map((item) => (
-              <Grid item xs={12} md={6} lg={4} key={item.product_id}>
-                <Card sx={{
-                  borderLeft: 4,
-                  borderColor: item.stock_sufficient ? 'success.main' : 'warning.main'
-                }}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                      <Box>
-                        <Typography variant="h6" gutterBottom>{item.product_name}</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {item.weight} {item.weight_unit}
-                        </Typography>
-                      </Box>
-                      <Chip
-                        label={item.stock_sufficient ? 'Stock OK' : 'Need Production'}
-                        color={item.stock_sufficient ? 'success' : 'warning'}
-                        size="small"
-                      />
-                    </Box>
-
-                    <Box sx={{ my: 2 }}>
-                      <Grid container spacing={1}>
-                        <Grid item xs={6}>
-                          <Typography variant="caption" color="text.secondary">Current Stock</Typography>
-                          <Typography variant="body1" color={item.stock_sufficient ? 'success.main' : 'inherit'}>
-                            {Math.max(0, item.current_stock)}
-                          </Typography>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography variant="caption" color="text.secondary">Required</Typography>
-                          <Typography variant="body1">{item.total_required}</Typography>
-                        </Grid>
-                        {!item.stock_sufficient && (
-                          <>
-                            <Grid item xs={6}>
-                              <Typography variant="caption" color="text.secondary">Need to Produce</Typography>
-                              <Typography variant="body1" color="warning.main">{item.production_needed}</Typography>
-                            </Grid>
-                            <Grid item xs={6}>
-                              <Typography variant="caption" color="text.secondary">Can Produce</Typography>
-                              <Typography variant="body1" color={item.can_produce >= item.production_needed ? 'success.main' : 'error'}>
-                                {item.can_produce}
-                              </Typography>
-                            </Grid>
-                          </>
-                        )}
-                      </Grid>
-                    </Box>
-
-                    {!item.stock_sufficient && (
-                      <>
-                        {!item.has_recipe ? (
-                          <Alert severity="warning" sx={{ mb: 2 }}>No recipe defined - Cannot produce</Alert>
-                        ) : item.materials && item.materials.length > 0 ? (
-                          <Box sx={{ mb: 2 }}>
-                            <Typography variant="caption" color="text.secondary">Raw Materials:</Typography>
-                            {item.materials.map((mat: any, idx: number) => (
-                              <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Typography variant="body2">{mat.raw_material_name}</Typography>
-                                <Chip
-                                  size="small"
-                                  label={mat.sufficient ? 'OK' : 'Low'}
-                                  color={mat.sufficient ? 'success' : 'error'}
-                                />
-                              </Box>
-                            ))}
-                          </Box>
-                        ) : null}
-
-                        {isAdmin && item.has_recipe && item.can_produce > 0 && (
+          <Card>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Product</TableCell>
+                  <TableCell align="center">Current Stock</TableCell>
+                  <TableCell align="center">Required</TableCell>
+                  <TableCell align="center">To Produce</TableCell>
+                  <TableCell align="center">Can Produce</TableCell>
+                  <TableCell align="center">Status</TableCell>
+                  {isAdmin && <TableCell align="center">Action</TableCell>}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {suggestions.map((item) => (
+                  <TableRow
+                    key={item.product_id}
+                    sx={{
+                      backgroundColor: item.stock_sufficient ? 'success.light' : 'inherit',
+                      '&:hover': { backgroundColor: item.stock_sufficient ? 'success.main' : 'action.hover' }
+                    }}
+                  >
+                    <TableCell>
+                      <Typography variant="body2" fontWeight="bold">{item.product_name}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {item.weight} {item.weight_unit}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body2"
+                        color={Math.max(0, item.current_stock) === 0 ? 'error.main' : 'text.primary'}
+                        fontWeight="bold"
+                      >
+                        {Math.max(0, item.current_stock)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">{item.total_required}</TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body2"
+                        color={item.production_needed > 0 ? 'warning.main' : 'text.primary'}
+                        fontWeight={item.production_needed > 0 ? 'bold' : 'normal'}
+                      >
+                        {item.production_needed}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body2"
+                        color={item.can_produce >= item.production_needed ? 'success.main' : 'error.main'}
+                      >
+                        {item.can_produce}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      {item.stock_sufficient ? (
+                        <Chip label="Ready" color="success" size="small" />
+                      ) : !item.has_recipe ? (
+                        <Chip label="No Recipe" color="error" size="small" />
+                      ) : item.can_produce >= item.production_needed ? (
+                        <Chip label="Can Produce" color="warning" size="small" />
+                      ) : (
+                        <Chip label="Low Materials" color="error" size="small" />
+                      )}
+                    </TableCell>
+                    {isAdmin && (
+                      <TableCell align="center">
+                        {!item.stock_sufficient && item.has_recipe && item.can_produce > 0 && (
                           <Button
-                            fullWidth
+                            size="small"
                             variant="contained"
                             startIcon={<FactoryIcon />}
                             onClick={() => handleOpenDialog(item)}
                           >
-                            Create Production Order
+                            Produce
                           </Button>
                         )}
-                      </>
+                      </TableCell>
                     )}
-
-                    {item.stock_sufficient && (
-                      <Alert severity="success" sx={{ mt: 1 }}>
-                        Ready to dispatch - No production needed
-                      </Alert>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
         )}
       </TabPanel>
 

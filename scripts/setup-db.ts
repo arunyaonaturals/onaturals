@@ -113,6 +113,39 @@ async function setupDatabase() {
   `)
   console.log('  Created: Store')
   
+  // Order table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS "Order" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "orderNumber" TEXT UNIQUE NOT NULL,
+      "storeId" INTEGER NOT NULL,
+      "createdById" INTEGER NOT NULL,
+      "status" TEXT NOT NULL DEFAULT 'draft',
+      "notes" TEXT,
+      "totalAmount" REAL NOT NULL DEFAULT 0,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY ("storeId") REFERENCES "Store"("id"),
+      FOREIGN KEY ("createdById") REFERENCES "User"("id")
+    )
+  `)
+  console.log('  Created: Order')
+  
+  // OrderItem table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS "OrderItem" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "orderId" INTEGER NOT NULL,
+      "productId" INTEGER NOT NULL,
+      "quantity" INTEGER NOT NULL DEFAULT 0,
+      "price" REAL NOT NULL DEFAULT 0,
+      "total" REAL NOT NULL DEFAULT 0,
+      FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE CASCADE,
+      FOREIGN KEY ("productId") REFERENCES "Product"("id")
+    )
+  `)
+  console.log('  Created: OrderItem')
+  
   // ==================== SEED DATA ====================
   console.log('\nSeeding data...')
   

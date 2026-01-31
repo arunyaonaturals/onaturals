@@ -20,7 +20,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  areas Area[] // Areas managed by this sales captain
+  areas  Area[]  // Areas managed by this sales captain
+  orders Order[] // Orders created by this user
 }
 
 // ==================== PRODUCTS ====================
@@ -32,29 +33,30 @@ model Category {
 }
 
 model Product {
-  id          Int       @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   name        String
-  sku         String?   @unique
+  sku         String?     @unique
   categoryId  Int?
-  category    Category? @relation(fields: [categoryId], references: [id])
+  category    Category?   @relation(fields: [categoryId], references: [id])
   weight      Float?
-  weightUnit  String?   @default("g") // g, kg, ml, l
-  mrp         Float     @default(0)
-  gstPercent  Float     @default(18)
+  weightUnit  String?     @default("g") // g, kg, ml, l
+  mrp         Float       @default(0)
+  gstPercent  Float       @default(18)
   hsnCode     String?
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
 }
 
 // ==================== STORES ====================
 model Area {
-  id              Int      @id @default(autoincrement())
-  name            String   @unique
-  salesCaptainId  Int?
-  salesCaptain    User?    @relation(fields: [salesCaptainId], references: [id])
-  stores          Store[]
-  createdAt       DateTime @default(now())
+  id             Int      @id @default(autoincrement())
+  name           String   @unique
+  salesCaptainId Int?
+  salesCaptain   User?    @relation(fields: [salesCaptainId], references: [id])
+  stores         Store[]
+  createdAt      DateTime @default(now())
 }
 
 model Store {
@@ -73,4 +75,32 @@ model Store {
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  orders        Order[]
+}
+
+// ==================== ORDERS ====================
+model Order {
+  id          Int         @id @default(autoincrement())
+  orderNumber String      @unique
+  storeId     Int
+  store       Store       @relation(fields: [storeId], references: [id])
+  createdById Int
+  createdBy   User        @relation(fields: [createdById], references: [id])
+  status      String      @default("draft") // draft, submitted, approved, invoiced, cancelled
+  notes       String?
+  totalAmount Float       @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  items       OrderItem[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(0)
+  price     Float   @default(0) // Price at time of order
+  total     Float   @default(0)
 }

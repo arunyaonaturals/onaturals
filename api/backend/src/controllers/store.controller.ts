@@ -27,11 +27,15 @@ export class StoreController {
         params.push(area_id); 
         countParams.push(area_id);
       }
-      if (is_active !== undefined) { 
-        sql += ' AND s.is_active = ?'; 
-        countSql += ' AND s.is_active = ?';
-        params.push(is_active === 'true' ? 1 : 0); 
-        countParams.push(is_active === 'true' ? 1 : 0);
+      if (is_active !== undefined && is_active !== '') { 
+        // Handle both numeric (1/0) and boolean-like values, also include NULL as active
+        if (is_active === 'true' || is_active === '1') {
+          sql += ' AND (s.is_active = 1 OR s.is_active IS NULL)'; 
+          countSql += ' AND (s.is_active = 1 OR s.is_active IS NULL)';
+        } else {
+          sql += ' AND s.is_active = 0'; 
+          countSql += ' AND s.is_active = 0';
+        }
       }
 
       sql += ' ORDER BY s.name LIMIT ? OFFSET ?';

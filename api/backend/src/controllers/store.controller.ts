@@ -65,21 +65,16 @@ export class StoreController {
 
   // Fast endpoint for dropdowns - no JOINs, minimal data
   getStoresForDropdown = async (req: AuthRequest, res: Response) => {
-    console.log('[BACKEND] getStoresForDropdown: ENTERED');
     try {
-      console.log('[BACKEND] getStoresForDropdown: About to query...');
-      // Simple query - just get all stores without filtering
       const stores = await query(`
         SELECT id, name, city 
         FROM stores 
         ORDER BY name
         LIMIT 500
       `);
-      console.log('[BACKEND] getStoresForDropdown: Query returned', stores?.length, 'stores');
       res.json({ success: true, data: stores || [] });
-      console.log('[BACKEND] getStoresForDropdown: Response sent');
     } catch (error: any) {
-      console.error('[BACKEND] getStoresForDropdown: ERROR', error);
+      console.error('Get stores for dropdown error:', error);
       res.status(500).json({ success: false, message: 'Error fetching stores' });
     }
   };

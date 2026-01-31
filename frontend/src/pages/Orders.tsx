@@ -33,6 +33,7 @@ const Orders: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [stores, setStores] = useState<any[]>([]);
+  const [storesLoading, setStoresLoading] = useState(false);
   const [products, setProducts] = useState<any[]>([]);
   const [selectedStore, setSelectedStore] = useState<any>(null);
   const [orderFormItems, setOrderFormItems] = useState<OrderFormItem[]>([]);
@@ -49,7 +50,6 @@ const Orders: React.FC = () => {
 
   useEffect(() => {
     fetchOrders();
-    fetchStores();
     fetchProducts();
   }, []);
 
@@ -65,37 +65,14 @@ const Orders: React.FC = () => {
   };
 
   const fetchStores = async () => {
-    // #region agent log
-    console.log('[DEBUG] fetchStores: CALLED at', new Date().toISOString());
-    // #endregion
+    setStoresLoading(true);
     try {
-      // #region agent log
-      console.log('[DEBUG] fetchStores: About to call storesAPI.getAll with pagination...');
-      // #endregion
-      // Use existing working endpoint with small limit (same as Stores page)
-      const response = await storesAPI.getAll({ is_active: 'true', page: 1, limit: 50 });
-      // #region agent log
-      console.log('[DEBUG] fetchStores: API response received', { 
-        success: response.data?.success, 
-        dataLength: response.data?.data?.length, 
-        firstStore: response.data?.data?.[0]
-      });
-      // #endregion
+      const response = await storesAPI.getAll({ is_active: 'true', page: 1, limit: 100 });
       setStores(response.data.data || []);
-      // #region agent log
-      console.log('[DEBUG] fetchStores: setStores completed with', response.data?.data?.length, 'stores');
-      // #endregion
     } catch (error: any) {
-      // #region agent log
-      console.error('[DEBUG] fetchStores: CATCH ERROR', { 
-        message: error?.message, 
-        name: error?.name,
-        response: error?.response?.data, 
-        status: error?.response?.status,
-        fullError: error 
-      });
-      // #endregion
       toast.error('Failed to load stores');
+    } finally {
+      setStoresLoading(false);
     }
   };
 
@@ -130,24 +107,32 @@ const Orders: React.FC = () => {
   };
 
   const handleOpenDialog = () => {
-    // #region agent log
-    console.log('[DEBUG] handleOpenDialog: stores array length =', stores.length, 'first store =', stores[0]);
-    // #endregion
     setSelectedStore(null);
     setNotes('');
     setEditMode(false);
     setEditingOrderId(null);
     initOrderForm();
     setDialogOpen(true);
+    // Lazy-load stores when dialog opens
+    fetchStores();
   };
 
   const handleEditOrder = async (id: number) => {
     try {
-      const response = await ordersAPI.getById(id);
-      const orderData = response.data.data;
+      // Fetch order and stores in parallel
+      setStoresLoading(true);
+      const [orderResponse, storesResponse] = await Promise.all([
+        ordersAPI.getById(id),
+        storesAPI.getAll({ is_active: 'true', page: 1, limit: 100 })
+      ]);
+      
+      const orderData = orderResponse.data.data;
+      const storesList = storesResponse.data.data || [];
+      setStores(storesList);
+      setStoresLoading(false);
 
-      // Set store
-      const store = stores.find(s => s.id === orderData.store_id);
+      // Set store from freshly loaded stores
+      const store = storesList.find((s: any) => s.id === orderData.store_id);
       setSelectedStore(store || null);
 
       // Initialize form with existing items
@@ -157,6 +142,7 @@ const Orders: React.FC = () => {
       setEditingOrderId(id);
       setDialogOpen(true);
     } catch (error) {
+      setStoresLoading(false);
       toast.error('Failed to load order for editing');
     }
   };
@@ -548,6 +534,7 @@ const Orders: React.FC = () => {
             {/* Store Selection */}
             <Autocomplete
               options={stores}
+              loading={storesLoading}
               getOptionLabel={(option) => `${option.name} - ${option.city || ''}`}
               value={selectedStore}
               onChange={(_, value) => setSelectedStore(value)}

@@ -14,35 +14,18 @@ api.interceptors.request.use(
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
-    // #region agent log
-    console.log('[DEBUG] axios interceptor: Request sent', config.method?.toUpperCase(), config.url);
-    // #endregion
     return config;
   },
   (error) => {
-    // #region agent log
-    console.error('[DEBUG] axios interceptor: Request error', error.message);
-    // #endregion
     return Promise.reject(error);
   }
 );
 
 // Response interceptor to handle errors
 api.interceptors.response.use(
-  (response) => {
-    // #region agent log
-    console.log('[DEBUG] axios interceptor: Response success', response.config.url, response.status);
-    // #endregion
-    return response;
-  },
+  (response) => response,
   (error) => {
-    // #region agent log
-    console.error('[DEBUG] axios interceptor: Response error', error.config?.url, error.response?.status, error.message);
-    // #endregion
     if (error.response?.status === 401) {
-      // #region agent log
-      console.log('[DEBUG] axios interceptor: 401 detected, redirecting to login');
-      // #endregion
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
@@ -95,39 +78,8 @@ export const areasAPI = {
 
 // Stores API
 export const storesAPI = {
-  getAll: (params?: any) => {
-    // #region agent log
-    console.log('[DEBUG] storesAPI.getAll: Making request with params', params);
-    // #endregion
-    return api.get('/stores', { params }).then(res => {
-      // #region agent log
-      console.log('[DEBUG] storesAPI.getAll: Response received', res.status, res.data?.data?.length, 'stores');
-      // #endregion
-      return res;
-    }).catch(err => {
-      // #region agent log
-      console.error('[DEBUG] storesAPI.getAll: Request failed', err.message, err.response?.status);
-      // #endregion
-      throw err;
-    });
-  },
-  // Fast endpoint for dropdowns - no JOINs, minimal fields
-  getDropdown: () => {
-    // #region agent log
-    console.log('[DEBUG] storesAPI.getDropdown: Making request');
-    // #endregion
-    return api.get('/stores/dropdown').then(res => {
-      // #region agent log
-      console.log('[DEBUG] storesAPI.getDropdown: Response received', res.status, res.data?.data?.length, 'stores');
-      // #endregion
-      return res;
-    }).catch(err => {
-      // #region agent log
-      console.error('[DEBUG] storesAPI.getDropdown: Request failed', err.message, err.response?.status);
-      // #endregion
-      throw err;
-    });
-  },
+  getAll: (params?: any) => api.get('/stores', { params }),
+  getDropdown: () => api.get('/stores/dropdown'),
   getMyStores: () => api.get('/stores/my-stores'),
   getById: (id: number) => api.get(`/stores/${id}`),
   search: (query: string) => api.get('/stores/search', { params: { q: query } }),

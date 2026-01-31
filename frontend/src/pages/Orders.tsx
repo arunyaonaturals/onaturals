@@ -527,10 +527,11 @@ const Orders: React.FC = () => {
               filterOptions={(options, state) => {
                 if (!state.inputValue) return options;
                 const inputValue = state.inputValue.toLowerCase();
-                return options.filter(option =>
-                  option.name?.toLowerCase().includes(inputValue) ||
-                  (option.city && option.city.toLowerCase().includes(inputValue))
-                );
+                return options.filter(option => {
+                  const name = (option.name || '').toLowerCase();
+                  const city = (option.city || '').toLowerCase();
+                  return name.includes(inputValue) || city.includes(inputValue);
+                });
               }}
               ListboxProps={{
                 style: { maxHeight: 300 }

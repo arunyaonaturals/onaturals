@@ -36,7 +36,7 @@ const CreateInvoice: React.FC = () => {
 
   const fetchStores = async () => {
     try {
-      const response = await storesAPI.getAll({ is_active: 'true' });
+      const response = await storesAPI.getAll({ is_active: 'true', limit: 1000 });
       setStores(response.data.data);
     } catch (error) { toast.error('Failed to load stores'); }
   };
@@ -112,7 +112,7 @@ const CreateInvoice: React.FC = () => {
   const calculateTotals = () => {
     const subtotal = items.reduce((sum, item) => sum + item.total, 0);
     let cgst = 0, sgst = 0, igst = 0;
-    
+
     // Calculate GST per item based on its GST rate
     items.forEach(item => {
       const itemGstRate = item.gst_rate || 0;
@@ -124,12 +124,12 @@ const CreateInvoice: React.FC = () => {
         sgst += itemGstAmount / 2;
       }
     });
-    
+
     // Calculate round off
     const totalBeforeRoundOff = subtotal + cgst + sgst + igst;
     const roundOff = Math.round(totalBeforeRoundOff) - totalBeforeRoundOff;
     const total = totalBeforeRoundOff + roundOff;
-    
+
     return { subtotal, cgst, sgst, igst, roundOff, total };
   };
 
@@ -165,11 +165,20 @@ const CreateInvoice: React.FC = () => {
               <Typography variant="h6" gutterBottom>Store Selection</Typography>
               <Autocomplete
                 options={stores}
-                getOptionLabel={(option) => `${option.name} - ${option.city || ''}`}
+                getOptionLabel={(option) => `${option.name || ''} - ${option.city || ''}`}
                 value={selectedStore}
                 onChange={(_, value) => handleStoreChange(value)}
                 renderInput={(params) => <TextField {...params} label="Select Store" />}
                 sx={{ mb: 3 }}
+                filterOptions={(options, state) => {
+                  if (!state.inputValue) return options;
+                  const inputValue = state.inputValue.toLowerCase();
+                  return options.filter(option => {
+                    const name = (option.name || '').toLowerCase();
+                    const city = (option.city || '').toLowerCase();
+                    return name.includes(inputValue) || city.includes(inputValue);
+                  });
+                }}
               />
               <Divider sx={{ my: 2 }} />
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>

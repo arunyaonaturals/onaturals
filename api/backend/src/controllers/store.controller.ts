@@ -57,7 +57,7 @@ export class StoreController {
           pages: Math.ceil(total / limitNum)
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Get all stores error:', error);
       res.status(500).json({ success: false, message: 'Error fetching stores' });
     }

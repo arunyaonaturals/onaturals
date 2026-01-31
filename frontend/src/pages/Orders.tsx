@@ -65,10 +65,22 @@ const Orders: React.FC = () => {
   };
 
   const fetchStores = async () => {
+    // #region agent log
+    console.log('[DEBUG] fetchStores: CALLED');
+    // #endregion
     try {
       const response = await storesAPI.getAll({ is_active: 'true', limit: 1000 });
-      setStores(response.data.data);
-    } catch (error) {
+      // #region agent log
+      console.log('[DEBUG] fetchStores: API response', { success: response.data?.success, dataLength: response.data?.data?.length, pagination: response.data?.pagination, firstStore: response.data?.data?.[0] });
+      // #endregion
+      setStores(response.data.data || []);
+      // #region agent log
+      console.log('[DEBUG] fetchStores: setStores called with', response.data?.data?.length, 'stores');
+      // #endregion
+    } catch (error: any) {
+      // #region agent log
+      console.error('[DEBUG] fetchStores: ERROR', { message: error?.message, response: error?.response?.data, status: error?.response?.status });
+      // #endregion
       toast.error('Failed to load stores');
     }
   };
@@ -104,6 +116,9 @@ const Orders: React.FC = () => {
   };
 
   const handleOpenDialog = () => {
+    // #region agent log
+    console.log('[DEBUG] handleOpenDialog: stores array length =', stores.length, 'first store =', stores[0]);
+    // #endregion
     setSelectedStore(null);
     setNotes('');
     setEditMode(false);

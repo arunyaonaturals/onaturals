@@ -28,7 +28,7 @@ import {
   TableContainer,
 } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Search as SearchIcon, Settings as RecipeIcon, Visibility as ViewIcon } from '@mui/icons-material';
+import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Search as SearchIcon, Settings as RecipeIcon, Visibility as ViewIcon, Inventory as StockIcon } from '@mui/icons-material';
 import { productsAPI, productionAPI, rawMaterialsAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
@@ -60,7 +60,7 @@ const Products: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
-  
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -75,6 +75,11 @@ const Products: React.FC = () => {
   const [productBatches, setProductBatches] = useState<any[]>([]);
   const [loadingBatches, setLoadingBatches] = useState(false);
   const { isAdmin } = useAuth();
+
+  // Stock adjustment state
+  const [stockDialogOpen, setStockDialogOpen] = useState(false);
+  const [stockAdjustProduct, setStockAdjustProduct] = useState<Product | null>(null);
+  const [newStockQuantity, setNewStockQuantity] = useState(0);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -102,7 +107,7 @@ const Products: React.FC = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await productsAPI.getAll({ 
+      const response = await productsAPI.getAll({
         is_active: 'true',
         page: paginationModel.page + 1,
         limit: paginationModel.pageSize
@@ -187,7 +192,7 @@ const Products: React.FC = () => {
     if (!selectedProductForRecipe) return;
 
     const validRecipes = recipeItems.filter(r => r.raw_material_id > 0 && r.quantity_required > 0);
-    
+
     try {
       await productionAPI.setRecipe(selectedProductForRecipe.id, { recipes: validRecipes });
       toast.success('Recipe saved successfully');
@@ -271,7 +276,7 @@ const Products: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     if (!window.confirm('Delete this product?')) return;
-    
+
     try {
       await productsAPI.delete(id);
       toast.success('Product deleted');
@@ -281,12 +286,33 @@ const Products: React.FC = () => {
     }
   };
 
+  // Stock adjustment handlers
+  const handleOpenStockDialog = (product: Product) => {
+    setStockAdjustProduct(product);
+    setNewStockQuantity(Math.max(0, product.stock_quantity || 0));
+    setStockDialogOpen(true);
+  };
+
+  const handleAdjustStock = async () => {
+    if (!stockAdjustProduct) return;
+
+    try {
+      await productsAPI.update(stockAdjustProduct.id, { stock_quantity: newStockQuantity });
+      toast.success('Stock updated successfully');
+      setStockDialogOpen(false);
+      setStockAdjustProduct(null);
+      fetchProducts();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to update stock');
+    }
+  };
+
   // Responsive columns
   const columns: GridColDef[] = [
     { field: 'name', headerName: 'Product Name', flex: 1, minWidth: isMobile ? 150 : 250 },
-    { 
-      field: 'weight', 
-      headerName: 'Weight', 
+    {
+      field: 'weight',
+      headerName: 'Weight',
       width: isMobile ? 70 : 100,
       valueGetter: (params) => {
         if (!params.row.weight) return '-';
@@ -294,21 +320,21 @@ const Products: React.FC = () => {
         return `${params.row.weight} ${unit}`;
       },
     },
-    ...(!isMobile ? [{ 
-      field: 'hsn_code', 
-      headerName: 'HSN', 
+    ...(!isMobile ? [{
+      field: 'hsn_code',
+      headerName: 'HSN',
       width: 100,
       valueGetter: (params: any) => params.row.hsn_code || '-',
     }] : []),
-    { 
-      field: 'mrp', 
-      headerName: 'MRP', 
+    {
+      field: 'mrp',
+      headerName: 'MRP',
       width: isMobile ? 70 : 100,
       valueFormatter: (params) => params.value ? `₹${params.value}` : '-',
     },
-    ...(!isTablet ? [{ 
-      field: 'gst_rate', 
-      headerName: 'GST%', 
+    ...(!isTablet ? [{
+      field: 'gst_rate',
+      headerName: 'GST%',
       width: 80,
       valueFormatter: (params: any) => params.value ? `${params.value}%` : '0%',
     }] : []),
@@ -328,6 +354,9 @@ const Products: React.FC = () => {
               <>
                 <IconButton size="small" onClick={() => handleOpenRecipeDialog(params.row)} title="Set Recipe" color="primary">
                   <RecipeIcon fontSize="small" />
+                </IconButton>
+                <IconButton size="small" onClick={() => handleOpenStockDialog(params.row)} title="Adjust Stock" color="success">
+                  <StockIcon fontSize="small" />
                 </IconButton>
                 <IconButton size="small" onClick={() => handleOpenDialog(params.row)} title="Edit">
                   <EditIcon fontSize="small" />
@@ -455,8 +484,8 @@ const Products: React.FC = () => {
                             <TableCell align="center">{batch.quantity_remaining}</TableCell>
                             <TableCell>{new Date(batch.production_date).toLocaleDateString('en-IN')}</TableCell>
                             <TableCell>
-                              <Chip 
-                                size="small" 
+                              <Chip
+                                size="small"
                                 label={batch.status.charAt(0).toUpperCase() + batch.status.slice(1)}
                                 color={batch.status === 'available' ? 'success' : 'default'}
                               />
@@ -479,6 +508,9 @@ const Products: React.FC = () => {
                   </Button>
                   <Button variant="outlined" color="error" startIcon={<DeleteIcon />} onClick={() => { handleDelete(viewingProduct.id); setViewDialogOpen(false); }} fullWidth>
                     Delete Product
+                  </Button>
+                  <Button variant="contained" color="success" startIcon={<StockIcon />} onClick={() => { setViewDialogOpen(false); handleOpenStockDialog(viewingProduct); }} fullWidth>
+                    Adjust Stock
                   </Button>
                 </Box>
               )}
@@ -578,10 +610,10 @@ const Products: React.FC = () => {
         <DialogTitle sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
           Recipe - {selectedProductForRecipe?.name}
           {selectedProductForRecipe?.weight && (
-            <Chip 
-              label={`${selectedProductForRecipe.weight} ${selectedProductForRecipe.weight_unit?.toUpperCase()}`} 
-              size="small" 
-              sx={{ ml: 1 }} 
+            <Chip
+              label={`${selectedProductForRecipe.weight} ${selectedProductForRecipe.weight_unit?.toUpperCase()}`}
+              size="small"
+              sx={{ ml: 1 }}
             />
           )}
         </DialogTitle>
@@ -653,6 +685,47 @@ const Products: React.FC = () => {
           <Button onClick={() => setRecipeDialogOpen(false)} fullWidth={isMobile}>Cancel</Button>
           <Button variant="contained" onClick={handleSaveRecipe} fullWidth={isMobile}>
             Save Recipe
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Stock Adjustment Dialog */}
+      <Dialog open={stockDialogOpen} onClose={() => setStockDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Adjust Stock</DialogTitle>
+        <DialogContent>
+          {stockAdjustProduct && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                {stockAdjustProduct.name}
+              </Typography>
+              {stockAdjustProduct.weight && (
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  {stockAdjustProduct.weight} {stockAdjustProduct.weight_unit?.toUpperCase()}
+                </Typography>
+              )}
+              <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
+                <Typography variant="body2" color="text.secondary">Current Stock</Typography>
+                <Typography variant="h5" fontWeight="bold" color={stockAdjustProduct.stock_quantity < 0 ? 'error.main' : 'text.primary'}>
+                  {stockAdjustProduct.stock_quantity || 0} units
+                </Typography>
+              </Box>
+              <TextField
+                fullWidth
+                label="New Stock Quantity"
+                type="number"
+                value={newStockQuantity}
+                onChange={(e) => setNewStockQuantity(parseInt(e.target.value) || 0)}
+                sx={{ mt: 2 }}
+                inputProps={{ min: 0 }}
+                helperText="Enter the actual physical stock count"
+              />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 2, pb: 2 }}>
+          <Button onClick={() => setStockDialogOpen(false)}>Cancel</Button>
+          <Button variant="contained" color="success" onClick={handleAdjustStock}>
+            Update Stock
           </Button>
         </DialogActions>
       </Dialog>

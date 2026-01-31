@@ -69,7 +69,7 @@ const Production: React.FC = () => {
         const response = await productionAPI.getAllBatches(params);
         setBatches(response.data.data);
       }
-      
+
       const productsRes = await productsAPI.getAll({ is_active: 'true' });
       setProducts(productsRes.data.data);
     } catch (error) {
@@ -194,10 +194,10 @@ const Production: React.FC = () => {
       headerName: 'Status',
       width: 110,
       renderCell: (params) => (
-        <Chip 
-          label={params.value.charAt(0).toUpperCase() + params.value.slice(1)} 
-          color={getStatusColor(params.value)} 
-          size="small" 
+        <Chip
+          label={params.value.charAt(0).toUpperCase() + params.value.slice(1)}
+          color={getStatusColor(params.value)}
+          size="small"
         />
       ),
     },
@@ -308,13 +308,13 @@ const Production: React.FC = () => {
                             Order Date: {new Date(order.created_at).toLocaleDateString('en-IN')}
                           </Typography>
                         </Box>
-                        <Chip 
-                          label={order.status} 
-                          color={order.status === 'approved' ? 'success' : 'warning'} 
-                          size="small" 
+                        <Chip
+                          label={order.status}
+                          color={order.status === 'approved' ? 'success' : 'warning'}
+                          size="small"
                         />
                       </Box>
-                      
+
                       <Table size="small">
                         <TableHead>
                           <TableRow>
@@ -331,7 +331,7 @@ const Production: React.FC = () => {
                               <TableRow key={item.id}>
                                 <TableCell>{item.product_name}</TableCell>
                                 <TableCell align="center">{item.quantity}</TableCell>
-                                <TableCell align="center">{item.stock_quantity || 0}</TableCell>
+                                <TableCell align="center">{Math.max(0, item.stock_quantity || 0)}</TableCell>
                                 <TableCell align="center">
                                   {shortage > 0 ? (
                                     <Chip label={shortage} color="error" size="small" />
@@ -365,9 +365,9 @@ const Production: React.FC = () => {
           <Grid container spacing={2}>
             {suggestions.map((item) => (
               <Grid item xs={12} md={6} lg={4} key={item.product_id}>
-                <Card sx={{ 
-                  borderLeft: 4, 
-                  borderColor: item.stock_sufficient ? 'success.main' : 'warning.main' 
+                <Card sx={{
+                  borderLeft: 4,
+                  borderColor: item.stock_sufficient ? 'success.main' : 'warning.main'
                 }}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
@@ -377,19 +377,19 @@ const Production: React.FC = () => {
                           {item.weight} {item.weight_unit}
                         </Typography>
                       </Box>
-                      <Chip 
-                        label={item.stock_sufficient ? 'Stock OK' : 'Need Production'} 
+                      <Chip
+                        label={item.stock_sufficient ? 'Stock OK' : 'Need Production'}
                         color={item.stock_sufficient ? 'success' : 'warning'}
                         size="small"
                       />
                     </Box>
-                    
+
                     <Box sx={{ my: 2 }}>
                       <Grid container spacing={1}>
                         <Grid item xs={6}>
                           <Typography variant="caption" color="text.secondary">Current Stock</Typography>
                           <Typography variant="body1" color={item.stock_sufficient ? 'success.main' : 'inherit'}>
-                            {item.current_stock}
+                            {Math.max(0, item.current_stock)}
                           </Typography>
                         </Grid>
                         <Grid item xs={6}>

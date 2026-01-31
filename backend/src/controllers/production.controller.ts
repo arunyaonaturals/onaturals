@@ -74,7 +74,7 @@ export class ProductionController {
         FROM orders o
         INNER JOIN stores s ON o.store_id = s.id
         INNER JOIN users u ON o.created_by = u.id
-        WHERE o.status IN ('submitted', 'approved')
+        WHERE o.status IN ('draft', 'submitted', 'approved')
         ORDER BY o.created_at DESC
       `);
 
@@ -86,7 +86,7 @@ export class ProductionController {
           INNER JOIN products p ON oi.product_id = p.id
           WHERE oi.order_id = ?
         `, [order.id]);
-        
+
         return { ...order, items };
       });
 
@@ -107,7 +107,7 @@ export class ProductionController {
         FROM order_items oi
         INNER JOIN orders o ON oi.order_id = o.id
         INNER JOIN products p ON oi.product_id = p.id
-        WHERE o.status IN ('submitted', 'approved')
+        WHERE o.status IN ('draft', 'submitted', 'approved')
         GROUP BY oi.product_id
       `);
 
@@ -115,7 +115,7 @@ export class ProductionController {
       const suggestions = [];
       for (const item of pendingOrderItems) {
         const needed = Math.max(0, item.total_required - item.stock_quantity);
-        
+
         // Get recipe for this product
         const recipes = await query(`
           SELECT pr.*, rm.name as raw_material_name, rm.stock_quantity as available_stock, rm.unit
@@ -127,7 +127,7 @@ export class ProductionController {
         // Check if we have enough raw materials
         let canProduce = needed > 0 ? needed : 0;
         const materialStatus = [];
-        
+
         if (recipes.length > 0 && needed > 0) {
           for (const recipe of recipes) {
             const requiredQty = recipe.quantity_required * needed;
@@ -186,9 +186,9 @@ export class ProductionController {
       `, [product_id]);
 
       if (recipes.length === 0) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Product does not have a recipe defined. Please set up the recipe first.' 
+        return res.status(400).json({
+          success: false,
+          message: 'Product does not have a recipe defined. Please set up the recipe first.'
         });
       }
 
@@ -272,7 +272,7 @@ export class ProductionController {
         INNER JOIN products p ON po.product_id = p.id
         WHERE po.id = ?
       `, [id]);
-      
+
       if (!order) {
         return res.status(404).json({ success: false, message: 'Production order not found' });
       }
@@ -298,11 +298,11 @@ export class ProductionController {
           // Calculate actual usage based on produced quantity ratio
           const usageRatio = finalQuantity / order.quantity_to_produce;
           const actualUsed = material.quantity_required * usageRatio;
-          
+
           // Deduct from raw material stock
-          await run('UPDATE raw_materials SET stock_quantity = stock_quantity - ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', 
+          await run('UPDATE raw_materials SET stock_quantity = stock_quantity - ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
             [actualUsed, material.raw_material_id]);
-          
+
           // Update production materials with actual usage
           await run('UPDATE production_materials SET quantity_used = ? WHERE id = ?', [actualUsed, material.id]);
         }
@@ -314,7 +314,7 @@ export class ProductionController {
         // Generate batch number and create batch record
         const batchNumber = await this.generateBatchNumber(order.product_id);
         const today = new Date().toISOString().split('T')[0];
-        
+
         const batchResult = await run(`
           INSERT INTO product_batches (product_id, batch_number, production_order_id, quantity_produced, quantity_remaining, production_date)
           VALUES (?, ?, ?, ?, ?, ?)
@@ -330,10 +330,10 @@ export class ProductionController {
         return { batchNumber, batchId: batchResult.lastInsertRowid };
       });
 
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         message: 'Production completed successfully',
-        data: { 
+        data: {
           quantity_produced: finalQuantity,
           batch_number: result.batchNumber,
           batch_id: result.batchId
@@ -504,9 +504,9 @@ export class ProductionController {
     const fyStart = month >= 4 ? year : year - 1;
     const fyEnd = (fyStart + 1) % 100;
     const fyString = `${fyStart}-${fyEnd.toString().padStart(2, '0')}`;
-    
+
     const prefix = `PROD-${fyString}/`;
-    
+
     if (!lastNumber) return `${prefix}1`;
 
     const match = lastNumber.match(/PROD-\d{4}-\d{2}\/(\d+)$/);
@@ -516,7 +516,7 @@ export class ProductionController {
         return `${prefix}${parseInt(match[1]) + 1}`;
       }
     }
-    
+
     return `${prefix}1`;
   }
 
@@ -525,13 +525,13 @@ export class ProductionController {
     const now = new Date();
     const dateStr = now.toISOString().split('T')[0].replace(/-/g, '');
     const prefix = `BATCH-${dateStr}`;
-    
+
     // Get count of batches created today for this product
     const countResult = await queryOne(`
       SELECT COUNT(*) as count FROM product_batches 
       WHERE product_id = ? AND DATE(created_at) = DATE('now')
     `, [productId]);
-    
+
     const sequence = (countResult?.count || 0) + 1;
     return `${prefix}-${sequence.toString().padStart(3, '0')}`;
   }

@@ -70,10 +70,10 @@ const Orders: React.FC = () => {
     // #endregion
     try {
       // #region agent log
-      console.log('[DEBUG] fetchStores: About to call storesAPI.getDropdown (fast endpoint)...');
+      console.log('[DEBUG] fetchStores: About to call storesAPI.getAll with pagination...');
       // #endregion
-      // Use fast dropdown endpoint - no JOINs, minimal fields
-      const response = await storesAPI.getDropdown();
+      // Use existing working endpoint with small limit (same as Stores page)
+      const response = await storesAPI.getAll({ is_active: 'true', page: 1, limit: 50 });
       // #region agent log
       console.log('[DEBUG] fetchStores: API response received', { 
         success: response.data?.success, 

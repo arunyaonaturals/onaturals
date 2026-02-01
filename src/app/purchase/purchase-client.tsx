@@ -63,6 +63,15 @@ export function PurchaseClient({ isAdmin }: { isAdmin: boolean }) {
     billingCycleDays: '0'
   })
 
+  // Purchase Modal
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false)
+  const [rawMaterials, setRawMaterials] = useState<any[]>([])
+  const [purchaseForm, setPurchaseForm] = useState({
+    vendorId: '',
+    notes: '',
+    items: [{ rawMaterialId: '', quantity: '', price: '' }]
+  })
+
   useEffect(() => {
     fetchData()
   }, [activeTab])
@@ -77,6 +86,15 @@ export function PurchaseClient({ isAdmin }: { isAdmin: boolean }) {
         if (activeTab === 'vendors') setVendors(data)
         else if (activeTab === 'purchase') setPurchases(data)
         else setBills(data)
+      }
+
+      // Fetch raw materials if we are in purchase tab
+      if (activeTab === 'purchase') {
+        const invRes = await fetch('/api/inventory')
+        if (invRes.ok) {
+          const invData = await invRes.json()
+          setRawMaterials(invData.materials || [])
+        }
       }
     } catch (err) {
       console.error('Failed to fetch data', err)
@@ -109,6 +127,62 @@ export function PurchaseClient({ isAdmin }: { isAdmin: boolean }) {
       console.error('Error saving vendor', err)
       alert('An unexpected error occurred while saving vendor')
     }
+  }
+
+  const handlePurchaseSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!purchaseForm.vendorId || purchaseForm.items.some(i => !i.rawMaterialId || !i.quantity || !i.price)) {
+      alert('Please fill all required fields')
+      return
+    }
+
+    try {
+      const res = await fetch('/api/purchase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(purchaseForm)
+      })
+      if (res.ok) {
+        alert('Purchase order created!')
+        setShowPurchaseModal(false)
+        setPurchaseForm({ vendorId: '', notes: '', items: [{ rawMaterialId: '', quantity: '', price: '' }] })
+        fetchData()
+      } else {
+        const error = await res.json()
+        alert(`Error: ${error.error}`)
+      }
+    } catch (err) {
+      console.error('Error creating purchase', err)
+      alert('Failed to create purchase order')
+    }
+  }
+
+  const addPurchaseItem = () => {
+    setPurchaseForm({
+      ...purchaseForm,
+      items: [...purchaseForm.items, { rawMaterialId: '', quantity: '', price: '' }]
+    })
+  }
+
+  const removePurchaseItem = (index: number) => {
+    if (purchaseForm.items.length === 1) return
+    const newItems = [...purchaseForm.items]
+    newItems.splice(index, 1)
+    setPurchaseForm({ ...purchaseForm, items: newItems })
+  }
+
+  const updatePurchaseItem = (index: number, field: string, value: string) => {
+    const newItems = [...purchaseForm.items]
+    newItems[index] = { ...newItems[index], [field]: value }
+    setPurchaseForm({ ...purchaseForm, items: newItems })
+  }
+
+  const calculateTotal = () => {
+    return purchaseForm.items.reduce((sum, item) => {
+      const q = parseFloat(item.quantity) || 0
+      const p = parseFloat(item.price) || 0
+      return sum + (q * p)
+    }, 0).toFixed(2)
   }
 
   const togglePurchaseReached = async (id: number) => {
@@ -150,7 +224,7 @@ export function PurchaseClient({ isAdmin }: { isAdmin: boolean }) {
             </button>
           )}
           {isAdmin && activeTab === 'purchase' && (
-            <button className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-700 transition shadow-sm">
+            <button onClick={() => setShowPurchaseModal(true)} className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-700 transition shadow-sm">
               <Plus className="w-5 h-5" />
               <span>New Purchase</span>
             </button>
@@ -384,6 +458,106 @@ export function PurchaseClient({ isAdmin }: { isAdmin: boolean }) {
           </div>
         </div>
       )}
+
+      {/* New Purchase Modal */}
+      {showPurchaseModal && (
+        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-8 shadow-2xl animate-in zoom-in duration-200 flex flex-col max-h-[90vh]">
+            <h2 className="text-2xl font-black text-gray-900 mb-6 font-mono uppercase tracking-tighter">Create Purchase Order</h2>
+            <form onSubmit={handlePurchaseSubmit} className="space-y-6 overflow-y-auto pr-2 custom-scrollbar">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Vendor *</label>
+                <select
+                  value={purchaseForm.vendorId}
+                  onChange={e => setPurchaseForm({ ...purchaseForm, vendorId: e.target.value })}
+                  required
+                  className="w-full px-4 py-3 bg-gray-50 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none font-bold transition-all appearance-none"
+                >
+                  <option value="">Select a Vendor</option>
+                  {vendors.map(v => (
+                    <option key={v.id} value={v.id}>{v.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center px-1">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Items *</label>
+                  <button type="button" onClick={addPurchaseItem} className="text-blue-600 text-[10px] font-black uppercase hover:text-blue-700 flex items-center gap-1">
+                    <Plus className="w-3 h-3" /> Add Item
+                  </button>
+                </div>
+                {purchaseForm.items.map((item, index) => (
+                  <div key={index} className="grid grid-cols-12 gap-3 items-end bg-gray-50/50 p-4 rounded-2xl border border-gray-100 relative group">
+                    <div className="col-span-12 sm:col-span-5 space-y-1">
+                      <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest px-1">Raw Material</label>
+                      <select
+                        value={item.rawMaterialId}
+                        onChange={e => updatePurchaseItem(index, 'rawMaterialId', e.target.value)}
+                        required
+                        className="w-full px-4 py-2 bg-white border-2 border-transparent focus:border-blue-500 rounded-xl outline-none font-bold transition-all text-sm"
+                      >
+                        <option value="">Select Material</option>
+                        {rawMaterials.map(m => (
+                          <option key={m.id} value={m.id}>{m.name} ({m.unit})</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-span-6 sm:col-span-3 space-y-1">
+                      <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest px-1">Quantity</label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={item.quantity}
+                        onChange={e => updatePurchaseItem(index, 'quantity', e.target.value)}
+                        required
+                        className="w-full px-4 py-2 bg-white border-2 border-transparent focus:border-blue-500 rounded-xl outline-none font-bold transition-all text-sm"
+                      />
+                    </div>
+                    <div className="col-span-6 sm:col-span-3 space-y-1">
+                      <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest px-1">Price/Unit</label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={item.price}
+                        onChange={e => updatePurchaseItem(index, 'price', e.target.value)}
+                        required
+                        className="w-full px-4 py-2 bg-white border-2 border-transparent focus:border-blue-500 rounded-xl outline-none font-bold transition-all text-sm"
+                      />
+                    </div>
+                    <div className="col-span-12 sm:col-span-1 pb-1">
+                      <button type="button" onClick={() => removePurchaseItem(index)} className="w-8 h-8 flex items-center justify-center text-red-400 hover:text-red-600 transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Notes</label>
+                <textarea
+                  value={purchaseForm.notes}
+                  onChange={e => setPurchaseForm({ ...purchaseForm, notes: e.target.value })}
+                  className="w-full px-4 py-3 bg-gray-50 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none font-bold transition-all"
+                  rows={2}
+                />
+              </div>
+
+              <div className="bg-blue-50 p-6 rounded-2xl flex justify-between items-center shadow-inner">
+                <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Estimated Total</span>
+                <span className="text-2xl font-black text-blue-700 font-mono">₹{calculateTotal()}</span>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button type="button" onClick={() => setShowPurchaseModal(false)} className="flex-1 py-4 text-gray-400 font-black hover:text-gray-600 transition uppercase tracking-widest text-xs">Discard</button>
+                <button type="submit" className="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 transition shadow-lg shadow-blue-100 uppercase tracking-widest text-xs">Create Order</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }

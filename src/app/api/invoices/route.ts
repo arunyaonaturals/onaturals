@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { orderId, dueDate, discountPercent: customDiscount } = await request.json()
+    const { orderId, dueDate, discountPercent: globalDiscount, items: customItems } = await request.json()
     if (!orderId) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 })
     }
@@ -74,13 +74,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Only approved orders can be invoiced' }, { status: 400 })
     }
 
-    // Update store margin if a new one is provided
-    let discountPercent = order.store.marginDiscountPercent ?? 0
-    if (customDiscount !== undefined && customDiscount !== null) {
-      discountPercent = parseFloat(customDiscount)
+    // Update store default margin if provided
+    if (globalDiscount !== undefined && globalDiscount !== null) {
       await db.store.update({
         where: { id: order.storeId },
-        data: { marginDiscountPercent: discountPercent }
+        data: { marginDiscountPercent: parseFloat(globalDiscount) }
       })
     }
 
@@ -91,29 +89,42 @@ export async function POST(request: NextRequest) {
     if (existingInvoice) {
       return NextResponse.json({ error: 'Invoice already exists for this order' }, { status: 400 })
     }
-    const discountMultiplier = 1 - discountPercent / 100
 
-    // Calculate invoice totals (apply store margin discount before GST)
-    let subtotal = 0
-    let gstAmount = 0
+    // Use default store margin unless item-specific margins are provided
+    const defaultMargin = order.store.marginDiscountPercent ?? 0
+
+    // Calculate invoice totals
+    let invoiceSubtotal = 0
+    let totalGstAmount = 0
+    let totalDiscountAmount = 0
+
     const invoiceItems = order.items.map(item => {
-      const lineTotalBeforeDiscount = item.total
-      subtotal += lineTotalBeforeDiscount
-      const lineTotalAfterDiscount = lineTotalBeforeDiscount * discountMultiplier
-      const itemGst = (lineTotalAfterDiscount * item.product.gstPercent) / 100
-      gstAmount += itemGst
+      // Find custom margin for this item if provided
+      const customItem = customItems?.find((ci: any) => ci.productId === item.productId)
+      const itemDiscountPercent = customItem?.discountPercent ?? defaultMargin
+
+      const lineSubtotal = item.total // This is Qty * MRP
+      const lineDiscountAmount = lineSubtotal * (itemDiscountPercent / 100)
+      const lineFactorTotal = lineSubtotal - lineDiscountAmount
+      const lineGstAmount = (lineFactorTotal * item.product.gstPercent) / 100
+
+      invoiceSubtotal += lineSubtotal
+      totalGstAmount += lineGstAmount
+      totalDiscountAmount += lineDiscountAmount
+
       return {
         productId: item.productId,
         quantity: item.quantity,
-        price: item.price,
+        price: lineFactorTotal / item.quantity, // Factor price per unit
+        discountPercent: itemDiscountPercent,
+        discountAmount: lineDiscountAmount,
         gstPercent: item.product.gstPercent,
-        gstAmount: itemGst,
-        total: lineTotalAfterDiscount + itemGst,
+        gstAmount: lineGstAmount,
+        total: lineFactorTotal + lineGstAmount,
       }
     })
 
-    const discountAmount = subtotal * (discountPercent / 100)
-    const totalAmount = subtotal - discountAmount + gstAmount
+    const finalTotalAmount = invoiceSubtotal - totalDiscountAmount + totalGstAmount
 
     // Create invoice
     const invoice = await db.invoice.create({
@@ -121,12 +132,12 @@ export async function POST(request: NextRequest) {
         invoiceNumber: generateInvoiceNumber(),
         orderId: parseInt(orderId),
         storeId: order.storeId,
-        subtotal,
-        discountPercent: discountPercent || null,
-        discountAmount,
-        gstAmount,
-        totalAmount,
-        balanceAmount: totalAmount,
+        subtotal: invoiceSubtotal,
+        discountPercent: defaultMargin, // Log the default margin used
+        discountAmount: totalDiscountAmount,
+        gstAmount: totalGstAmount,
+        totalAmount: finalTotalAmount,
+        balanceAmount: finalTotalAmount,
         dueDate: dueDate ? new Date(dueDate) : null,
         items: { create: invoiceItems },
       },

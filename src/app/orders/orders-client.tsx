@@ -209,38 +209,6 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
     }
   }
 
-  const handleCreateInvoice = async (order: Order) => {
-    setSelectedOrderForInvoice(order)
-    setCustomMargin(order.store.marginDiscountPercent?.toString() || '0')
-    setShowMarginModal(true)
-  }
-
-  const submitInvoiceWithMargin = async () => {
-    if (!selectedOrderForInvoice) return
-
-    try {
-      const res = await fetch('/api/invoices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderId: selectedOrderForInvoice.id,
-          discountPercent: parseFloat(customMargin) || 0
-        }),
-      })
-
-      if (res.ok) {
-        alert('Invoice created successfully!')
-        setShowMarginModal(false)
-        fetchOrders()
-      } else {
-        const data = await res.json()
-        alert(data.error || 'Failed to create invoice')
-      }
-    } catch {
-      console.error('Failed to create invoice')
-    }
-  }
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'draft': return 'bg-gray-100 text-gray-800'
@@ -412,22 +380,12 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
                         </button>
                       )}
                       {order.status === 'approved' && (
-                        <>
-                          {isAdmin && (
-                            <button
-                              onClick={() => handleCreateInvoice(order)}
-                              className="text-green-600 hover:text-green-800 font-bold mr-2"
-                            >
-                              Create Invoice
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleDelete(order.id)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            Delete
-                          </button>
-                        </>
+                        <button
+                          onClick={() => handleDelete(order.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          Delete
+                        </button>
                       )}
                       {order.status === 'submitted' && isAdmin && (
                         <button
@@ -650,59 +608,6 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
               >
                 Close
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Margin Discount Modal */}
-      {showMarginModal && selectedOrderForInvoice && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-8 shadow-2xl">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-black text-gray-900">Finalize Margin</h3>
-              <p className="text-sm text-gray-500 mt-1">Set the discount for <strong>{selectedOrderForInvoice.store.name}</strong></p>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Margin Discount %</label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="100"
-                    value={customMargin}
-                    onChange={(e) => setCustomMargin(e.target.value)}
-                    className="w-full pl-4 pr-12 py-4 bg-gray-50 border-2 border-transparent focus:border-green-500 rounded-2xl text-lg font-black text-gray-900 transition-all outline-none"
-                    placeholder="e.g. 25"
-                    autoFocus
-                  />
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">%</div>
-                </div>
-                <p className="text-[10px] text-gray-400 mt-2 px-1">This will be saved to the store's profile for future orders.</p>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  onClick={() => setShowMarginModal(false)}
-                  className="flex-1 py-4 px-6 bg-gray-100 text-gray-500 rounded-2xl font-bold hover:bg-gray-200 transition-all active:scale-95"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={submitInvoiceWithMargin}
-                  className="flex-[2] py-4 px-6 bg-green-600 text-white rounded-2xl font-black shadow-lg shadow-green-200 hover:bg-green-700 transition-all active:scale-95"
-                >
-                  Generate Invoice
-                </button>
-              </div>
             </div>
           </div>
         </div>

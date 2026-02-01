@@ -24,6 +24,7 @@ const menuItems = [
 
 const adminOnlyItems = [
   { name: 'Users', href: '/users', icon: '👥' },
+  { name: 'Settings', href: '/settings', icon: '⚙️' },
 ]
 
 export function Dashboard({ user }: DashboardProps) {

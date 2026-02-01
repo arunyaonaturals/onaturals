@@ -65,7 +65,7 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
       const res = await fetch('/api/invoices')
       if (res.ok) {
         const data = await res.json()
-        setUnpaidInvoices(data.filter((i: Invoice) => i.status !== 'paid' && i.status !== 'draft'))
+        setUnpaidInvoices(data.filter((i: Invoice) => i.status !== 'draft'))
       }
     } catch {
       console.error('Failed to fetch invoices')
@@ -135,109 +135,134 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
     }
   }
 
+  const getPaymentStatusStyles = (status: string) => {
+    switch (status) {
+      case 'paid': return 'bg-green-100 text-green-700'
+      case 'partial': return 'bg-yellow-100 text-yellow-700'
+      default: return 'bg-red-100 text-red-700'
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-green-600 hover:text-green-700">← Back</Link>
-            <h1 className="text-2xl font-bold text-gray-800">Payments</h1>
+            <Link href="/" className="text-green-600 hover:text-green-700 font-bold">← Back</Link>
+            <h1 className="text-2xl font-black text-gray-800">Invoiced Bills</h1>
           </div>
-          {unpaidInvoices.length > 0 && (
-            <button onClick={() => setShowModal(true)} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-              + Record Payment
-            </button>
-          )}
+          <button onClick={() => setShowModal(true)} className="bg-green-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-green-700 transition shadow-sm">
+            + Record Payment
+          </button>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Pending Payments Section */}
-        {unpaidInvoices.length > 0 && (
-          <div className="bg-white rounded-lg shadow overflow-hidden border border-red-100">
-            <div className="px-6 py-4 bg-red-50 border-b border-red-100">
-              <h2 className="text-lg font-black text-red-800">Pending Payments</h2>
-              <p className="text-xs text-red-600 font-bold">Invoices waiting for payment</p>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-100">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Invoice</th>
-                    <th className="px-6 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Store</th>
-                    <th className="px-6 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Balance</th>
-                    <th className="px-6 py-3 text-right text-[10px] font-black text-gray-400 uppercase tracking-widest">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {unpaidInvoices.map((inv) => (
-                    <tr key={inv.id} className="hover:bg-red-50/30 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-black text-gray-900">{inv.invoiceNumber}</div>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${inv.status === 'partial' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+            <p className="mt-4 text-gray-500 font-medium">Loading bills...</p>
+          </div>
+        ) : unpaidInvoices.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100">
+            <p className="text-gray-500 font-medium">No invoiced bills found yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {unpaidInvoices.map((inv) => {
+              const invPayments = payments.filter(p => p.invoice.id === inv.id)
+
+              return (
+                <div key={inv.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  {/* Bill Header */}
+                  <div className="px-6 py-4 bg-gray-50 border-b border-gray-100 flex flex-wrap justify-between items-start gap-4">
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-lg font-black text-gray-900">{inv.invoiceNumber}</h3>
+                        <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${getPaymentStatusStyles(inv.status)}`}>
                           {inv.status}
                         </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-bold text-gray-800">{inv.store.name}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-black text-red-600">
-                        {formatCurrency(inv.balanceAmount)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <button onClick={() => handleRecordPayment(inv.id)} className="bg-green-600 text-white text-xs font-black px-4 py-2 rounded-lg hover:bg-green-700 transition shadow-sm">
-                          Record
+                      </div>
+                      <p className="text-sm font-bold text-gray-800 mt-1">{inv.store.name}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs font-black text-gray-400 uppercase tracking-widest">Total Bill</div>
+                      <div className="text-xl font-black text-gray-900">{formatCurrency(inv.totalAmount)}</div>
+                    </div>
+                  </div>
+
+                  {/* Payment Details Grid */}
+                  <div className="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Progress & Actions */}
+                    <div className="lg:col-span-4 space-y-6">
+                      <div className="space-y-4">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500 font-bold">Paid:</span>
+                          <span className="text-green-600 font-black">{formatCurrency(inv.totalAmount - inv.balanceAmount)}</span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="bg-green-500 h-full transition-all duration-500"
+                            style={{ width: `${((inv.totalAmount - inv.balanceAmount) / inv.totalAmount) * 100}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500 font-bold">Balance:</span>
+                          <span className="text-red-600 font-black">{formatCurrency(inv.balanceAmount)}</span>
+                        </div>
+                      </div>
+
+                      {inv.status !== 'paid' && (
+                        <button
+                          onClick={() => handleRecordPayment(inv.id)}
+                          className="w-full bg-green-600 text-white font-black py-3 rounded-xl hover:bg-green-700 transition shadow-md"
+                        >
+                          Record Payment
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      )}
+                    </div>
+
+                    {/* Transaction History */}
+                    <div className="lg:col-span-8">
+                      <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Payment History</h4>
+                      {invPayments.length === 0 ? (
+                        <div className="py-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                          <p className="text-xs text-gray-400 font-bold italic">No transactions for this bill yet</p>
+                        </div>
+                      ) : (
+                        <div className="overflow-hidden rounded-xl border border-gray-100">
+                          <table className="min-w-full divide-y divide-gray-100">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-4 py-2 text-left text-[9px] font-black text-gray-400 uppercase tracking-widest">Receipt #</th>
+                                <th className="px-4 py-2 text-left text-[9px] font-black text-gray-400 uppercase tracking-widest">Date</th>
+                                <th className="px-4 py-2 text-left text-[9px] font-black text-gray-400 uppercase tracking-widest">Method</th>
+                                <th className="px-4 py-2 text-right text-[9px] font-black text-gray-400 uppercase tracking-widest">Amount</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50 bg-white">
+                              {invPayments.map((p) => (
+                                <tr key={p.id}>
+                                  <td className="px-4 py-3 text-xs font-bold text-gray-900">{p.paymentNumber}</td>
+                                  <td className="px-4 py-3 text-[10px] text-gray-500">{new Date(p.collectedAt).toLocaleDateString()}</td>
+                                  <td className="px-4 py-3">
+                                    <span className="text-[10px] font-black text-gray-600 uppercase">{getModeLabel(p.paymentMode)}</span>
+                                    {p.reference && <div className="text-[8px] text-gray-300 font-mono">{p.reference}</div>}
+                                  </td>
+                                  <td className="px-4 py-3 text-right text-xs font-black text-green-600">{formatCurrency(p.amount)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         )}
-
-        {/* Payment History Section */}
-        <div>
-          <h2 className="text-lg font-black text-gray-800 mb-4 px-1">Payment History</h2>
-          {loading ? (
-            <div className="text-center py-8">Loading...</div>
-          ) : payments.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">No payments recorded yet.</div>
-          ) : (
-            <div className="bg-white rounded-lg shadow overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment #</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Invoice</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Store</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mode</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Collected By</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {payments.map((payment) => (
-                    <tr key={payment.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{payment.paymentNumber}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{payment.invoice.invoiceNumber}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{payment.store.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">{formatCurrency(payment.amount)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {getModeLabel(payment.paymentMode)}
-                        {payment.reference && <div className="text-xs text-gray-400">{payment.reference}</div>}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{payment.collectedBy.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(payment.collectedAt)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
       </main>
 
       {/* Record Payment Modal */}

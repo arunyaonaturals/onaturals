@@ -258,7 +258,7 @@ export function StoresClient({ isAdmin }: { isAdmin: boolean }) {
         </div>
       </section>
 
-      {/* Main Content: Card Grid */}
+      {/* Main Content: List View (Table) */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 animate-pulse">
@@ -276,117 +276,97 @@ export function StoresClient({ isAdmin }: { isAdmin: boolean }) {
             <p className="mt-2 text-gray-500 font-medium">Get started by creating your first sales outlet.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {stores.map((store) => (
-              <div
-                key={store.id}
-                className={`group relative bg-white rounded-[2rem] shadow-sm border border-gray-100 p-8 flex flex-col transition-all duration-300 hover:shadow-2xl hover:shadow-gray-200/50 hover:-translate-y-1 ${!store.isActive ? 'bg-gray-50/50 opacity-75 grayscale-[0.5]' : ''}`}
-              >
-                {/* Status Indicator Bar */}
-                <div className={`absolute top-0 left-12 right-12 h-1 rounded-b-full transition-all ${store.isActive ? 'bg-green-500 opacity-0 group-hover:opacity-100' : 'bg-gray-300'}`}></div>
-
-                {/* Card Header */}
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-xl font-bold text-gray-900 truncate leading-tight group-hover:text-green-600 transition-colors" title={store.name}>
-                      {store.name}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-1.5">
-                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{store.area?.name || 'Global'}</span>
-                      {store.gstNumber && (
-                        <span className="text-[9px] font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full tabular-nums">GST: {store.gstNumber}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="shrink-0 ml-4">
-                    {isAdmin ? (
-                      <button
-                        onClick={() => handleToggleActive(store)}
-                        className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${store.isActive
-                          ? 'bg-green-50 text-green-600 hover:bg-green-600 hover:text-white'
-                          : 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white'
-                          }`}
-                        title={store.isActive ? 'Deactivate Store' : 'Activate Store'}
-                      >
-                        <div className={`w-2 h-2 rounded-full ${store.isActive ? 'bg-current pulse' : 'bg-current opacity-40'}`}></div>
-                      </button>
-                    ) : (
-                      <div className={`w-2.5 h-2.5 rounded-full ${store.isActive ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-gray-300'}`}></div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Card Details */}
-                <div className="space-y-6 flex-grow">
-                  <div className="flex gap-4 items-start">
-                    <div className="mt-1 flex items-center justify-center w-8 h-8 rounded-xl bg-gray-50 text-gray-400 group-hover:text-green-500 group-hover:bg-green-50 transition-colors">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 leading-relaxed italic line-clamp-2">
-                        {store.address || 'Address pending verification'}
-                      </p>
-                      {(store.city || store.state) && (
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
-                          {store.city}{store.state ? `, ${store.state}` : ''} {store.pincode ? `(${store.pincode})` : ''}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="relative group/field">
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 pointer-events-none transition-colors group-hover/field:text-green-500/60">Contact</p>
-                      <p className="text-sm font-bold text-gray-800 truncate" title={store.contactPerson || undefined}>
-                        {store.contactPerson || '--'}
-                      </p>
-                    </div>
-                    <div className="relative group/field">
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 pointer-events-none transition-colors group-hover/field:text-green-500/60">Phone</p>
-                      <p className="text-sm font-bold text-gray-800 tabular-nums">
-                        {store.phone || '--'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {store.email && (
-                    <div className="flex items-center gap-3 py-2 px-3 bg-gray-50 rounded-xl group/email hover:bg-gray-100 transition-colors cursor-default">
-                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                      <span className="text-xs font-bold text-gray-500 truncate" title={store.email}>{store.email}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Card Actions */}
-                <div className="mt-8 pt-6 border-t border-gray-50 flex items-center justify-between gap-4">
-                  <button
-                    onClick={() => handleEdit(store)}
-                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all hover:bg-green-600 hover:shadow-lg hover:shadow-green-200 active:scale-95"
-                  >
-                    <span>Edit</span>
-                    <svg className="w-4 h-4 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-                  {isAdmin && (
-                    <button
-                      onClick={() => handleDelete(store)}
-                      className="shrink-0 w-[54px] h-[54px] flex items-center justify-center bg-white text-red-500 border border-red-50 rounded-2xl transition-all hover:bg-red-500 hover:text-white hover:border-red-500 active:scale-95"
-                      title="Deactivate Store"
+          <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-100">
+                <thead className="bg-[#f8fafc]/50">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Store & GST</th>
+                    <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hidden sm:table-cell">Area & City</th>
+                    <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hidden md:table-cell">Phone & Contact</th>
+                    <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Status</th>
+                    <th className="px-6 py-4 text-right text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-50">
+                  {stores.map((store) => (
+                    <tr
+                      key={store.id}
+                      className={`group hover:bg-green-50/30 transition-colors ${!store.isActive ? 'opacity-60 bg-gray-50/50' : ''}`}
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
+                      <td className="px-6 py-5 whitespace-nowrap">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-black text-gray-900 group-hover:text-green-700 transition-colors">{store.name}</span>
+                          {store.gstNumber && (
+                            <span className="text-[10px] font-bold text-gray-400 tabular-nums">GST: {store.gstNumber}</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap hidden sm:table-cell">
+                        <div className="flex flex-col">
+                          <span className="text-xs font-bold text-gray-700">{store.area?.name || 'Unassigned'}</span>
+                          <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">{store.city || '--'}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap hidden md:table-cell">
+                        <div className="flex flex-col">
+                          <span className="text-xs font-bold text-gray-700 tabular-nums">{store.phone || '--'}</span>
+                          <span className="text-[10px] font-medium text-gray-400">{store.contactPerson || '--'}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap">
+                        {isAdmin ? (
+                          <button
+                            onClick={() => handleToggleActive(store)}
+                            className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${store.isActive
+                              ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                              : 'bg-red-100 text-red-700 hover:bg-red-200'
+                              }`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${store.isActive ? 'bg-green-600' : 'bg-red-600'}`}></span>
+                            {store.isActive ? 'Active' : 'Inactive'}
+                          </button>
+                        ) : (
+                          <span
+                            className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${store.isActive
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-red-100 text-red-700'
+                              }`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${store.isActive ? 'bg-green-600' : 'bg-red-600'}`}></span>
+                            {store.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap text-right">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => handleEdit(store)}
+                            className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all active:scale-95"
+                            title="Edit"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          {isAdmin && (
+                            <button
+                              onClick={() => handleDelete(store)}
+                              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all active:scale-95"
+                              title="Delete"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </main>

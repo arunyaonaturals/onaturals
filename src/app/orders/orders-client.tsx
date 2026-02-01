@@ -48,7 +48,7 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
   const [showModal, setShowModal] = useState(false)
   const [viewOrder, setViewOrder] = useState<Order | null>(null)
   const [filterStatus, setFilterStatus] = useState('')
-  
+
   // New order form state (quantity = new stock needed, availableQuantity = available at store)
   const [selectedStore, setSelectedStore] = useState('')
   const [orderItems, setOrderItems] = useState<{ productId: number; quantity: number; availableQuantity: number | null; price: number }[]>([])
@@ -65,7 +65,7 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
     try {
       let url = '/api/orders'
       if (filterStatus) url += `?status=${filterStatus}`
-      
+
       const res = await fetch(url)
       if (res.ok) {
         const data = await res.json()
@@ -350,12 +350,20 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
                         </>
                       )}
                       {order.status === 'submitted' && (
-                        <button
-                          onClick={() => handleStatusChange(order.id, 'cancelled')}
-                          className="text-red-600 hover:text-red-800 mr-2"
-                        >
-                          Cancel
-                        </button>
+                        <>
+                          <button
+                            onClick={() => handleStatusChange(order.id, 'cancelled')}
+                            className="text-red-600 hover:text-red-800 mr-2"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => handleDelete(order.id)}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            Delete
+                          </button>
+                        </>
                       )}
                       {order.status === 'cancelled' && (
                         <button

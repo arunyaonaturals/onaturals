@@ -74,8 +74,8 @@ export async function PUT(
     }
 
     if (status && !validTransitions[existingOrder.status]?.includes(status)) {
-      return NextResponse.json({ 
-        error: `Cannot change status from ${existingOrder.status} to ${status}` 
+      return NextResponse.json({
+        error: `Cannot change status from ${existingOrder.status} to ${status}`
       }, { status: 400 })
     }
 
@@ -119,10 +119,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
 
-    // Only draft orders can be deleted
-    if (order.status !== 'draft' && order.status !== 'cancelled') {
-      return NextResponse.json({ 
-        error: 'Only draft or cancelled orders can be deleted' 
+    // Only draft, cancelled, or submitted orders can be deleted
+    if (order.status !== 'draft' && order.status !== 'cancelled' && order.status !== 'submitted') {
+      return NextResponse.json({
+        error: 'Only draft, cancelled, or submitted orders can be deleted'
       }, { status: 400 })
     }
 

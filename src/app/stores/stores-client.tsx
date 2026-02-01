@@ -240,26 +240,32 @@ export function StoresClient({ isAdmin }: { isAdmin: boolean }) {
             No stores found. Click &quot;+ Add Store&quot; to create one.
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 text-sm">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Store
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Address
+                  </th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Location
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Area
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Phone
+                  </th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Contact
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -267,32 +273,38 @@ export function StoresClient({ isAdmin }: { isAdmin: boolean }) {
               <tbody className="bg-white divide-y divide-gray-200">
                 {stores.map((store) => (
                   <tr key={store.id} className={!store.isActive ? 'bg-gray-50' : ''}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{store.name}</div>
+                    <td className="px-4 py-2 whitespace-nowrap">
+                      <div className="font-medium text-gray-900">{store.name}</div>
                       {store.gstNumber && (
                         <div className="text-xs text-gray-500">GST: {store.gstNumber}</div>
                       )}
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-600">
+                    <td className="px-4 py-2 max-w-[200px]">
+                      <div className="text-gray-600 truncate" title={store.address || undefined}>
+                        {store.address || '-'}
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap">
+                      <div className="text-gray-600">
                         {store.city && store.state ? `${store.city}, ${store.state}` : store.city || store.state || '-'}
                       </div>
                       {store.pincode && (
                         <div className="text-xs text-gray-400">{store.pincode}</div>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-600">
-                        {store.area?.name || '-'}
-                      </span>
+                    <td className="px-4 py-2 whitespace-nowrap text-gray-600">
+                      {store.area?.name || '-'}
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-600">{store.contactPerson || '-'}</div>
-                      {store.phone && (
-                        <div className="text-xs text-gray-400">{store.phone}</div>
+                    <td className="px-4 py-2 whitespace-nowrap text-gray-600">
+                      {store.phone || '-'}
+                    </td>
+                    <td className="px-4 py-2">
+                      <div className="text-gray-600">{store.contactPerson || '-'}</div>
+                      {store.email && (
+                        <div className="text-xs text-gray-400 truncate max-w-[140px]" title={store.email}>{store.email}</div>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-2 whitespace-nowrap">
                       {isAdmin ? (
                         <button
                           onClick={() => handleToggleActive(store)}
@@ -316,10 +328,10 @@ export function StoresClient({ isAdmin }: { isAdmin: boolean }) {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <td className="px-4 py-2 whitespace-nowrap text-sm">
                       <button
                         onClick={() => handleEdit(store)}
-                        className="text-blue-600 hover:text-blue-800 mr-3"
+                        className="text-blue-600 hover:text-blue-800 mr-2"
                       >
                         Edit
                       </button>

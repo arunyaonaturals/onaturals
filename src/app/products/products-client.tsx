@@ -24,11 +24,9 @@ interface Product {
 
 export function ProductsClient({ isAdmin }: { isAdmin: boolean }) {
   const [products, setProducts] = useState<Product[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
-  const [filterCategory, setFilterCategory] = useState('')
   const [showInactive, setShowInactive] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -44,13 +42,11 @@ export function ProductsClient({ isAdmin }: { isAdmin: boolean }) {
 
   useEffect(() => {
     fetchProducts()
-    fetchCategories()
-  }, [filterCategory, showInactive])
+  }, [showInactive])
 
   const fetchProducts = async () => {
     try {
       let url = '/api/products?'
-      if (filterCategory) url += `categoryId=${filterCategory}&`
       if (!showInactive) url += 'isActive=true'
       
       const res = await fetch(url)
@@ -62,18 +58,6 @@ export function ProductsClient({ isAdmin }: { isAdmin: boolean }) {
       console.error('Failed to fetch products')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const fetchCategories = async () => {
-    try {
-      const res = await fetch('/api/categories')
-      if (res.ok) {
-        const data = await res.json()
-        setCategories(data)
-      }
-    } catch {
-      console.error('Failed to fetch categories')
     }
   }
 
@@ -203,21 +187,6 @@ export function ProductsClient({ isAdmin }: { isAdmin: boolean }) {
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="bg-white rounded-lg shadow p-4 flex flex-wrap gap-4 items-center">
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">Category</label>
-            <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
-            >
-              <option value="">All Categories</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
           <div className="flex items-center gap-2 mt-6">
             <input
               type="checkbox"
@@ -255,9 +224,6 @@ export function ProductsClient({ isAdmin }: { isAdmin: boolean }) {
                     Product
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Weight
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -284,11 +250,6 @@ export function ProductsClient({ isAdmin }: { isAdmin: boolean }) {
                       {product.sku && (
                         <div className="text-xs text-gray-500">SKU: {product.sku}</div>
                       )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-600">
-                        {product.category?.name || '-'}
-                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       {formatWeight(product)}
@@ -375,35 +336,16 @@ export function ProductsClient({ isAdmin }: { isAdmin: boolean }) {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    SKU
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.sku}
-                    onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Category
-                  </label>
-                  <select
-                    value={formData.categoryId}
-                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  SKU
+                </label>
+                <input
+                  type="text"
+                  value={formData.sku}
+                  onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">

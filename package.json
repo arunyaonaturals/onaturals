@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "db:setup": "npx tsx scripts/setup-db.ts",
-    "db:generate": "npx prisma generate"
+    "db:generate": "npx prisma generate",
+    "db:import-stores": "npx tsx scripts/import-stores-from-xlsx.ts",
+    "db:import-stores-clear": "npx tsx scripts/import-stores-from-xlsx.ts --clear"
   },
   "dependencies": {
     "@libsql/client": "^0.17.0",
@@ -32,6 +34,7 @@
     "prisma": "^7.3.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "xlsx": "^0.18.5"
   }
 }

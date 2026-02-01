@@ -106,6 +106,15 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
     }
   }
 
+  const handleRecordPayment = (invoiceId: number) => {
+    setFormData({
+      ...formData,
+      invoiceId: invoiceId.toString(),
+      amount: '',
+    })
+    setShowModal(true)
+  }
+
   const selectedInvoice = unpaidInvoices.find(i => i.id.toString() === formData.invoiceId)
 
   const formatCurrency = (value: number) => {
@@ -142,44 +151,93 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {loading ? (
-          <div className="text-center py-8">Loading...</div>
-        ) : payments.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">No payments recorded yet.</div>
-        ) : (
-          <div className="bg-white rounded-lg shadow overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment #</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Invoice</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Store</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mode</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Collected By</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {payments.map((payment) => (
-                  <tr key={payment.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{payment.paymentNumber}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{payment.invoice.invoiceNumber}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{payment.store.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">{formatCurrency(payment.amount)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {getModeLabel(payment.paymentMode)}
-                      {payment.reference && <div className="text-xs text-gray-400">{payment.reference}</div>}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{payment.collectedBy.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(payment.collectedAt)}</td>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Pending Payments Section */}
+        {unpaidInvoices.length > 0 && (
+          <div className="bg-white rounded-lg shadow overflow-hidden border border-red-100">
+            <div className="px-6 py-4 bg-red-50 border-b border-red-100">
+              <h2 className="text-lg font-black text-red-800">Pending Payments</h2>
+              <p className="text-xs text-red-600 font-bold">Invoices waiting for payment</p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-100">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Invoice</th>
+                    <th className="px-6 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Store</th>
+                    <th className="px-6 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Balance</th>
+                    <th className="px-6 py-3 text-right text-[10px] font-black text-gray-400 uppercase tracking-widest">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {unpaidInvoices.map((inv) => (
+                    <tr key={inv.id} className="hover:bg-red-50/30 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-black text-gray-900">{inv.invoiceNumber}</div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${inv.status === 'partial' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
+                          {inv.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-bold text-gray-800">{inv.store.name}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-black text-red-600">
+                        {formatCurrency(inv.balanceAmount)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <button onClick={() => handleRecordPayment(inv.id)} className="bg-green-600 text-white text-xs font-black px-4 py-2 rounded-lg hover:bg-green-700 transition shadow-sm">
+                          Record
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
+
+        {/* Payment History Section */}
+        <div>
+          <h2 className="text-lg font-black text-gray-800 mb-4 px-1">Payment History</h2>
+          {loading ? (
+            <div className="text-center py-8">Loading...</div>
+          ) : payments.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">No payments recorded yet.</div>
+          ) : (
+            <div className="bg-white rounded-lg shadow overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment #</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Invoice</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Store</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mode</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Collected By</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {payments.map((payment) => (
+                    <tr key={payment.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{payment.paymentNumber}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{payment.invoice.invoiceNumber}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{payment.store.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">{formatCurrency(payment.amount)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {getModeLabel(payment.paymentMode)}
+                        {payment.reference && <div className="text-xs text-gray-400">{payment.reference}</div>}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{payment.collectedBy.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(payment.collectedAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </main>
 
       {/* Record Payment Modal */}

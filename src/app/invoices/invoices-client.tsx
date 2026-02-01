@@ -391,10 +391,6 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
                             <Link href={`/invoices/${invoice.id}/print`} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600 font-bold">Print</Link>
                           )}
 
-                          {invoice.status !== 'paid' && invoice.status !== 'draft' && (
-                            <Link href={`/payments?invoiceId=${invoice.id}`} className="text-green-600 hover:text-green-800 font-black">Pay</Link>
-                          )}
-
                           {isAdmin && (
                             <button onClick={() => handleDeleteInvoice(invoice.id)} className="text-red-400 hover:text-red-600 font-bold">Delete</button>
                           )}

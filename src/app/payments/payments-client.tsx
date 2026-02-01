@@ -23,6 +23,7 @@ interface Invoice {
   store: { name: string }
   totalAmount: number
   balanceAmount: number
+  paidAmount: number
   status: string
 }
 
@@ -164,11 +165,20 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
             <p className="mt-4 text-gray-500 font-medium">Loading bills...</p>
           </div>
         ) : unpaidInvoices.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100">
-            <p className="text-gray-500 font-medium">No invoiced bills found yet.</p>
+          <div className="text-center py-16 bg-white rounded-2xl shadow-sm border border-dashed border-gray-200">
+            <p className="text-gray-500 font-black text-xl mb-2">No invoiced bills found</p>
+            <p className="text-sm text-gray-400 font-bold max-w-sm mx-auto">
+              If you just created an invoice, make sure to <Link href="/invoices" className="text-green-600 underline">Approve</Link> it first. Only approved invoices can be paid.
+            </p>
           </div>
         ) : (
           <div className="space-y-6">
+            <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-4 flex gap-3">
+              <span className="text-xl">💡</span>
+              <p className="text-sm text-yellow-800 font-bold leading-relaxed">
+                Only <span className="underline italic">Approved</span> invoices appear here. If a bill is missing, check the <Link href="/invoices" className="underline hover:text-yellow-900 transition-colors">Invoices tab</Link> to Approve it.
+              </p>
+            </div>
             {unpaidInvoices.map((inv) => {
               const invPayments = payments.filter(p => p.invoice.id === inv.id)
 
@@ -185,9 +195,9 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
                       </div>
                       <p className="text-sm font-bold text-gray-800 mt-1">{inv.store.name}</p>
                     </div>
-                    <div className="text-right">
-                      <div className="text-xs font-black text-gray-400 uppercase tracking-widest">Total Bill</div>
-                      <div className="text-xl font-black text-gray-900">{formatCurrency(inv.totalAmount)}</div>
+                    <div className="text-right flex flex-col items-end">
+                      <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Total Bill Amount</div>
+                      <div className="text-2xl font-black text-gray-900 leading-none">{formatCurrency(inv.totalAmount)}</div>
                     </div>
                   </div>
 
@@ -198,12 +208,12 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
                       <div className="space-y-4">
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-500 font-bold">Paid:</span>
-                          <span className="text-green-600 font-black">{formatCurrency(inv.totalAmount - inv.balanceAmount)}</span>
+                          <span className="text-green-600 font-black">{formatCurrency(inv.paidAmount)}</span>
                         </div>
                         <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                           <div
                             className="bg-green-500 h-full transition-all duration-500"
-                            style={{ width: `${((inv.totalAmount - inv.balanceAmount) / inv.totalAmount) * 100}%` }}
+                            style={{ width: `${(inv.paidAmount / inv.totalAmount) * 100}%` }}
                           />
                         </div>
                         <div className="flex justify-between text-sm">

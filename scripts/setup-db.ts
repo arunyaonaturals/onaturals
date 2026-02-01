@@ -140,6 +140,7 @@ async function setupDatabase() {
       "orderId" INTEGER NOT NULL,
       "productId" INTEGER NOT NULL,
       "quantity" INTEGER NOT NULL DEFAULT 0,
+      "availableQuantity" INTEGER,
       "price" REAL NOT NULL DEFAULT 0,
       "total" REAL NOT NULL DEFAULT 0,
       FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE CASCADE,

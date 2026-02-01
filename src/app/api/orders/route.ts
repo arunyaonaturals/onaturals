@@ -71,14 +71,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'At least one item is required' }, { status: 400 })
     }
 
-    // Calculate total
+    // Calculate total (quantity = new stock needed)
     let totalAmount = 0
-    const orderItems = items.map((item: { productId: number; quantity: number; price: number }) => {
+    const orderItems = items.map((item: { productId: number; quantity: number; price: number; availableQuantity?: number | null }) => {
       const itemTotal = item.quantity * item.price
       totalAmount += itemTotal
       return {
         productId: item.productId,
         quantity: item.quantity,
+        availableQuantity: item.availableQuantity != null ? item.availableQuantity : undefined,
         price: item.price,
         total: itemTotal,
       }

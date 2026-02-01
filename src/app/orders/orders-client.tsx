@@ -22,6 +22,7 @@ interface OrderItem {
   productId: number
   product: Product
   quantity: number
+  availableQuantity: number | null
   price: number
   total: number
 }
@@ -48,9 +49,9 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
   const [viewOrder, setViewOrder] = useState<Order | null>(null)
   const [filterStatus, setFilterStatus] = useState('')
   
-  // New order form state
+  // New order form state (quantity = new stock needed, availableQuantity = available at store)
   const [selectedStore, setSelectedStore] = useState('')
-  const [orderItems, setOrderItems] = useState<{ productId: number; quantity: number; price: number }[]>([])
+  const [orderItems, setOrderItems] = useState<{ productId: number; quantity: number; availableQuantity: number | null; price: number }[]>([])
   const [notes, setNotes] = useState('')
   const [error, setError] = useState('')
 
@@ -147,8 +148,8 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
 
   const openNewOrderModal = () => {
     resetForm()
-    // Initialize order items with all products
-    setOrderItems(products.map(p => ({ productId: p.id, quantity: 0, price: p.mrp })))
+    // Initialize order items with all products (quantity = new stock needed, availableQuantity = available at store)
+    setOrderItems(products.map(p => ({ productId: p.id, quantity: 0, availableQuantity: null, price: p.mrp })))
     setShowModal(true)
   }
 
@@ -156,6 +157,14 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
     setOrderItems(items =>
       items.map(item =>
         item.productId === productId ? { ...item, quantity: Math.max(0, quantity) } : item
+      )
+    )
+  }
+
+  const updateAvailableQuantity = (productId: number, availableQuantity: number | null) => {
+    setOrderItems(items =>
+      items.map(item =>
+        item.productId === productId ? { ...item, availableQuantity: availableQuantity ?? null } : item
       )
     )
   }
@@ -390,14 +399,15 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
               </div>
 
               <div className="mb-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Products</h3>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Products — record available at store and new stock needed</h3>
                 <div className="border rounded-lg overflow-hidden">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Product</th>
+                        <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 w-24">Available</th>
+                        <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 w-28">New stock needed</th>
                         <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">MRP</th>
-                        <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 w-32">Qty</th>
                         <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">Total</th>
                       </tr>
                     </thead>
@@ -405,6 +415,7 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
                       {products.map((product) => {
                         const item = orderItems.find(i => i.productId === product.id)
                         const qty = item?.quantity || 0
+                        const available = item?.availableQuantity ?? ''
                         const total = qty * product.mrp
                         return (
                           <tr key={product.id} className={qty > 0 ? 'bg-green-50' : ''}>
@@ -416,8 +427,18 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
                                 </span>
                               )}
                             </td>
-                            <td className="px-4 py-2 text-sm text-right">
-                              {formatCurrency(product.mrp)}
+                            <td className="px-4 py-2">
+                              <input
+                                type="number"
+                                min="0"
+                                placeholder="0"
+                                value={available === '' ? '' : available}
+                                onChange={(e) => {
+                                  const v = e.target.value
+                                  updateAvailableQuantity(product.id, v === '' ? null : Math.max(0, parseInt(v, 10) || 0))
+                                }}
+                                className="w-full px-2 py-1 border border-gray-300 rounded text-center text-sm"
+                              />
                             </td>
                             <td className="px-4 py-2">
                               <input
@@ -428,6 +449,9 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
                                 className="w-full px-2 py-1 border border-gray-300 rounded text-center text-sm"
                               />
                             </td>
+                            <td className="px-4 py-2 text-sm text-right">
+                              {formatCurrency(product.mrp)}
+                            </td>
                             <td className="px-4 py-2 text-sm text-right font-medium">
                               {qty > 0 ? formatCurrency(total) : '-'}
                             </td>
@@ -437,7 +461,7 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
                     </tbody>
                     <tfoot className="bg-gray-50">
                       <tr>
-                        <td colSpan={3} className="px-4 py-2 text-sm font-medium text-right">
+                        <td colSpan={4} className="px-4 py-2 text-sm font-medium text-right">
                           Total:
                         </td>
                         <td className="px-4 py-2 text-sm font-bold text-right">
@@ -500,7 +524,8 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Product</th>
-                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">Qty</th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">Available</th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">New stock needed</th>
                     <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">Price</th>
                     <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">Total</th>
                   </tr>
@@ -509,6 +534,7 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
                   {viewOrder.items.map((item) => (
                     <tr key={item.id}>
                       <td className="px-4 py-2 text-sm">{item.product.name}</td>
+                      <td className="px-4 py-2 text-sm text-right">{item.availableQuantity ?? '-'}</td>
                       <td className="px-4 py-2 text-sm text-right">{item.quantity}</td>
                       <td className="px-4 py-2 text-sm text-right">{formatCurrency(item.price)}</td>
                       <td className="px-4 py-2 text-sm text-right font-medium">{formatCurrency(item.total)}</td>
@@ -517,7 +543,7 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
                 </tbody>
                 <tfoot className="bg-gray-50">
                   <tr>
-                    <td colSpan={3} className="px-4 py-2 text-sm font-medium text-right">Total:</td>
+                    <td colSpan={4} className="px-4 py-2 text-sm font-medium text-right">Total:</td>
                     <td className="px-4 py-2 text-sm font-bold text-right">
                       {formatCurrency(viewOrder.totalAmount)}
                     </td>

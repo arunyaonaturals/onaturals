@@ -358,7 +358,10 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
                             )}
                           </>
                         )}
-                        {(order.status === 'cancelled' || order.status === 'approved') && (
+                        {order.status === 'cancelled' && (
+                          <IconButton icon={Trash2} label="Delete order" variant="delete" onClick={() => handleDelete(order.id)} />
+                        )}
+                        {order.status === 'approved' && isAdmin && (
                           <IconButton icon={Trash2} label="Delete order" variant="delete" onClick={() => handleDelete(order.id)} />
                         )}
                       </div>

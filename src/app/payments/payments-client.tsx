@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { ArrowLeft, Banknote, Plus } from 'lucide-react'
+import { ArrowLeft, Banknote, Plus, Trash2 } from 'lucide-react'
+import { IconButton } from '@/components/ui/icon-button'
 
 interface Payment {
   id: number
@@ -115,6 +116,22 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
       amount: '',
     })
     setShowModal(true)
+  }
+
+  const handleDeletePayment = async (paymentId: number) => {
+    if (!confirm('Remove this payment? The invoice balance will be updated.')) return
+    try {
+      const res = await fetch(`/api/payments/${paymentId}`, { method: 'DELETE' })
+      if (res.ok) {
+        fetchPayments()
+        fetchUnpaidInvoices()
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Failed to delete payment')
+      }
+    } catch {
+      alert('An error occurred')
+    }
   }
 
   const selectedInvoice = unpaidInvoices.find(i => i.id.toString() === formData.invoiceId)
@@ -254,6 +271,9 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
                                 <th className="px-4 py-2 text-left text-[9px] font-black text-gray-400 uppercase tracking-widest">Date</th>
                                 <th className="px-4 py-2 text-left text-[9px] font-black text-gray-400 uppercase tracking-widest">Method</th>
                                 <th className="px-4 py-2 text-right text-[9px] font-black text-gray-400 uppercase tracking-widest">Amount</th>
+                                {isAdmin && (
+                                  <th className="px-4 py-2 text-right text-[9px] font-black text-gray-400 uppercase tracking-widest">Actions</th>
+                                )}
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50 bg-white">
@@ -266,6 +286,11 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
                                     {p.reference && <div className="text-[8px] text-gray-300 font-mono">{p.reference}</div>}
                                   </td>
                                   <td className="px-4 py-3 text-right text-xs font-black text-green-600">{formatCurrency(p.amount)}</td>
+                                  {isAdmin && (
+                                    <td className="px-4 py-3 text-right">
+                                      <IconButton icon={Trash2} label="Delete payment" variant="delete" onClick={() => handleDeletePayment(p.id)} />
+                                    </td>
+                                  )}
                                 </tr>
                               ))}
                             </tbody>

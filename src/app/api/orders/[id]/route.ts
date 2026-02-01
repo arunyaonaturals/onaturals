@@ -126,8 +126,13 @@ export async function DELETE(
       }, { status: 400 })
     }
 
-    // Only creator or admin can delete
-    if (order.createdById !== parseInt(session.user.id) && session.user.role !== 'admin') {
+    // Only admin can delete approved orders
+    if (order.status === 'approved' && session.user.role !== 'admin') {
+      return NextResponse.json({ error: 'Only admin can delete approved orders' }, { status: 403 })
+    }
+
+    // For other statuses: only creator or admin can delete
+    if (order.status !== 'approved' && order.createdById !== parseInt(session.user.id) && session.user.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 

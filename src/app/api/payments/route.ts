@@ -78,8 +78,8 @@ export async function POST(request: NextRequest) {
     }
 
     if (paymentAmount > invoice.balanceAmount) {
-      return NextResponse.json({ 
-        error: `Amount exceeds balance (${invoice.balanceAmount})` 
+      return NextResponse.json({
+        error: `Amount exceeds balance (${invoice.balanceAmount})`
       }, { status: 400 })
     }
 
@@ -94,6 +94,7 @@ export async function POST(request: NextRequest) {
         paymentMode: paymentMode || 'cash',
         reference: reference || null,
         notes: notes || null,
+        collectedAt: body.collectedAt ? new Date(body.collectedAt) : new Date(),
       },
       include: {
         invoice: { select: { id: true, invoiceNumber: true } },

@@ -40,6 +40,7 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
     paymentMode: 'cash',
     reference: '',
     notes: '',
+    collectedAt: new Date().toISOString().split('T')[0],
   })
   const [error, setError] = useState('')
 
@@ -64,7 +65,7 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
       const res = await fetch('/api/invoices')
       if (res.ok) {
         const data = await res.json()
-        setUnpaidInvoices(data.filter((i: Invoice) => i.status !== 'paid'))
+        setUnpaidInvoices(data.filter((i: Invoice) => i.status !== 'paid' && i.status !== 'draft'))
       }
     } catch {
       console.error('Failed to fetch invoices')
@@ -86,7 +87,14 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
       })
       if (res.ok) {
         setShowModal(false)
-        setFormData({ invoiceId: '', amount: '', paymentMode: 'cash', reference: '', notes: '' })
+        setFormData({
+          invoiceId: '',
+          amount: '',
+          paymentMode: 'cash',
+          reference: '',
+          notes: '',
+          collectedAt: new Date().toISOString().split('T')[0]
+        })
         fetchPayments()
         fetchUnpaidInvoices()
       } else {
@@ -206,22 +214,28 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
                 <label className="block text-sm font-medium text-gray-700 mb-1">Amount (₹) *</label>
                 <input type="number" step="0.01" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} required className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" placeholder="Enter amount" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Mode</label>
-                <select value={formData.paymentMode} onChange={(e) => setFormData({ ...formData, paymentMode: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
-                  <option value="cash">Cash</option>
-                  <option value="upi">UPI</option>
-                  <option value="bank_transfer">Bank Transfer</option>
-                  <option value="cheque">Cheque</option>
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Payment Mode</label>
+                  <select value={formData.paymentMode} onChange={(e) => setFormData({ ...formData, paymentMode: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
+                    <option value="cash">Cash</option>
+                    <option value="upi">UPI</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="cheque">Cheque</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Payment Date</label>
+                  <input type="date" value={formData.collectedAt} onChange={(e) => setFormData({ ...formData, collectedAt: e.target.value })} required className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Reference (UPI ID / Cheque No.)</label>
-                <input type="text" value={formData.reference} onChange={(e) => setFormData({ ...formData, reference: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" />
+                <input type="text" value={formData.reference} onChange={(e) => setFormData({ ...formData, reference: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" placeholder="Optional" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={2} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" />
+                <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={2} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" placeholder="Optional comments..." />
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>

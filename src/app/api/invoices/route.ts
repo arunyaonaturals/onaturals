@@ -141,6 +141,7 @@ export async function POST(request: NextRequest) {
         discountPercent: defaultMargin, // Log the default margin used
         discountAmount: totalDiscountAmount,
         gstAmount: totalGstAmount,
+        status: 'draft',
         totalAmount: finalTotalAmount,
         balanceAmount: finalTotalAmount,
         dueDate: dueDate ? new Date(dueDate) : null,

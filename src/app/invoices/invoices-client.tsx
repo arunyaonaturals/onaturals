@@ -189,8 +189,46 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
     }
   }
 
+  const handleApprove = async (id: number) => {
+    if (!confirm('Approve this invoice? This will make it final and ready for payment.')) return
+    try {
+      const res = await fetch(`/api/invoices/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'unpaid' }),
+      })
+      if (res.ok) {
+        fetchInvoices()
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Failed to approve invoice')
+      }
+    } catch {
+      alert('An error occurred')
+    }
+  }
+
+  const handleDeleteInvoice = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this invoice? The associated order will be reset to "Approved" status.')) return
+    try {
+      const res = await fetch(`/api/invoices/${id}`, {
+        method: 'DELETE',
+      })
+      if (res.ok) {
+        fetchInvoices()
+        fetchApprovedOrders() // Reload pending orders list
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Failed to delete invoice')
+      }
+    } catch {
+      alert('An error occurred')
+    }
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'draft': return 'bg-gray-100 text-gray-800 border border-gray-300'
       case 'unpaid': return 'bg-red-100 text-red-800'
       case 'partial': return 'bg-yellow-100 text-yellow-800'
       case 'paid': return 'bg-green-100 text-green-800'
@@ -344,11 +382,21 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
                         <span className={`px-3 py-1 text-[10px] font-black uppercase rounded-full ${getStatusColor(invoice.status)}`}>{invoice.status}</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                        <div className="flex justify-end gap-3">
+                        <div className="flex justify-end gap-3 items-center">
                           <button onClick={() => fetchInvoiceDetails(invoice.id)} className="text-blue-600 hover:text-blue-800 font-bold">View</button>
-                          <Link href={`/invoices/${invoice.id}/print`} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600 font-bold">Print</Link>
-                          {invoice.status !== 'paid' && (
+
+                          {invoice.status === 'draft' ? (
+                            <button onClick={() => handleApprove(invoice.id)} className="text-green-600 hover:text-green-800 font-black px-2 py-1 bg-green-50 rounded-lg">Approve</button>
+                          ) : (
+                            <Link href={`/invoices/${invoice.id}/print`} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600 font-bold">Print</Link>
+                          )}
+
+                          {invoice.status !== 'paid' && invoice.status !== 'draft' && (
                             <Link href={`/payments?invoiceId=${invoice.id}`} className="text-green-600 hover:text-green-800 font-black">Pay</Link>
+                          )}
+
+                          {isAdmin && (
+                            <button onClick={() => handleDeleteInvoice(invoice.id)} className="text-red-400 hover:text-red-600 font-bold">Delete</button>
                           )}
                         </div>
                       </td>

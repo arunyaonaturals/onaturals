@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { orderId, dueDate } = await request.json()
+    const { orderId, dueDate, discountPercent: customDiscount } = await request.json()
     if (!orderId) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 })
     }
@@ -74,6 +74,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Only approved orders can be invoiced' }, { status: 400 })
     }
 
+    // Update store margin if a new one is provided
+    let discountPercent = order.store.marginDiscountPercent ?? 0
+    if (customDiscount !== undefined && customDiscount !== null) {
+      discountPercent = parseFloat(customDiscount)
+      await db.store.update({
+        where: { id: order.storeId },
+        data: { marginDiscountPercent: discountPercent }
+      })
+    }
+
     // Check if invoice already exists
     const existingInvoice = await db.invoice.findUnique({
       where: { orderId: parseInt(orderId) },
@@ -81,8 +91,6 @@ export async function POST(request: NextRequest) {
     if (existingInvoice) {
       return NextResponse.json({ error: 'Invoice already exists for this order' }, { status: 400 })
     }
-
-    const discountPercent = order.store.marginDiscountPercent ?? 0
     const discountMultiplier = 1 - discountPercent / 100
 
     // Calculate invoice totals (apply store margin discount before GST)

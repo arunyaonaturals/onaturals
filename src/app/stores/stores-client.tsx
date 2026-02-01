@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { ArrowLeft, Pencil, Plus, Trash2 } from 'lucide-react'
+import { IconButton } from '@/components/ui/icon-button'
 
 interface Area {
   id: number
@@ -177,15 +179,14 @@ export function StoresClient({ isAdmin }: { isAdmin: boolean }) {
     <div className="min-h-screen bg-[#f8fafc]">
       {/* Premium Header */}
       <header className="bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-6">
             <Link
               href="/"
-              className="group flex items-center justify-center w-10 h-10 rounded-full bg-gray-50 text-gray-400 hover:bg-green-50 hover:text-green-600 transition-all border border-gray-100"
+              className="group flex items-center justify-center w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-gray-50 text-gray-400 hover:bg-green-50 hover:text-green-600 transition-all border border-gray-100"
+              aria-label="Back"
             >
-              <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
-              </svg>
+              <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" aria-hidden />
             </Link>
             <div>
               <h1 className="text-3xl font-black text-gray-900 tracking-tight">Stores</h1>
@@ -198,11 +199,9 @@ export function StoresClient({ isAdmin }: { isAdmin: boolean }) {
               resetForm()
               setShowModal(true)
             }}
-            className="group relative flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-2xl font-bold transition-all hover:bg-green-700 hover:shadow-lg hover:shadow-green-200 active:scale-95"
+            className="group relative flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-2xl font-bold transition-all hover:bg-green-700 hover:shadow-lg hover:shadow-green-200 active:scale-95 min-h-[44px]"
           >
-            <svg className="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
-            </svg>
+            <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" aria-hidden />
             <span>Add Store</span>
           </button>
         </div>
@@ -339,26 +338,10 @@ export function StoresClient({ isAdmin }: { isAdmin: boolean }) {
                         )}
                       </td>
                       <td className="px-6 py-5 whitespace-nowrap text-right">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => handleEdit(store)}
-                            className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all active:scale-95"
-                            title="Edit"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </button>
+                        <div className="flex justify-end items-center gap-2">
+                          <IconButton icon={Pencil} label="Edit store" variant="edit" onClick={() => handleEdit(store)} />
                           {isAdmin && (
-                            <button
-                              onClick={() => handleDelete(store)}
-                              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all active:scale-95"
-                              title="Delete"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
+                            <IconButton icon={Trash2} label="Deactivate store" variant="delete" onClick={() => handleDelete(store)} />
                           )}
                         </div>
                       </td>

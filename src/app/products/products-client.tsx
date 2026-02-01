@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { ArrowLeft, Pencil, Plus, Trash2 } from 'lucide-react'
+import { IconButton } from '@/components/ui/icon-button'
 
 interface Category {
   id: number
@@ -162,10 +164,11 @@ export function ProductsClient({ isAdmin }: { isAdmin: boolean }) {
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
       <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-green-600 hover:text-green-700">
-              ← Back
+            <Link href="/" className="flex items-center gap-2 text-green-600 hover:text-green-700 min-h-[44px] items-center" aria-label="Back">
+              <ArrowLeft className="w-5 h-5" aria-hidden />
+              <span>Back</span>
             </Link>
             <h1 className="text-2xl font-bold text-gray-800">Products</h1>
           </div>
@@ -176,9 +179,10 @@ export function ProductsClient({ isAdmin }: { isAdmin: boolean }) {
                 resetForm()
                 setShowModal(true)
               }}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition min-h-[44px]"
             >
-              + Add Product
+              <Plus className="w-5 h-5" aria-hidden />
+              <span>Add Product</span>
             </button>
           )}
         </div>
@@ -283,19 +287,11 @@ export function ProductsClient({ isAdmin }: { isAdmin: boolean }) {
                       )}
                     </td>
                     {isAdmin && (
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <button
-                          onClick={() => handleEdit(product)}
-                          className="text-blue-600 hover:text-blue-800 mr-3"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(product)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          Delete
-                        </button>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex justify-end items-center gap-2">
+                          <IconButton icon={Pencil} label="Edit product" variant="edit" onClick={() => handleEdit(product)} />
+                          <IconButton icon={Trash2} label="Deactivate product" variant="delete" onClick={() => handleDelete(product)} />
+                        </div>
                       </td>
                     )}
                   </tr>

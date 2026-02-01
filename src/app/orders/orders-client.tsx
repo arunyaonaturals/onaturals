@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { ArrowLeft, Check, Eye, Plus, Trash2, X } from 'lucide-react'
+import { IconButton } from '@/components/ui/icon-button'
 
 interface Store {
   id: number
@@ -244,18 +246,24 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
       <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-green-600 hover:text-green-700">
-              ← Back
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-green-600 hover:text-green-700 min-h-[44px] items-center"
+              aria-label="Back"
+            >
+              <ArrowLeft className="w-5 h-5" aria-hidden />
+              <span>Back</span>
             </Link>
             <h1 className="text-2xl font-bold text-gray-800">Orders</h1>
           </div>
           <button
             onClick={openNewOrderModal}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition min-h-[44px]"
           >
-            + New Order
+            <Plus className="w-5 h-5" aria-hidden />
+            <span>New Order</span>
           </button>
         </div>
       </header>
@@ -332,69 +340,28 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(order.createdAt)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button
-                        onClick={() => setViewOrder(order)}
-                        className="text-blue-600 hover:text-blue-800 mr-2"
-                      >
-                        View
-                      </button>
-                      {order.status === 'draft' && (
-                        <>
-                          <button
-                            onClick={() => handleStatusChange(order.id, 'submitted')}
-                            className="text-green-600 hover:text-green-800 mr-2"
-                          >
-                            Submit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(order.id)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
-                      {order.status === 'submitted' && (
-                        <>
-                          <button
-                            onClick={() => handleStatusChange(order.id, 'cancelled')}
-                            className="text-red-600 hover:text-red-800 mr-2"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={() => handleDelete(order.id)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
-                      {order.status === 'cancelled' && (
-                        <button
-                          onClick={() => handleDelete(order.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          Delete
-                        </button>
-                      )}
-                      {order.status === 'approved' && (
-                        <button
-                          onClick={() => handleDelete(order.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          Delete
-                        </button>
-                      )}
-                      {order.status === 'submitted' && isAdmin && (
-                        <button
-                          onClick={() => handleStatusChange(order.id, 'approved')}
-                          className="text-blue-600 hover:text-blue-800 mr-2"
-                        >
-                          Approve
-                        </button>
-                      )}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <IconButton icon={Eye} label="View order" variant="view" onClick={() => setViewOrder(order)} />
+                        {order.status === 'draft' && (
+                          <>
+                            <IconButton icon={Check} label="Submit order" variant="primary" onClick={() => handleStatusChange(order.id, 'submitted')} />
+                            <IconButton icon={Trash2} label="Delete order" variant="delete" onClick={() => handleDelete(order.id)} />
+                          </>
+                        )}
+                        {order.status === 'submitted' && (
+                          <>
+                            <IconButton icon={X} label="Cancel order" variant="delete" onClick={() => handleStatusChange(order.id, 'cancelled')} />
+                            <IconButton icon={Trash2} label="Delete order" variant="delete" onClick={() => handleDelete(order.id)} />
+                            {isAdmin && (
+                              <IconButton icon={Check} label="Approve order" variant="primary" onClick={() => handleStatusChange(order.id, 'approved')} />
+                            )}
+                          </>
+                        )}
+                        {(order.status === 'cancelled' || order.status === 'approved') && (
+                          <IconButton icon={Trash2} label="Delete order" variant="delete" onClick={() => handleDelete(order.id)} />
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

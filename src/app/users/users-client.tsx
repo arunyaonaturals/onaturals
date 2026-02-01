@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { ArrowLeft, Pencil, Plus, Trash2 } from 'lucide-react'
+import { IconButton } from '@/components/ui/icon-button'
 
 interface User {
   id: number
@@ -118,10 +120,11 @@ export function UsersClient() {
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
       <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-green-600 hover:text-green-700">
-              ← Back
+            <Link href="/" className="flex items-center gap-2 text-green-600 hover:text-green-700 min-h-[44px] items-center" aria-label="Back">
+              <ArrowLeft className="w-5 h-5" aria-hidden />
+              <span>Back</span>
             </Link>
             <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
           </div>
@@ -131,9 +134,10 @@ export function UsersClient() {
               setFormData({ email: '', password: '', name: '', role: 'sales_captain' })
               setShowModal(true)
             }}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition min-h-[44px]"
           >
-            + Add User
+            <Plus className="w-5 h-5" aria-hidden />
+            <span>Add User</span>
           </button>
         </div>
       </header>
@@ -143,7 +147,7 @@ export function UsersClient() {
         {loading ? (
           <div className="text-center py-8">Loading...</div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-lg shadow overflow-x-auto min-w-0">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -196,19 +200,11 @@ export function UsersClient() {
                         {user.isActive ? 'Active' : 'Inactive'}
                       </button>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button
-                        onClick={() => handleEdit(user)}
-                        className="text-blue-600 hover:text-blue-800 mr-3"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(user)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        Delete
-                      </button>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <IconButton icon={Pencil} label="Edit user" variant="edit" onClick={() => handleEdit(user)} />
+                        <IconButton icon={Trash2} label="Deactivate user" variant="delete" onClick={() => handleDelete(user)} />
+                      </div>
                     </td>
                   </tr>
                 ))}

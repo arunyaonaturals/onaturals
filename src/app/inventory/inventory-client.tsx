@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { ArrowLeft, Package, ClipboardList, Store, Plus } from 'lucide-react'
 
 interface Movement {
   id: number
@@ -162,14 +163,17 @@ export function InventoryClient({ isAdmin }: { isAdmin: boolean }) {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-green-600 hover:text-green-700 font-bold text-lg">←</Link>
+            <Link href="/" className="flex items-center justify-center min-w-[44px] min-h-[44px] text-green-600 hover:text-green-700 font-bold text-lg rounded-xl hover:bg-green-50 transition" aria-label="Back">
+              <ArrowLeft className="w-5 h-5" aria-hidden />
+            </Link>
             <h1 className="text-2xl font-black text-gray-800 tracking-tight">Inventory</h1>
           </div>
           {isAdmin && activeTab === 'stock' && (
-            <button onClick={() => setShowAddModal(true)} className="bg-green-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-green-700 transition shadow-sm">
-              + Add Material
+            <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 bg-green-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-green-700 transition shadow-sm min-h-[44px]">
+              <Plus className="w-5 h-5" aria-hidden />
+              <span>Add Material</span>
             </button>
           )}
         </div>
@@ -178,21 +182,23 @@ export function InventoryClient({ isAdmin }: { isAdmin: boolean }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-8 border-b border-gray-100">
             {[
-              { id: 'stock', label: 'Current Stock', icon: '📦' },
-              { id: 'pending', label: 'Pending Needs', icon: '📝' },
-              { id: 'stores', label: 'Store Orders', icon: '🏪' },
-            ].map((tab) => (
+              { id: 'stock', label: 'Current Stock', icon: Package },
+              { id: 'pending', label: 'Pending Needs', icon: ClipboardList },
+              { id: 'stores', label: 'Store Orders', icon: Store },
+            ].map((tab) => {
+              const Icon = tab.icon
+              return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`py-4 px-2 text-sm font-black transition-all relative ${activeTab === tab.id ? 'text-green-600' : 'text-gray-400 hover:text-gray-600'
+                className={`flex items-center gap-2 py-4 px-2 text-sm font-black transition-all relative min-h-[44px] ${activeTab === tab.id ? 'text-green-600' : 'text-gray-400 hover:text-gray-600'
                   }`}
               >
-                <span className="mr-2">{tab.icon}</span>
+                <Icon className="w-5 h-5" aria-hidden />
                 {tab.label}
                 {activeTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-600 rounded-t-full" />}
               </button>
-            ))}
+            )})}
           </div>
         </div>
       </header>
@@ -272,7 +278,7 @@ export function InventoryClient({ isAdmin }: { isAdmin: boolean }) {
 
             {activeTab === 'pending' && (
               <div className="max-w-4xl mx-auto space-y-6">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto min-w-0">
                   <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
                     <h2 className="text-sm font-black text-gray-900 uppercase tracking-widest">Cumulative Production Needs</h2>
                   </div>

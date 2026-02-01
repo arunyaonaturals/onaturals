@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { ArrowLeft, Check, Play, Plus } from 'lucide-react'
+import { IconButton } from '@/components/ui/icon-button'
 
 interface Production {
   id: number
@@ -86,14 +88,18 @@ export function ProductionClient({ isAdmin }: { isAdmin: boolean }) {
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-green-600 hover:text-green-700">← Back</Link>
+            <Link href="/" className="flex items-center gap-2 text-green-600 hover:text-green-700 min-h-[44px] items-center" aria-label="Back">
+              <ArrowLeft className="w-5 h-5" aria-hidden />
+              <span>Back</span>
+            </Link>
             <h1 className="text-2xl font-bold text-gray-800">Production</h1>
           </div>
           {isAdmin && (
-            <button onClick={() => setShowModal(true)} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-              + Add Task
+            <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition min-h-[44px]">
+              <Plus className="w-5 h-5" aria-hidden />
+              <span>Add Task</span>
             </button>
           )}
         </div>
@@ -122,7 +128,7 @@ export function ProductionClient({ isAdmin }: { isAdmin: boolean }) {
         ) : productions.length === 0 ? (
           <div className="text-center py-8 text-gray-500">No production tasks.</div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-lg shadow overflow-x-auto min-w-0">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -144,13 +150,15 @@ export function ProductionClient({ isAdmin }: { isAdmin: boolean }) {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{prod.notes || '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(prod.createdAt)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {prod.status === 'suggested' && (
-                        <button onClick={() => handleStatusChange(prod.id, 'in_progress')} className="text-yellow-600 hover:text-yellow-800 mr-2">Start</button>
-                      )}
-                      {prod.status === 'in_progress' && (
-                        <button onClick={() => handleStatusChange(prod.id, 'completed')} className="text-green-600 hover:text-green-800">Complete</button>
-                      )}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        {prod.status === 'suggested' && (
+                          <IconButton icon={Play} label="Start task" variant="default" onClick={() => handleStatusChange(prod.id, 'in_progress')} />
+                        )}
+                        {prod.status === 'in_progress' && (
+                          <IconButton icon={Check} label="Complete task" variant="primary" onClick={() => handleStatusChange(prod.id, 'completed')} />
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

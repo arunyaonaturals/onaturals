@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { ArrowLeft, Check, Eye, Plus, Printer, Trash2, X } from 'lucide-react'
+import { IconButton } from '@/components/ui/icon-button'
 
 interface Invoice {
   id: number
@@ -247,16 +249,20 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-green-600 hover:text-green-700">← Back</Link>
+            <Link href="/" className="flex items-center gap-2 text-green-600 hover:text-green-700 min-h-[44px] items-center" aria-label="Back">
+              <ArrowLeft className="w-5 h-5" aria-hidden />
+              <span>Back</span>
+            </Link>
             <h1 className="text-2xl font-bold text-gray-800">Invoices</h1>
           </div>
           {isAdmin && (
             <div className="flex items-center gap-4">
               {approvedOrders.length > 0 ? (
-                <button onClick={() => setShowCreateModal(true)} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                  + Create Invoice
+                <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition min-h-[44px]">
+                  <Plus className="w-5 h-5" aria-hidden />
+                  <span>Create Invoice</span>
                 </button>
               ) : (
                 <span className="text-sm text-gray-500 italic">No approved orders to invoice</span>
@@ -321,9 +327,10 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <button
                           onClick={() => fetchOrderForInvoicing(order.id)}
-                          className="bg-green-600 text-white px-4 py-2 rounded-xl text-xs font-black shadow-lg shadow-green-100 hover:bg-green-700 transition"
+                          className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl text-xs font-black shadow-lg shadow-green-100 hover:bg-green-700 transition min-h-[44px]"
                         >
-                          Generate Invoice →
+                          <Plus className="w-4 h-4" aria-hidden />
+                          <span>Generate Invoice</span>
                         </button>
                       </td>
                     </tr>
@@ -350,7 +357,7 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
               </p>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl shadow overflow-hidden border border-gray-100">
+            <div className="bg-white rounded-2xl shadow border border-gray-100 overflow-x-auto min-w-0">
               <table className="min-w-full divide-y divide-gray-100">
                 <thead className="bg-gray-50">
                   <tr>
@@ -381,18 +388,16 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <span className={`px-3 py-1 text-[10px] font-black uppercase rounded-full ${getStatusColor(invoice.status)}`}>{invoice.status}</span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                        <div className="flex justify-end gap-3 items-center">
-                          <button onClick={() => fetchInvoiceDetails(invoice.id)} className="text-blue-600 hover:text-blue-800 font-bold">View</button>
-
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <div className="flex justify-end items-center gap-2">
+                          <IconButton icon={Eye} label="View invoice" variant="view" onClick={() => fetchInvoiceDetails(invoice.id)} />
                           {invoice.status === 'draft' ? (
-                            <button onClick={() => handleApprove(invoice.id)} className="text-green-600 hover:text-green-800 font-black px-2 py-1 bg-green-50 rounded-lg">Approve</button>
+                            <IconButton icon={Check} label="Approve invoice" variant="primary" onClick={() => handleApprove(invoice.id)} />
                           ) : (
-                            <Link href={`/invoices/${invoice.id}/print`} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600 font-bold">Print</Link>
+                            <IconButton icon={Printer} label="Print tax invoice" variant="print" href={`/invoices/${invoice.id}/print`} />
                           )}
-
                           {isAdmin && (
-                            <button onClick={() => handleDeleteInvoice(invoice.id)} className="text-red-400 hover:text-red-600 font-bold">Delete</button>
+                            <IconButton icon={Trash2} label="Delete invoice" variant="delete" onClick={() => handleDeleteInvoice(invoice.id)} />
                           )}
                         </div>
                       </td>
@@ -410,11 +415,7 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
           <div className="bg-white rounded-2xl max-w-2xl w-full p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-black text-gray-900">Create Tax Invoice</h2>
-              <button onClick={() => setShowCreateModal(false)} className="text-gray-400 hover:text-gray-600">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <IconButton icon={X} label="Close" variant="default" onClick={() => setShowCreateModal(false)} className="!p-2 !min-w-0 !min-h-0" />
             </div>
 
             {error && <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm font-bold rounded-r-lg">{error}</div>}
@@ -596,9 +597,15 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
               <div><span className="text-gray-500">Balance:</span> <span className="text-red-600 font-medium">{formatCurrency(viewInvoice.balanceAmount)}</span></div>
             </div>
 
-            <div className="flex justify-end gap-2">
-              <a href={`/invoices/${viewInvoice.id}/print`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-center">Print Tax Invoice</a>
-              <button onClick={() => setViewInvoice(null)} className="px-4 py-2 text-gray-600 hover:text-gray-800">Close</button>
+            <div className="flex flex-wrap justify-end gap-2">
+              <a href={`/invoices/${viewInvoice.id}/print`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-center min-h-[44px]">
+                <Printer className="w-4 h-4" aria-hidden />
+                <span>Print Tax Invoice</span>
+              </a>
+              <button onClick={() => setViewInvoice(null)} className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 min-h-[44px]">
+                <X className="w-4 h-4" aria-hidden />
+                <span>Close</span>
+              </button>
             </div>
           </div>
         </div>

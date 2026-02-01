@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { ArrowLeft, Banknote, Plus } from 'lucide-react'
 
 interface Payment {
   id: number
@@ -147,13 +148,17 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-green-600 hover:text-green-700 font-bold">← Back</Link>
+            <Link href="/" className="flex items-center gap-2 text-green-600 hover:text-green-700 font-bold min-h-[44px] items-center" aria-label="Back">
+              <ArrowLeft className="w-5 h-5" aria-hidden />
+              <span>Back</span>
+            </Link>
             <h1 className="text-2xl font-black text-gray-800">Invoiced Bills</h1>
           </div>
-          <button onClick={() => setShowModal(true)} className="bg-green-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-green-700 transition shadow-sm">
-            + Record Payment
+          <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-green-700 transition shadow-sm min-h-[44px]">
+            <Banknote className="w-5 h-5" aria-hidden />
+            <span>Record Payment</span>
           </button>
         </div>
       </header>
@@ -225,9 +230,10 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
                       {inv.status !== 'paid' && (
                         <button
                           onClick={() => handleRecordPayment(inv.id)}
-                          className="w-full bg-green-600 text-white font-black py-3 rounded-xl hover:bg-green-700 transition shadow-md"
+                          className="flex items-center justify-center gap-2 w-full bg-green-600 text-white font-black py-3 rounded-xl hover:bg-green-700 transition shadow-md min-h-[44px]"
                         >
-                          Record Payment
+                          <Banknote className="w-5 h-5" aria-hidden />
+                          <span>Record Payment</span>
                         </button>
                       )}
                     </div>
@@ -240,7 +246,7 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
                           <p className="text-xs text-gray-400 font-bold italic">No transactions for this bill yet</p>
                         </div>
                       ) : (
-                        <div className="overflow-hidden rounded-xl border border-gray-100">
+                        <div className="overflow-x-auto rounded-xl border border-gray-100 min-w-0">
                           <table className="min-w-full divide-y divide-gray-100">
                             <thead className="bg-gray-50">
                               <tr>

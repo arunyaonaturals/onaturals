@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 
 export function SettingsClient({ userId }: { userId: string }) {
     const [showConfirmModal, setShowConfirmModal] = useState(false)
@@ -39,8 +40,11 @@ export function SettingsClient({ userId }: { userId: string }) {
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
             <header className="bg-white shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-4">
-                    <Link href="/" className="text-green-600 hover:text-green-700 font-bold">← Back</Link>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center gap-3">
+                    <Link href="/" className="flex items-center gap-2 text-green-600 hover:text-green-700 font-bold min-h-[44px] items-center" aria-label="Back">
+                        <ArrowLeft className="w-5 h-5" aria-hidden />
+                        <span>Back</span>
+                    </Link>
                     <h1 className="text-2xl font-black text-gray-800">Admin Settings</h1>
                 </div>
             </header>

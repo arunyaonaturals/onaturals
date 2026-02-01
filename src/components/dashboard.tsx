@@ -2,6 +2,19 @@
 
 import { signOut } from 'next-auth/react'
 import Link from 'next/link'
+import {
+  Banknote,
+  ClipboardList,
+  Factory,
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  Package,
+  Settings,
+  Store,
+  Users,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 interface DashboardProps {
   user: {
@@ -11,20 +24,20 @@ interface DashboardProps {
   }
 }
 
-const menuItems = [
-  { name: 'Dashboard', href: '/', icon: '📊' },
-  { name: 'Products', href: '/products', icon: '📦' },
-  { name: 'Stores', href: '/stores', icon: '🏪' },
-  { name: 'Orders', href: '/orders', icon: '📋' },
-  { name: 'Invoices', href: '/invoices', icon: '🧾' },
-  { name: 'Payments', href: '/payments', icon: '💰' },
-  { name: 'Inventory', href: '/inventory', icon: '📦' },
-  { name: 'Production', href: '/production', icon: '🏭' },
+const menuItems: { name: string; href: string; icon: LucideIcon }[] = [
+  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Products', href: '/products', icon: Package },
+  { name: 'Stores', href: '/stores', icon: Store },
+  { name: 'Orders', href: '/orders', icon: ClipboardList },
+  { name: 'Invoices', href: '/invoices', icon: FileText },
+  { name: 'Payments', href: '/payments', icon: Banknote },
+  { name: 'Inventory', href: '/inventory', icon: Package },
+  { name: 'Production', href: '/production', icon: Factory },
 ]
 
-const adminOnlyItems = [
-  { name: 'Users', href: '/users', icon: '👥' },
-  { name: 'Settings', href: '/settings', icon: '⚙️' },
+const adminOnlyItems: { name: string; href: string; icon: LucideIcon }[] = [
+  { name: 'Users', href: '/users', icon: Users },
+  { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
 export function Dashboard({ user }: DashboardProps) {
@@ -34,17 +47,20 @@ export function Dashboard({ user }: DashboardProps) {
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
       <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 md:py-4 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-bold text-green-600">Arunya ERP</h1>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <span className="text-sm text-gray-600">
               {user.name} ({user.role})
             </span>
             <button
               onClick={() => signOut({ callbackUrl: '/login' })}
-              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm transition"
+              className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm transition min-h-[44px]"
+              title="Sign Out"
+              aria-label="Sign Out"
             >
-              Sign Out
+              <LogOut className="w-4 h-4" aria-hidden />
+              <span>Sign Out</span>
             </button>
           </div>
         </div>
@@ -64,30 +80,36 @@ export function Dashboard({ user }: DashboardProps) {
 
         {/* Menu Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {menuItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition flex flex-col items-center gap-2"
-            >
-              <span className="text-4xl">{item.icon}</span>
-              <span className="font-medium text-gray-700">{item.name}</span>
-            </Link>
-          ))}
-
-          {/* Admin Only Items */}
-          {isAdmin &&
-            adminOnlyItems.map((item) => (
+          {menuItems.map((item) => {
+            const Icon = item.icon
+            return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition flex flex-col items-center gap-2 border-2 border-yellow-400"
+                className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition flex flex-col items-center gap-2 min-h-[120px] justify-center"
               >
-                <span className="text-4xl">{item.icon}</span>
+                <Icon className="w-10 h-10 text-green-600" aria-hidden />
                 <span className="font-medium text-gray-700">{item.name}</span>
-                <span className="text-xs text-yellow-600">Admin Only</span>
               </Link>
-            ))}
+            )
+          })}
+
+          {/* Admin Only Items */}
+          {isAdmin &&
+            adminOnlyItems.map((item) => {
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition flex flex-col items-center gap-2 border-2 border-yellow-400 min-h-[120px] justify-center"
+                >
+                  <Icon className="w-10 h-10 text-green-600" aria-hidden />
+                  <span className="font-medium text-gray-700">{item.name}</span>
+                  <span className="text-xs text-yellow-600">Admin Only</span>
+                </Link>
+              )
+            })}
         </div>
 
         {/* Quick Stats */}

@@ -21,6 +21,7 @@ interface Store {
   contactPerson: string | null
   areaId: number | null
   area: Area | null
+  marginDiscountPercent: number | null
   isActive: boolean
 }
 
@@ -43,6 +44,7 @@ export function StoresClient({ isAdmin }: { isAdmin: boolean }) {
     gstNumber: '',
     contactPerson: '',
     areaId: '',
+    marginDiscountPercent: '',
   })
   const [error, setError] = useState('')
 
@@ -121,6 +123,7 @@ export function StoresClient({ isAdmin }: { isAdmin: boolean }) {
       gstNumber: '',
       contactPerson: '',
       areaId: '',
+      marginDiscountPercent: '',
     })
   }
 
@@ -137,6 +140,7 @@ export function StoresClient({ isAdmin }: { isAdmin: boolean }) {
       gstNumber: store.gstNumber || '',
       contactPerson: store.contactPerson || '',
       areaId: store.areaId?.toString() || '',
+      marginDiscountPercent: store.marginDiscountPercent != null ? String(store.marginDiscountPercent) : '',
     })
     setShowModal(true)
   }
@@ -495,6 +499,23 @@ export function StoresClient({ isAdmin }: { isAdmin: boolean }) {
                   onChange={(e) => setFormData({ ...formData, gstNumber: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Margin discount %
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  placeholder="e.g. 5"
+                  value={formData.marginDiscountPercent}
+                  onChange={(e) => setFormData({ ...formData, marginDiscountPercent: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                />
+                <p className="text-xs text-gray-500 mt-0.5">Applied when creating invoice from approved order. Same discount used every time for this store.</p>
               </div>
 
               <div className="flex justify-end gap-3 pt-4">

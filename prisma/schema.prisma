@@ -62,24 +62,25 @@ model Area {
 }
 
 model Store {
-  id            Int       @id @default(autoincrement())
-  name          String
-  address       String?
-  city          String?
-  state         String?
-  pincode       String?
-  phone         String?
-  email         String?
-  gstNumber     String?
-  contactPerson String?
-  areaId        Int?
-  area          Area?     @relation(fields: [areaId], references: [id])
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  orders        Order[]
-  invoices      Invoice[]
-  payments      Payment[]
+  id                   Int       @id @default(autoincrement())
+  name                 String
+  address              String?
+  city                 String?
+  state                String?
+  pincode              String?
+  phone                String?
+  email                String?
+  gstNumber            String?
+  contactPerson        String?
+  areaId               Int?
+  area                 Area?     @relation(fields: [areaId], references: [id])
+  marginDiscountPercent Float?   // Default discount % for this store (e.g. 5 = 5%), applied when creating invoice
+  isActive             Boolean   @default(true)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  orders               Order[]
+  invoices             Invoice[]
+  payments             Payment[]
 }
 
 // ==================== ORDERS ====================
@@ -120,6 +121,8 @@ model Invoice {
   storeId       Int
   store         Store         @relation(fields: [storeId], references: [id])
   subtotal      Float         @default(0)
+  discountPercent Float?      // Store margin discount % applied (e.g. 5)
+  discountAmount   Float      @default(0)
   gstAmount     Float         @default(0)
   totalAmount   Float         @default(0)
   paidAmount    Float         @default(0)

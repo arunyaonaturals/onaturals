@@ -9,6 +9,8 @@ interface Invoice {
   store: { id: number; name: string; city: string | null }
   order: { id: number; orderNumber: string }
   subtotal: number
+  discountPercent: number | null
+  discountAmount: number
   gstAmount: number
   totalAmount: number
   paidAmount: number
@@ -201,6 +203,7 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(invoice.createdAt)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <button onClick={() => fetchInvoiceDetails(invoice.id)} className="text-blue-600 hover:text-blue-800 mr-2">View</button>
+                      <Link href={`/invoices/${invoice.id}/print`} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-800 mr-2">Print</Link>
                       {invoice.status !== 'paid' && (
                         <Link href={`/payments?invoiceId=${invoice.id}`} className="text-green-600 hover:text-green-800">Record Payment</Link>
                       )}
@@ -281,6 +284,14 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
                     <td colSpan={4} className="px-4 py-2 text-sm text-right">Subtotal:</td>
                     <td className="px-4 py-2 text-sm text-right">{formatCurrency(viewInvoice.subtotal)}</td>
                   </tr>
+                  {(viewInvoice.discountAmount ?? 0) > 0 && (
+                    <tr>
+                      <td colSpan={4} className="px-4 py-2 text-sm text-right">
+                        Margin discount ({viewInvoice.discountPercent ?? 0}%):
+                      </td>
+                      <td className="px-4 py-2 text-sm text-right text-green-600">-{formatCurrency(viewInvoice.discountAmount)}</td>
+                    </tr>
+                  )}
                   <tr>
                     <td colSpan={4} className="px-4 py-2 text-sm text-right">GST:</td>
                     <td className="px-4 py-2 text-sm text-right">{formatCurrency(viewInvoice.gstAmount)}</td>
@@ -298,7 +309,8 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
               <div><span className="text-gray-500">Balance:</span> <span className="text-red-600 font-medium">{formatCurrency(viewInvoice.balanceAmount)}</span></div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
+              <a href={`/invoices/${viewInvoice.id}/print`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-center">Print Tax Invoice</a>
               <button onClick={() => setViewInvoice(null)} className="px-4 py-2 text-gray-600 hover:text-gray-800">Close</button>
             </div>
           </div>

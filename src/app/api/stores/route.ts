@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, address, city, state, pincode, phone, email, gstNumber, contactPerson, areaId } = body
+    const { name, address, city, state, pincode, phone, email, gstNumber, contactPerson, areaId, marginDiscountPercent } = body
 
     if (!name) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 })
@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
         gstNumber: gstNumber || null,
         contactPerson: contactPerson || null,
         areaId: areaId ? parseInt(areaId) : null,
+        marginDiscountPercent: marginDiscountPercent != null ? parseFloat(marginDiscountPercent) : null,
       },
       include: { area: true },
     })

@@ -57,10 +57,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 })
     }
 
-    // Get the order
+    // Get the order with store (for margin discount)
     const order = await db.order.findUnique({
       where: { id: parseInt(orderId) },
-      include: { items: { include: { product: true } } },
+      include: {
+        items: { include: { product: true } },
+        store: true,
+      },
     })
 
     if (!order) {
@@ -79,12 +82,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invoice already exists for this order' }, { status: 400 })
     }
 
-    // Calculate invoice totals
+    const discountPercent = order.store.marginDiscountPercent ?? 0
+    const discountMultiplier = 1 - discountPercent / 100
+
+    // Calculate invoice totals (apply store margin discount before GST)
     let subtotal = 0
     let gstAmount = 0
     const invoiceItems = order.items.map(item => {
-      const itemGst = (item.total * item.product.gstPercent) / 100
-      subtotal += item.total
+      const lineTotalBeforeDiscount = item.total
+      subtotal += lineTotalBeforeDiscount
+      const lineTotalAfterDiscount = lineTotalBeforeDiscount * discountMultiplier
+      const itemGst = (lineTotalAfterDiscount * item.product.gstPercent) / 100
       gstAmount += itemGst
       return {
         productId: item.productId,
@@ -92,11 +100,12 @@ export async function POST(request: NextRequest) {
         price: item.price,
         gstPercent: item.product.gstPercent,
         gstAmount: itemGst,
-        total: item.total + itemGst,
+        total: lineTotalAfterDiscount + itemGst,
       }
     })
 
-    const totalAmount = subtotal + gstAmount
+    const discountAmount = subtotal * (discountPercent / 100)
+    const totalAmount = subtotal - discountAmount + gstAmount
 
     // Create invoice
     const invoice = await db.invoice.create({
@@ -105,6 +114,8 @@ export async function POST(request: NextRequest) {
         orderId: parseInt(orderId),
         storeId: order.storeId,
         subtotal,
+        discountPercent: discountPercent || null,
+        discountAmount,
         gstAmount,
         totalAmount,
         balanceAmount: totalAmount,

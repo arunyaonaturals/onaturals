@@ -44,7 +44,7 @@ export async function PUT(
 
     const { id } = await params
     const body = await request.json()
-    const { name, address, city, state, pincode, phone, email, gstNumber, contactPerson, areaId, isActive } = body
+    const { name, address, city, state, pincode, phone, email, gstNumber, contactPerson, areaId, isActive, marginDiscountPercent } = body
 
     const store = await db.store.update({
       where: { id: parseInt(id) },
@@ -60,6 +60,7 @@ export async function PUT(
         ...(contactPerson !== undefined && { contactPerson: contactPerson || null }),
         ...(areaId !== undefined && { areaId: areaId ? parseInt(areaId) : null }),
         ...(typeof isActive === 'boolean' && { isActive }),
+        ...(marginDiscountPercent !== undefined && { marginDiscountPercent: marginDiscountPercent === '' || marginDiscountPercent == null ? null : parseFloat(marginDiscountPercent) }),
       },
       include: { area: true },
     })

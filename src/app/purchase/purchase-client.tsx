@@ -96,13 +96,18 @@ export function PurchaseClient({ isAdmin }: { isAdmin: boolean }) {
         body: JSON.stringify(vendorForm)
       })
       if (res.ok) {
+        alert('Vendor saved successfully!')
         setShowVendorModal(false)
         setEditingVendor(null)
         setVendorForm({ name: '', gstNumber: '', address: '', phone: '', email: '', billingCycleDays: '0' })
         fetchData()
+      } else {
+        const errorData = await res.json()
+        alert(`Error: ${errorData.error || 'Failed to save vendor'}`)
       }
     } catch (err) {
       console.error('Error saving vendor', err)
+      alert('An unexpected error occurred while saving vendor')
     }
   }
 
@@ -314,7 +319,7 @@ export function PurchaseClient({ isAdmin }: { isAdmin: boolean }) {
                         </td>
                         <td className="px-6 py-4 text-center">
                           <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-full ${b.status === 'paid' ? 'bg-green-100 text-green-700' :
-                              b.status === 'sent_to_vendor' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'
+                            b.status === 'sent_to_vendor' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'
                             }`}>
                             {b.status.replace(/_/g, ' ')}
                           </span>

@@ -13,17 +13,18 @@ const client = createClient({
 async function setupDatabase() {
   console.log('🚀 Setting up database...')
   console.log('Database URL:', process.env.TURSO_DATABASE_URL)
-  
+
   // Drop existing tables (in reverse order of dependencies)
   console.log('\nDropping existing tables...')
   const tables = [
+    'VendorBill', 'PurchaseOrderItem', 'PurchaseOrder', 'Vendor',
     'Payment', 'InvoiceItem', 'Invoice',
     'OrderItem', 'Order',
-    'Inventory', 'RawMaterial', 'Production',
+    'Inventory', 'RawMaterial',
     'Store', 'Area', 'Product', 'Category', 'User',
     '_prisma_migrations'
   ]
-  
+
   for (const table of tables) {
     try {
       await client.execute(`DROP TABLE IF EXISTS "${table}"`)
@@ -32,10 +33,10 @@ async function setupDatabase() {
       // Ignore errors
     }
   }
-  
+
   // ==================== CREATE TABLES ====================
   console.log('\nCreating tables...')
-  
+
   // User table
   await client.execute(`
     CREATE TABLE IF NOT EXISTS "User" (
@@ -50,7 +51,7 @@ async function setupDatabase() {
     )
   `)
   console.log('  Created: User')
-  
+
   // Category table
   await client.execute(`
     CREATE TABLE IF NOT EXISTS "Category" (
@@ -60,7 +61,7 @@ async function setupDatabase() {
     )
   `)
   console.log('  Created: Category')
-  
+
   // Product table
   await client.execute(`
     CREATE TABLE IF NOT EXISTS "Product" (
@@ -80,7 +81,7 @@ async function setupDatabase() {
     )
   `)
   console.log('  Created: Product')
-  
+
   // Area table
   await client.execute(`
     CREATE TABLE IF NOT EXISTS "Area" (
@@ -92,7 +93,7 @@ async function setupDatabase() {
     )
   `)
   console.log('  Created: Area')
-  
+
   // Store table
   await client.execute(`
     CREATE TABLE IF NOT EXISTS "Store" (
@@ -115,7 +116,7 @@ async function setupDatabase() {
     )
   `)
   console.log('  Created: Store')
-  
+
   // Order table
   await client.execute(`
     CREATE TABLE IF NOT EXISTS "Order" (
@@ -133,7 +134,7 @@ async function setupDatabase() {
     )
   `)
   console.log('  Created: Order')
-  
+
   // OrderItem table
   await client.execute(`
     CREATE TABLE IF NOT EXISTS "OrderItem" (
@@ -149,7 +150,7 @@ async function setupDatabase() {
     )
   `)
   console.log('  Created: OrderItem')
-  
+
   // Invoice table
   await client.execute(`
     CREATE TABLE IF NOT EXISTS "Invoice" (
@@ -173,7 +174,7 @@ async function setupDatabase() {
     )
   `)
   console.log('  Created: Invoice')
-  
+
   // InvoiceItem table
   await client.execute(`
     CREATE TABLE IF NOT EXISTS "InvoiceItem" (
@@ -190,7 +191,7 @@ async function setupDatabase() {
     )
   `)
   console.log('  Created: InvoiceItem')
-  
+
   // Payment table
   await client.execute(`
     CREATE TABLE IF NOT EXISTS "Payment" (
@@ -211,7 +212,7 @@ async function setupDatabase() {
     )
   `)
   console.log('  Created: Payment')
-  
+
   // RawMaterial table
   await client.execute(`
     CREATE TABLE IF NOT EXISTS "RawMaterial" (
@@ -226,7 +227,7 @@ async function setupDatabase() {
     )
   `)
   console.log('  Created: RawMaterial')
-  
+
   // Inventory table
   await client.execute(`
     CREATE TABLE IF NOT EXISTS "Inventory" (
@@ -240,24 +241,77 @@ async function setupDatabase() {
     )
   `)
   console.log('  Created: Inventory')
-  
-  // Production table
+
+  // Vendor table
   await client.execute(`
-    CREATE TABLE IF NOT EXISTS "Production" (
+    CREATE TABLE IF NOT EXISTS "Vendor" (
       "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-      "productName" TEXT NOT NULL,
-      "quantity" INTEGER NOT NULL DEFAULT 0,
-      "status" TEXT NOT NULL DEFAULT 'suggested',
-      "notes" TEXT,
+      "name" TEXT NOT NULL,
+      "gstNumber" TEXT,
+      "address" TEXT,
+      "phone" TEXT,
+      "email" TEXT,
+      "billingCycleDays" INTEGER NOT NULL DEFAULT 0,
+      "isActive" INTEGER NOT NULL DEFAULT 1,
       "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
   `)
-  console.log('  Created: Production')
-  
+  console.log('  Created: Vendor')
+
+  // PurchaseOrder table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS "PurchaseOrder" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "orderNumber" TEXT UNIQUE NOT NULL,
+      "vendorId" INTEGER NOT NULL,
+      "status" TEXT NOT NULL DEFAULT 'pending',
+      "totalAmount" REAL NOT NULL DEFAULT 0,
+      "notes" TEXT,
+      "reachedOfficeAt" DATETIME,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY ("vendorId") REFERENCES "Vendor"("id")
+    )
+  `)
+  console.log('  Created: PurchaseOrder')
+
+  // PurchaseOrderItem table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS "PurchaseOrderItem" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "purchaseOrderId" INTEGER NOT NULL,
+      "rawMaterialId" INTEGER NOT NULL,
+      "quantity" REAL NOT NULL DEFAULT 0,
+      "price" REAL NOT NULL DEFAULT 0,
+      "total" REAL NOT NULL DEFAULT 0,
+      FOREIGN KEY ("purchaseOrderId") REFERENCES "PurchaseOrder"("id") ON DELETE CASCADE,
+      FOREIGN KEY ("rawMaterialId") REFERENCES "RawMaterial"("id")
+    )
+  `)
+  console.log('  Created: PurchaseOrderItem')
+
+  // VendorBill table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS "VendorBill" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "billNumber" TEXT UNIQUE,
+      "vendorId" INTEGER NOT NULL,
+      "purchaseOrderId" INTEGER UNIQUE NOT NULL,
+      "billDate" DATETIME,
+      "amount" REAL NOT NULL DEFAULT 0,
+      "status" TEXT NOT NULL DEFAULT 'pending_dispatch',
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY ("vendorId") REFERENCES "Vendor"("id"),
+      FOREIGN KEY ("purchaseOrderId") REFERENCES "PurchaseOrder"("id")
+    )
+  `)
+  console.log('  Created: VendorBill')
+
   // ==================== SEED DATA ====================
   console.log('\nSeeding data...')
-  
+
   // Create admin user
   const hashedPassword = await bcrypt.hash('demo123', 10)
   try {
@@ -269,7 +323,7 @@ async function setupDatabase() {
   } catch (e) {
     console.log('  Admin user may already exist')
   }
-  
+
   // Create sample categories
   const categories = ['Hair Care', 'Skin Care', 'Body Care', 'Face Care', 'Oils']
   for (const cat of categories) {
@@ -283,7 +337,7 @@ async function setupDatabase() {
     }
   }
   console.log('  Created sample categories')
-  
+
   // Create sample areas
   const areas = ['North Zone', 'South Zone', 'East Zone', 'West Zone', 'Central']
   for (const area of areas) {
@@ -297,7 +351,7 @@ async function setupDatabase() {
     }
   }
   console.log('  Created sample areas')
-  
+
   console.log('\n✅ Database setup complete!')
   console.log('\nAdmin credentials:')
   console.log('  Username: sanjay')

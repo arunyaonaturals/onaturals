@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Package, ClipboardList, Store, Plus } from 'lucide-react'
+import { ArrowLeft, Package, ClipboardList, Store, Plus, Pencil } from 'lucide-react'
 
 interface Movement {
   id: number
@@ -144,9 +144,9 @@ export function InventoryClient({ isAdmin }: { isAdmin: boolean }) {
     }
   }
 
-  const openStockModal = (id: number, name: string, type: 'material' | 'product', currentStock: number, unit: string) => {
+  const openStockModal = (id: number, name: string, type: 'material' | 'product', currentStock: number, unit: string, opType: string = 'in') => {
     setSelectedItem({ id, name, type, currentStock, unit })
-    setStockData({ type: 'in', quantity: '', notes: '' })
+    setStockData({ type: opType, quantity: '', notes: '' })
     setShowStockModal(true)
   }
 
@@ -188,17 +188,18 @@ export function InventoryClient({ isAdmin }: { isAdmin: boolean }) {
             ].map((tab) => {
               const Icon = tab.icon
               return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 py-4 px-2 text-sm font-black transition-all relative min-h-[44px] ${activeTab === tab.id ? 'text-green-600' : 'text-gray-400 hover:text-gray-600'
-                  }`}
-              >
-                <Icon className="w-5 h-5" aria-hidden />
-                {tab.label}
-                {activeTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-600 rounded-t-full" />}
-              </button>
-            )})}
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center gap-2 py-4 px-2 text-sm font-black transition-all relative min-h-[44px] ${activeTab === tab.id ? 'text-green-600' : 'text-gray-400 hover:text-gray-600'
+                    }`}
+                >
+                  <Icon className="w-5 h-5" aria-hidden />
+                  {tab.label}
+                  {activeTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-600 rounded-t-full" />}
+                </button>
+              )
+            })}
           </div>
         </div>
       </header>
@@ -215,62 +216,125 @@ export function InventoryClient({ isAdmin }: { isAdmin: boolean }) {
               <div className="space-y-12">
                 {/* Products Section */}
                 <section>
-                  <div className="flex items-center gap-2 mb-6">
-                    <div className="h-8 w-1 bg-green-500 rounded-full" />
-                    <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Finished Goods (Products)</h2>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-1 bg-green-500 rounded-full" />
+                      <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Finished Goods (Products)</h2>
+                    </div>
                   </div>
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {products.map((p) => (
-                      <div key={p.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition group">
-                        <div className="flex justify-between items-start mb-4">
-                          <div className="space-y-1">
-                            <h3 className="font-black text-gray-900 leading-tight group-hover:text-green-600 transition-colors">{p.name}</h3>
-                            <p className="text-[10px] font-mono text-gray-400 uppercase">{p.sku || 'No SKU'}</p>
-                          </div>
-                          <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full ${getStockStatus(p.currentStock, p.minStock)}`}>
-                            {p.currentStock <= 0 ? 'Out of Stock' : p.currentStock < p.minStock ? 'Low Stock' : 'In Stock'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-end">
-                          <div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Available Quantity</p>
-                            <p className="text-2xl font-black text-gray-900">{p.currentStock} <span className="text-sm font-bold text-gray-400">pcs</span></p>
-                          </div>
-                          <button onClick={() => openStockModal(p.id, p.name, 'product', p.currentStock, 'pcs')} className="bg-gray-50 text-gray-600 hover:bg-green-50 hover:text-green-600 px-4 py-2 rounded-xl text-xs font-black transition-colors border border-transparent hover:border-green-100">
-                            Update
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-100">
+                        <thead className="bg-gray-50/50">
+                          <tr>
+                            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Product Info</th>
+                            <th className="px-6 py-4 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Current Stock</th>
+                            <th className="px-6 py-4 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Min Stock</th>
+                            <th className="px-6 py-4 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
+                            <th className="px-6 py-4 text-right text-[10px] font-black text-gray-400 uppercase tracking-widest">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50 bg-white">
+                          {products.map((p) => (
+                            <tr key={p.id} className="hover:bg-gray-50/50 transition-colors group">
+                              <td className="px-6 py-4">
+                                <p className="font-black text-gray-900 group-hover:text-green-600 transition-colors">{p.name}</p>
+                                <p className="text-[10px] font-mono text-gray-400 uppercase">{p.sku || 'No SKU'}</p>
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                <button
+                                  onClick={() => openStockModal(p.id, p.name, 'product', p.currentStock, 'pcs', 'adjustment')}
+                                  className="flex items-center justify-center gap-1 mx-auto hover:text-green-600 transition-colors"
+                                  title="Quick Adjust"
+                                >
+                                  <span className="text-lg font-black text-gray-900">{p.currentStock}</span>
+                                  <Pencil className="w-3 h-3 text-gray-400 group-hover:text-green-500" />
+                                </button>
+                                <span className="text-[10px] font-bold text-gray-400 uppercase">pcs</span>
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                <span className="text-sm font-bold text-gray-500">{p.minStock}</span>
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-full ${getStockStatus(p.currentStock, p.minStock)}`}>
+                                  {p.currentStock <= 0 ? 'Out of Stock' : p.currentStock < p.minStock ? 'Low Stock' : 'In Stock'}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <button
+                                  onClick={() => openStockModal(p.id, p.name, 'product', p.currentStock, 'pcs')}
+                                  className="bg-gray-50 text-gray-600 hover:bg-green-600 hover:text-white px-4 py-2 rounded-xl text-[10px] font-black transition-all border border-gray-100 hover:border-green-600 uppercase tracking-widest"
+                                >
+                                  Update
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </section>
 
                 {/* Raw Materials Section */}
                 <section>
-                  <div className="flex items-center gap-2 mb-6">
-                    <div className="h-8 w-1 bg-blue-500 rounded-full" />
-                    <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Raw Materials</h2>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-1 bg-blue-500 rounded-full" />
+                      <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Raw Materials</h2>
+                    </div>
                   </div>
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {materials.map((m) => (
-                      <div key={m.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition group">
-                        <div className="flex justify-between items-start mb-4">
-                          <h3 className="font-black text-gray-900 leading-tight group-hover:text-blue-600 transition-colors">{m.name}</h3>
-                          <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full ${getStockStatus(m.currentStock, m.minStock)}`}>
-                            {m.currentStock <= 0 ? 'Wiped' : m.currentStock < m.minStock ? 'Warning' : 'Healthy'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-end">
-                          <div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">In Material Bank</p>
-                            <p className="text-2xl font-black text-gray-900">{m.currentStock} <span className="text-sm font-bold text-gray-400 uppercase tracking-tight">{m.unit}</span></p>
-                          </div>
-                          <button onClick={() => openStockModal(m.id, m.name, 'material', m.currentStock, m.unit)} className="bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-4 py-2 rounded-xl text-xs font-black transition-colors border border-transparent hover:border-blue-100">
-                            Manage
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-100">
+                        <thead className="bg-gray-50/50">
+                          <tr>
+                            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Material Info</th>
+                            <th className="px-6 py-4 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Current Stock</th>
+                            <th className="px-6 py-4 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Min Stock</th>
+                            <th className="px-6 py-4 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
+                            <th className="px-6 py-4 text-right text-[10px] font-black text-gray-400 uppercase tracking-widest">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50 bg-white">
+                          {materials.map((m) => (
+                            <tr key={m.id} className="hover:bg-gray-50/50 transition-colors group">
+                              <td className="px-6 py-4">
+                                <p className="font-black text-gray-900 group-hover:text-blue-600 transition-colors">{m.name}</p>
+                                <p className="text-[10px] font-mono text-gray-400 uppercase">Category: Raw Material</p>
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                <button
+                                  onClick={() => openStockModal(m.id, m.name, 'material', m.currentStock, m.unit, 'adjustment')}
+                                  className="flex items-center justify-center gap-1 mx-auto hover:text-blue-600 transition-colors"
+                                  title="Quick Adjust"
+                                >
+                                  <span className="text-lg font-black text-gray-900">{m.currentStock}</span>
+                                  <Pencil className="w-3 h-3 text-gray-400 group-hover:text-blue-500" />
+                                </button>
+                                <span className="text-[10px] font-bold text-gray-400 uppercase">{m.unit}</span>
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                <span className="text-sm font-bold text-gray-500">{m.minStock}</span>
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-full ${getStockStatus(m.currentStock, m.minStock)}`}>
+                                  {m.currentStock <= 0 ? 'Wiped' : m.currentStock < m.minStock ? 'Warning' : 'Healthy'}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <button
+                                  onClick={() => openStockModal(m.id, m.name, 'material', m.currentStock, m.unit)}
+                                  className="bg-gray-50 text-gray-600 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-xl text-[10px] font-black transition-all border border-gray-100 hover:border-blue-600 uppercase tracking-widest"
+                                >
+                                  Update
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </section>
               </div>

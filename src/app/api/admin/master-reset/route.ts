@@ -42,8 +42,10 @@ export async function POST(request: NextRequest) {
                 data: { currentStock: 0 }
             }),
 
-            // 8. Delete Production records
-            db.production.deleteMany({}),
+            // 8. Delete Purchase & Billing records
+            db.purchaseOrderItem.deleteMany({}),
+            db.vendorBill.deleteMany({}),
+            db.purchaseOrder.deleteMany({}),
         ])
 
         return NextResponse.json({ message: 'Master reset successful. All transaction data cleared.' })

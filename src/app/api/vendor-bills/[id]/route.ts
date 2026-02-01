@@ -5,15 +5,16 @@ import { db } from '@/lib/db'
 
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params
         const session = await getServerSession(authOptions)
         if (!session || session.user.role !== 'admin') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const billId = parseInt(params.id)
+        const billId = parseInt(id)
         const body = await request.json()
         const { status, billNumber, billDate } = body
 

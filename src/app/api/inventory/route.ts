@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/db'
 
-// GET all raw materials with current stock
+// GET all raw materials and products with current stock
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
@@ -11,18 +11,24 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const materials = await db.rawMaterial.findMany({
-      where: { isActive: true },
-      include: {
-        movements: {
-          orderBy: { createdAt: 'desc' },
-          take: 5,
+    const [materials, products] = await Promise.all([
+      db.rawMaterial.findMany({
+        where: { isActive: true },
+        include: {
+          movements: {
+            orderBy: { createdAt: 'desc' },
+            take: 5,
+          },
         },
-      },
-      orderBy: { name: 'asc' },
-    })
+        orderBy: { name: 'asc' },
+      }),
+      db.product.findMany({
+        where: { isActive: true },
+        orderBy: { name: 'asc' },
+      })
+    ])
 
-    return NextResponse.json(materials)
+    return NextResponse.json({ materials, products })
   } catch (error) {
     console.error('Error fetching inventory:', error)
     return NextResponse.json({ error: 'Failed to fetch inventory' }, { status: 500 })
@@ -81,49 +87,71 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { rawMaterialId, type, quantity, notes } = body
+    const { rawMaterialId, productId, type, quantity, notes } = body
 
-    if (!rawMaterialId || !type || !quantity) {
-      return NextResponse.json({ error: 'Material, type and quantity are required' }, { status: 400 })
-    }
-
-    const material = await db.rawMaterial.findUnique({
-      where: { id: parseInt(rawMaterialId) },
-    })
-
-    if (!material) {
-      return NextResponse.json({ error: 'Material not found' }, { status: 404 })
+    if ((!rawMaterialId && !productId) || !type || !quantity) {
+      return NextResponse.json({ error: 'Material/Product, type and quantity are required' }, { status: 400 })
     }
 
     const qty = parseFloat(quantity)
-    let newStock = material.currentStock
+    let updated
 
-    if (type === 'in') {
-      newStock += qty
-    } else if (type === 'out') {
-      if (qty > material.currentStock) {
-        return NextResponse.json({ error: 'Insufficient stock' }, { status: 400 })
+    if (rawMaterialId) {
+      const material = await db.rawMaterial.findUnique({
+        where: { id: parseInt(rawMaterialId) },
+      })
+
+      if (!material) {
+        return NextResponse.json({ error: 'Material not found' }, { status: 404 })
       }
-      newStock -= qty
-    } else if (type === 'adjustment') {
-      newStock = qty
+
+      let newStock = material.currentStock
+      if (type === 'in') newStock += qty
+      else if (type === 'out') {
+        if (qty > material.currentStock) return NextResponse.json({ error: 'Insufficient stock' }, { status: 400 })
+        newStock -= qty
+      }
+      else if (type === 'adjustment') newStock = qty
+
+      // Create movement record
+      await db.inventory.create({
+        data: {
+          rawMaterialId: parseInt(rawMaterialId),
+          type,
+          quantity: qty,
+          notes: notes || null,
+        },
+      })
+
+      // Update stock
+      updated = await db.rawMaterial.update({
+        where: { id: parseInt(rawMaterialId) },
+        data: { currentStock: newStock },
+      })
+    } else if (productId) {
+      const product = await db.product.findUnique({
+        where: { id: parseInt(productId) },
+      })
+
+      if (!product) {
+        return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+      }
+
+      let newStock = (product as any).currentStock || 0
+      if (type === 'in') newStock += qty
+      else if (type === 'out') {
+        if (qty > newStock) return NextResponse.json({ error: 'Insufficient stock' }, { status: 400 })
+        newStock -= qty
+      }
+      else if (type === 'adjustment') newStock = qty
+
+      // Note: We don't have a specific ProductMovement table yet, 
+      // but we update the currentStock field.
+      updated = await db.product.update({
+        where: { id: parseInt(productId) },
+        data: { currentStock: newStock } as any,
+      })
     }
-
-    // Create movement record
-    await db.inventory.create({
-      data: {
-        rawMaterialId: parseInt(rawMaterialId),
-        type,
-        quantity: qty,
-        notes: notes || null,
-      },
-    })
-
-    // Update stock
-    const updated = await db.rawMaterial.update({
-      where: { id: parseInt(rawMaterialId) },
-      data: { currentStock: newStock },
-    })
 
     return NextResponse.json(updated)
   } catch (error) {

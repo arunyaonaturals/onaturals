@@ -45,6 +45,8 @@ model Product {
   gstPercent   Float         @default(18)
   hsnCode      String?
   isActive     Boolean       @default(true)
+  currentStock Float         @default(0)
+  minStock     Float         @default(0)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   orderItems   OrderItem[]

@@ -7,7 +7,7 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    // Use Turso database URL for migrations
-    url: process.env["TURSO_DATABASE_URL"],
+    // Use local SQLite for schema operations; runtime uses Turso adapter
+    url: "file:./prisma/dev.db",
   },
 });

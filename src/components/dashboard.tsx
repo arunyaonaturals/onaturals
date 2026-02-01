@@ -32,7 +32,7 @@ const menuItems: { name: string; href: string; icon: LucideIcon }[] = [
   { name: 'Invoices', href: '/invoices', icon: FileText },
   { name: 'Payments', href: '/payments', icon: Banknote },
   { name: 'Inventory', href: '/inventory', icon: Package },
-  { name: 'Production', href: '/production', icon: Factory },
+  { name: 'Purchase', href: '/purchase', icon: Factory },
 ]
 
 const adminOnlyItems: { name: string; href: string; icon: LucideIcon }[] = [

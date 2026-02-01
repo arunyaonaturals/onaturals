@@ -181,6 +181,7 @@ model RawMaterial {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   movements    Inventory[]
+  purchaseItems PurchaseOrderItem[]
 }
 
 model Inventory {
@@ -193,13 +194,58 @@ model Inventory {
   createdAt     DateTime    @default(now())
 }
 
-// ==================== PRODUCTION ====================
-model Production {
-  id          Int      @id @default(autoincrement())
-  productName String
-  quantity    Int      @default(0)
-  status      String   @default("suggested") // suggested, in_progress, completed
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+// ==================== PURCHASE & VENDORS ====================
+model Vendor {
+  id               Int             @id @default(autoincrement())
+  name             String
+  gstNumber        String?
+  address          String?
+  phone            String?
+  email            String?
+  billingCycleDays Int             @default(0) // Default billing time
+  isActive         Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  purchaseOrders   PurchaseOrder[]
+  vendorBills      VendorBill[]
+}
+
+model PurchaseOrder {
+  id              Int                 @id @default(autoincrement())
+  orderNumber     String              @unique
+  vendorId        Int
+  vendor          Vendor              @relation(fields: [vendorId], references: [id])
+  status          String              @default("pending") // pending, reached_office, cancelled
+  totalAmount     Float               @default(0)
+  notes           String?
+  reachedOfficeAt DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  items           PurchaseOrderItem[]
+  vendorBill      VendorBill?
+}
+
+model PurchaseOrderItem {
+  id              Int           @id @default(autoincrement())
+  purchaseOrderId Int
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  rawMaterialId   Int
+  rawMaterial     RawMaterial   @relation(fields: [rawMaterialId], references: [id])
+  quantity        Float         @default(0)
+  price           Float         @default(0)
+  total           Float         @default(0)
+}
+
+model VendorBill {
+  id              Int           @id @default(autoincrement())
+  billNumber      String?       @unique
+  vendorId        Int
+  vendor          Vendor        @relation(fields: [vendorId], references: [id])
+  purchaseOrderId Int           @unique
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  billDate        DateTime?
+  amount          Float         @default(0)
+  status          String        @default("pending_dispatch") // pending_dispatch, sent_to_vendor, paid
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }

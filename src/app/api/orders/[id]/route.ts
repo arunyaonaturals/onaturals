@@ -119,10 +119,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
 
-    // Only draft, cancelled, or submitted orders can be deleted
-    if (order.status !== 'draft' && order.status !== 'cancelled' && order.status !== 'submitted') {
+    // Only draft, cancelled, submitted, or approved orders can be deleted
+    if (order.status !== 'draft' && order.status !== 'cancelled' && order.status !== 'submitted' && order.status !== 'approved') {
       return NextResponse.json({
-        error: 'Only draft, cancelled, or submitted orders can be deleted'
+        error: 'Only draft, cancelled, submitted, or approved orders can be deleted'
       }, { status: 400 })
     }
 

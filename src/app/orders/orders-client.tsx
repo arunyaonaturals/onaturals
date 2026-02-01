@@ -373,10 +373,28 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
                           Delete
                         </button>
                       )}
+                      {order.status === 'approved' && (
+                        <>
+                          {isAdmin && (
+                            <button
+                              onClick={() => handleStatusChange(order.id, 'approved')}
+                              className="text-blue-600 hover:text-blue-800 hidden"
+                            >
+                              Approve
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDelete(order.id)}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
                       {order.status === 'submitted' && isAdmin && (
                         <button
                           onClick={() => handleStatusChange(order.id, 'approved')}
-                          className="text-blue-600 hover:text-blue-800"
+                          className="text-blue-600 hover:text-blue-800 mr-2"
                         >
                           Approve
                         </button>

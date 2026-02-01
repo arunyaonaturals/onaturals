@@ -92,7 +92,7 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
     }
   }
 
-  const fetchOrderForInvoicing = async (orderId: string) => {
+  const fetchOrderForInvoicing = async (orderId: string | number) => {
     if (!orderId) {
       setSelectedOrder(null)
       setInvoiceItems([])
@@ -113,6 +113,7 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
           discountPercent: defaultMargin,
           gstPercent: item.product.gstPercent
         })) || [])
+        setShowCreateModal(true)
       }
     } catch {
       console.error('Failed to fetch order details')
@@ -244,65 +245,120 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        {loading ? (
-          <div className="text-center py-8">Loading...</div>
-        ) : invoices.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <div className="text-4xl mb-4">🧾</div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">No invoices found</h3>
-            <p className="text-gray-500 max-w-sm mx-auto">
-              Invoices are created from **Approved** orders. You can create them from the
-              <Link href="/orders" className="text-green-600 hover:underline mx-1">Orders</Link>
-              page or by clicking the button above.
-            </p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Invoice #</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Store</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Paid</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {invoices.map((invoice) => (
-                  <tr key={invoice.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-medium text-gray-900">{invoice.invoiceNumber}</span>
-                      <div className="text-xs text-gray-500">Order: {invoice.order.orderNumber}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{invoice.store.name}</div>
-                      <div className="text-xs text-gray-500">{invoice.store.city || ''}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{formatCurrency(invoice.totalAmount)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600">{formatCurrency(invoice.paidAmount)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600">{formatCurrency(invoice.balanceAmount)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(invoice.status)}`}>{invoice.status}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(invoice.createdAt)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button onClick={() => fetchInvoiceDetails(invoice.id)} className="text-blue-600 hover:text-blue-800 mr-2">View</button>
-                      <Link href={`/invoices/${invoice.id}/print`} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-800 mr-2">Print</Link>
-                      {invoice.status !== 'paid' && (
-                        <Link href={`/payments?invoiceId=${invoice.id}`} className="text-green-600 hover:text-green-800">Record Payment</Link>
-                      )}
-                    </td>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 space-y-8">
+        {/* Pending Invoices Section */}
+        {isAdmin && approvedOrders.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
+            <div className="bg-orange-50/50 px-6 py-4 flex justify-between items-center border-b border-orange-100">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center font-bold text-lg">!</div>
+                <div>
+                  <h3 className="text-sm font-black text-gray-900 leading-none">Pending for Invoicing</h3>
+                  <p className="text-[10px] text-orange-600 font-bold uppercase tracking-wider mt-1">{approvedOrders.length} Approved Order(s)</p>
+                </div>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-100">
+                <thead className="bg-[#fefaf6]">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #</th>
+                    <th className="px-6 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Store</th>
+                    <th className="px-6 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Amount</th>
+                    <th className="px-6 py-3 text-right text-[10px] font-black text-gray-400 uppercase tracking-widest">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {approvedOrders.map((order) => (
+                    <tr key={order.id} className="hover:bg-orange-50/20 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm font-black text-gray-900">{order.orderNumber}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-bold text-gray-800">{order.store.name}</span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm font-black text-gray-900">{formatCurrency(order.totalAmount)}</span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <button
+                          onClick={() => fetchOrderForInvoicing(order.id)}
+                          className="bg-green-600 text-white px-4 py-2 rounded-xl text-xs font-black shadow-lg shadow-green-100 hover:bg-green-700 transition"
+                        >
+                          Generate Invoice →
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
+
+        {/* Generated Invoices Section */}
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest ml-1">Generated Invoices</h3>
+          </div>
+          {loading ? (
+            <div className="text-center py-8">Loading...</div>
+          ) : invoices.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow p-12 text-center border-2 border-dashed border-gray-100">
+              <div className="text-4xl mb-4">🧾</div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">No invoices found</h3>
+              <p className="text-gray-500 max-w-sm mx-auto text-sm">
+                Approved orders from the **Orders** tab will appear here automatically for invoicing.
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-2xl shadow overflow-hidden border border-gray-100">
+              <table className="min-w-full divide-y divide-gray-100">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Invoice #</th>
+                    <th className="px-6 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Store</th>
+                    <th className="px-6 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Total</th>
+                    <th className="px-6 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Paid</th>
+                    <th className="px-6 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
+                    <th className="px-6 py-3 text-right text-[10px] font-black text-gray-400 uppercase tracking-widest">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50 bg-white">
+                  {invoices.map((invoice) => (
+                    <tr key={invoice.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-black text-gray-900">{invoice.invoiceNumber}</div>
+                        <div className="text-[10px] font-bold text-gray-400">Order: {invoice.order.orderNumber}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-bold text-gray-800">{invoice.store.name}</div>
+                        <div className="text-[10px] text-gray-400">{invoice.store.city || ''}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-black text-gray-900">{formatCurrency(invoice.totalAmount)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-black text-green-600">{formatCurrency(invoice.paidAmount)}</div>
+                        <div className="text-[10px] text-red-400 font-bold">Bal: {formatCurrency(invoice.balanceAmount)}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <span className={`px-3 py-1 text-[10px] font-black uppercase rounded-full ${getStatusColor(invoice.status)}`}>{invoice.status}</span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                        <div className="flex justify-end gap-3">
+                          <button onClick={() => fetchInvoiceDetails(invoice.id)} className="text-blue-600 hover:text-blue-800 font-bold">View</button>
+                          <Link href={`/invoices/${invoice.id}/print`} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600 font-bold">Print</Link>
+                          {invoice.status !== 'paid' && (
+                            <Link href={`/payments?invoiceId=${invoice.id}`} className="text-green-600 hover:text-green-800 font-black">Pay</Link>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </main>
 
       {showCreateModal && (

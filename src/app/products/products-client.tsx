@@ -48,7 +48,7 @@ export function ProductsClient({ isAdmin }: { isAdmin: boolean }) {
     try {
       let url = '/api/products?'
       if (!showInactive) url += 'isActive=true'
-      
+
       const res = await fetch(url)
       if (res.ok) {
         const data = await res.json()
@@ -216,7 +216,7 @@ export function ProductsClient({ isAdmin }: { isAdmin: boolean }) {
             No products found. {isAdmin && 'Click "+ Add Product" to create one.'}
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -264,21 +264,19 @@ export function ProductsClient({ isAdmin }: { isAdmin: boolean }) {
                       {isAdmin ? (
                         <button
                           onClick={() => handleToggleActive(product)}
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            product.isActive
+                          className={`px-2 py-1 text-xs rounded-full ${product.isActive
                               ? 'bg-green-100 text-green-800'
                               : 'bg-red-100 text-red-800'
-                          }`}
+                            }`}
                         >
                           {product.isActive ? 'Active' : 'Inactive'}
                         </button>
                       ) : (
                         <span
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            product.isActive
+                          className={`px-2 py-1 text-xs rounded-full ${product.isActive
                               ? 'bg-green-100 text-green-800'
                               : 'bg-red-100 text-red-800'
-                          }`}
+                            }`}
                         >
                           {product.isActive ? 'Active' : 'Inactive'}
                         </span>

@@ -29,7 +29,7 @@ interface Invoice {
 export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: string }) {
   const searchParams = useSearchParams()
   const preselectedInvoiceId = searchParams.get('invoiceId')
-  
+
   const [payments, setPayments] = useState<Payment[]>([])
   const [unpaidInvoices, setUnpaidInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
@@ -140,7 +140,7 @@ export function PaymentsClient({ isAdmin, userId }: { isAdmin: boolean; userId: 
         ) : payments.length === 0 ? (
           <div className="text-center py-8 text-gray-500">No payments recorded yet.</div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>

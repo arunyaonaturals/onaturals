@@ -58,7 +58,7 @@ export function StoresClient({ isAdmin }: { isAdmin: boolean }) {
       let url = '/api/stores?'
       if (filterArea) url += `areaId=${filterArea}&`
       if (!showInactive) url += 'isActive=true'
-      
+
       const res = await fetch(url)
       if (res.ok) {
         const data = await res.json()
@@ -312,21 +312,19 @@ export function StoresClient({ isAdmin }: { isAdmin: boolean }) {
                       {isAdmin ? (
                         <button
                           onClick={() => handleToggleActive(store)}
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            store.isActive
+                          className={`px-2 py-1 text-xs rounded-full ${store.isActive
                               ? 'bg-green-100 text-green-800'
                               : 'bg-red-100 text-red-800'
-                          }`}
+                            }`}
                         >
                           {store.isActive ? 'Active' : 'Inactive'}
                         </button>
                       ) : (
                         <span
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            store.isActive
+                          className={`px-2 py-1 text-xs rounded-full ${store.isActive
                               ? 'bg-green-100 text-green-800'
                               : 'bg-red-100 text-red-800'
-                          }`}
+                            }`}
                         >
                           {store.isActive ? 'Active' : 'Inactive'}
                         </span>

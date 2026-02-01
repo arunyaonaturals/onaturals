@@ -289,7 +289,7 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
             No orders found. Click &quot;+ New Order&quot; to create one.
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -348,6 +348,22 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
                             Delete
                           </button>
                         </>
+                      )}
+                      {order.status === 'submitted' && (
+                        <button
+                          onClick={() => handleStatusChange(order.id, 'cancelled')}
+                          className="text-red-600 hover:text-red-800 mr-2"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                      {order.status === 'cancelled' && (
+                        <button
+                          onClick={() => handleDelete(order.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          Delete
+                        </button>
                       )}
                       {order.status === 'submitted' && isAdmin && (
                         <button

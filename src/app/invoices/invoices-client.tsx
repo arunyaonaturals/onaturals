@@ -138,10 +138,16 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
             <Link href="/" className="text-green-600 hover:text-green-700">← Back</Link>
             <h1 className="text-2xl font-bold text-gray-800">Invoices</h1>
           </div>
-          {isAdmin && approvedOrders.length > 0 && (
-            <button onClick={() => setShowCreateModal(true)} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-              + Create Invoice
-            </button>
+          {isAdmin && (
+            <div className="flex items-center gap-4">
+              {approvedOrders.length > 0 ? (
+                <button onClick={() => setShowCreateModal(true)} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                  + Create Invoice
+                </button>
+              ) : (
+                <span className="text-sm text-gray-500 italic">No approved orders to invoice</span>
+              )}
+            </div>
           )}
         </div>
       </header>
@@ -169,7 +175,7 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
         ) : invoices.length === 0 ? (
           <div className="text-center py-8 text-gray-500">No invoices found.</div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>

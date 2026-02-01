@@ -173,7 +173,15 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
         {loading ? (
           <div className="text-center py-8">Loading...</div>
         ) : invoices.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">No invoices found.</div>
+          <div className="bg-white rounded-lg shadow p-12 text-center">
+            <div className="text-4xl mb-4">🧾</div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">No invoices found</h3>
+            <p className="text-gray-500 max-w-sm mx-auto">
+              Invoices are created from **Approved** orders. You can create them from the
+              <Link href="/orders" className="text-green-600 hover:underline mx-1">Orders</Link>
+              page or by clicking the button above.
+            </p>
+          </div>
         ) : (
           <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">

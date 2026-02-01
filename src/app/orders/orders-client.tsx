@@ -203,6 +203,28 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
     }
   }
 
+  const handleCreateInvoice = async (orderId: number) => {
+    if (!confirm('Are you sure you want to create an invoice for this order?')) return
+
+    try {
+      const res = await fetch('/api/invoices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId }),
+      })
+
+      if (res.ok) {
+        alert('Invoice created successfully!')
+        fetchOrders()
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Failed to create invoice')
+      }
+    } catch {
+      console.error('Failed to create invoice')
+    }
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'draft': return 'bg-gray-100 text-gray-800'
@@ -377,10 +399,10 @@ export function OrdersClient({ isAdmin, userId }: { isAdmin: boolean; userId: st
                         <>
                           {isAdmin && (
                             <button
-                              onClick={() => handleStatusChange(order.id, 'approved')}
-                              className="text-blue-600 hover:text-blue-800 hidden"
+                              onClick={() => handleCreateInvoice(order.id)}
+                              className="text-green-600 hover:text-green-800 font-bold mr-2"
                             >
-                              Approve
+                              Create Invoice
                             </button>
                           )}
                           <button

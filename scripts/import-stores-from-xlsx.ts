@@ -155,7 +155,7 @@ async function main() {
   // Resolve area name to areaId (Excel may have "Area" as text)
   const areaRows = await client.execute({ sql: 'SELECT id, name FROM "Area"' })
   const areaNameToId: Record<string, number> = {}
-  for (const r of areaRows.rows as { id: number; name: string }[]) {
+  for (const r of areaRows.rows as unknown as { id: number; name: string }[]) {
     const key = String(r.name || '').trim().toLowerCase()
     if (key) areaNameToId[key] = r.id
   }

@@ -147,7 +147,7 @@ export function InvoicesClient({ isAdmin }: { isAdmin: boolean }) {
         fetchApprovedOrders()
       } else {
         const data = await res.json()
-        setError(data.error || 'Failed to create invoice')
+        setError(data.details ? `${data.error}: ${data.details}` : (data.error || 'Failed to create invoice'))
       }
     } catch {
       setError('An error occurred')

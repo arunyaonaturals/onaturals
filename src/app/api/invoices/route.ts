@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
       return {
         productId: item.productId,
         quantity: item.quantity,
-        price: lineFactorTotal / item.quantity, // Factor price per unit
+        price: item.quantity > 0 ? lineFactorTotal / item.quantity : 0, // Factor price per unit
         discountPercent: itemDiscountPercent,
         discountAmount: lineDiscountAmount,
         gstPercent: item.product.gstPercent,
@@ -125,6 +125,11 @@ export async function POST(request: NextRequest) {
     })
 
     const finalTotalAmount = invoiceSubtotal - totalDiscountAmount + totalGstAmount
+
+    // Debug: Log the data being created
+    console.log('Creating invoice for order:', orderId)
+    console.log('Invoice items:', JSON.stringify(invoiceItems, null, 2))
+    console.log('Totals:', { invoiceSubtotal, totalDiscountAmount, totalGstAmount, finalTotalAmount })
 
     // Create invoice
     const invoice = await db.invoice.create({
@@ -155,8 +160,11 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(invoice, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating invoice:', error)
-    return NextResponse.json({ error: 'Failed to create invoice' }, { status: 500 })
+    return NextResponse.json({
+      error: 'Failed to create invoice',
+      details: error.message
+    }, { status: 500 })
   }
 }
